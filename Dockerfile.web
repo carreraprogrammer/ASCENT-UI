@@ -1,0 +1,18 @@
+# Production image for ascent-web on Railway (TCW-1, comment-06). The Dockerfile next to it is the dev server.
+FROM node:22-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY . .
+# Vite bakes these in at build time; Railway passes the service variables of the same name as build args.
+ARG VITE_API_URL=https://api.ascent.thecyborgway.dev
+ARG VITE_TCW_ISSUER=https://thecyborgway.dev
+ARG VITE_TCW_CLIENT_ID=ascent-web
+ENV VITE_API_URL=$VITE_API_URL VITE_TCW_ISSUER=$VITE_TCW_ISSUER VITE_TCW_CLIENT_ID=$VITE_TCW_CLIENT_ID
+RUN npm run build
+
+FROM caddy:2.8-alpine
+COPY deploy/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /app/dist /srv
+EXPOSE 8080
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
