@@ -65,7 +65,7 @@
   padding: 10px 12px;
   background: var(--surface-panel-soft);
   border: 1px solid var(--surface-border-muted);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
 }
 
 .statLabel {
@@ -83,11 +83,11 @@
 }
 
 .statPositive {
-  color: #1A9E4A;
+  color: var(--data-both);
 }
 
 .statNegative {
-  color: #C0392B;
+  color: var(--data-lexical);
 }
 
 .insight {
@@ -97,14 +97,14 @@
   padding: 14px 16px;
   background: var(--surface-panel-soft);
   border: 1px solid var(--surface-border);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
 }
 
 .insightIcon {
   width: 36px;
   height: 36px;
   flex: 0 0 36px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   background: var(--drawer-soft);
   border: 1px solid var(--drawer-color);
   color: var(--drawer-color);
@@ -153,7 +153,7 @@
   list-style: none;
   background: var(--surface-panel-soft);
   border: 1px solid var(--surface-border);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -179,7 +179,7 @@
   width: 34px;
   height: 34px;
   flex: 0 0 34px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   background: var(--drawer-soft);
   color: var(--drawer-color);
   display: grid;
@@ -221,7 +221,7 @@
 }
 
 .txnAmtIncome {
-  color: #1A9E4A;
+  color: var(--data-both);
 }
 
 .center {
@@ -253,7 +253,7 @@
   font-size: 14px;
   background: var(--surface-panel-soft);
   border: 1px solid var(--surface-border);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
 }
 
 @media (max-width: 720px) {

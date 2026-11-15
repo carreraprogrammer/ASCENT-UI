@@ -3,13 +3,13 @@
   height: 0.55rem;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .progressFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(124, 224, 211, 0.95), rgba(var(--color-brand-rgb), 0.9));
+  background: color-mix(in srgb, var(--cat-sky) 95%, transparent);
 }
 
 .actions {

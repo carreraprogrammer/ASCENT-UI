@@ -47,9 +47,9 @@ export function WhyAsk({ children }: { children: ReactNode }) {
 const COACH_ORDER: Persona[] = ['nilo', 'pip', 'teo']
 
 const COACH_COPY: Record<Persona, { name: string; trait: string; line: string; color: string }> = {
-  nilo: { name: 'Nilo', trait: 'el calmado', color: '#5FB58A', line: 'Va contigo despacio. Respira hondo y te baja las pulsaciones.' },
-  pip: { name: 'Pip', trait: 'el juguetón', color: '#E6B656', line: 'Celebra cada paso. Rebota cuando algo te sale bien.' },
-  teo: { name: 'Teo', trait: 'el analítico', color: '#7CA6E0', line: 'Te da los números claros. Mira, calcula y asiente.' },
+  nilo: { name: 'Nilo', trait: 'el calmado', color: 'var(--cat-sage)', line: 'Va contigo despacio. Respira hondo y te baja las pulsaciones.' },
+  pip: { name: 'Pip', trait: 'el juguetón', color: 'var(--cat-gold)', line: 'Celebra cada paso. Rebota cuando algo te sale bien.' },
+  teo: { name: 'Teo', trait: 'el analítico', color: 'var(--cat-sky)', line: 'Te da los números claros. Mira, calcula y asiente.' },
 }
 
 export function WelcomeScreen({

@@ -57,13 +57,13 @@ function parseAmount(text: string): number {
 
 function detectCategory(text: string): { cat: string; color: string } {
   const t = text.toLowerCase();
-  if (/uber|taxi|bus|gasolina|metro/.test(t)) return { cat: 'Transporte', color: '#D4732A' };
-  if (/mercado|carulla|exito|d1/.test(t)) return { cat: 'Mercado', color: '#D4732A' };
-  if (/almuerzo|cena|desayuno|restaurante|brulee/.test(t)) return { cat: 'Restaurantes', color: '#C9980A' };
-  if (/spotify|netflix|suscrip|chatgpt/.test(t)) return { cat: 'Suscripciones', color: '#C9980A' };
-  if (/cine|cerveza|bar|salida/.test(t)) return { cat: 'Ocio', color: '#8A4FD8' };
-  if (/regalo|cumple/.test(t)) return { cat: 'Regalos', color: '#8A4FD8' };
-  return { cat: 'Gasto', color: '#5FB58A' };
+  if (/uber|taxi|bus|gasolina|metro/.test(t)) return { cat: 'Transporte', color: 'var(--color-necessary)' };
+  if (/mercado|carulla|exito|d1/.test(t)) return { cat: 'Mercado', color: 'var(--color-necessary)' };
+  if (/almuerzo|cena|desayuno|restaurante|brulee/.test(t)) return { cat: 'Restaurantes', color: 'var(--color-discretionary)' };
+  if (/spotify|netflix|suscrip|chatgpt/.test(t)) return { cat: 'Suscripciones', color: 'var(--color-discretionary)' };
+  if (/cine|cerveza|bar|salida/.test(t)) return { cat: 'Ocio', color: 'var(--color-social)' };
+  if (/regalo|cumple/.test(t)) return { cat: 'Regalos', color: 'var(--color-social)' };
+  return { cat: 'Gasto', color: 'var(--color-unknown)' };
 }
 
 const fmt = (n: number) => n.toLocaleString('es-CO');

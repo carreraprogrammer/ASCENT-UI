@@ -4,9 +4,9 @@
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.035);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
   color: var(--color-text-primary);
   cursor: pointer;
   transition:
@@ -26,15 +26,15 @@
 
 .primary {
   border-color: rgba(var(--color-brand-rgb), 0.3);
-  background: linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.12), rgba(var(--color-brand-rgb), 0.15));
+  background: var(--surface);
 }
 
 .ghost {
-  background: rgba(255, 255, 255, 0.035);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
 }
 
 .danger {
-  border-color: rgba(255, 110, 110, 0.28);
-  background: rgba(255, 110, 110, 0.12);
+  border-color: color-mix(in srgb, var(--danger) 28%, transparent);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
   color: var(--color-error);
 }

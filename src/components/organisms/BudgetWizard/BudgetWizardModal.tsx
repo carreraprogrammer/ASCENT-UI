@@ -26,11 +26,11 @@ interface BudgetWizardModalProps {
 // ── Colors ─────────────────────────────────────────────────────────────────────
 
 const CAT_COLORS: Record<string, { c: string }> = {
-  committed:     { c: '#C0392B' },
-  necessary:     { c: '#D4732A' },
-  discretionary: { c: '#C9980A' },
-  investment:    { c: '#1A9E4A' },
-  social:        { c: '#8A4FD8' },
+  committed:     { c: 'var(--color-committed)' },
+  necessary:     { c: 'var(--color-necessary)' },
+  discretionary: { c: 'var(--color-discretionary)' },
+  investment:    { c: 'var(--color-investment)' },
+  social:        { c: 'var(--color-social)' },
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -309,7 +309,7 @@ interface CategoryFlatRowProps {
 }
 
 function CategoryFlatRow({ cat, subcatAmounts, totalIncome, onClick }: CategoryFlatRowProps) {
-  const col = CAT_COLORS[cat.code] ?? { c: '#7A6E5E' };
+  const col = CAT_COLORS[cat.code] ?? { c: 'var(--color-unknown)' };
   const total = catTotal(cat, subcatAmounts);
   const pct = totalIncome > 0 ? Math.min(total / totalIncome, 1) : 0;
   const subCount = cat.subcategories.length;
@@ -401,7 +401,7 @@ interface FocusEditorProps {
 }
 
 function FocusEditor({ cat, subcatAmounts, porAsignar, totalIncome, planLocked = false, onSetSub, onClose }: FocusEditorProps) {
-  const col = CAT_COLORS[cat.code] ?? { c: '#7A6E5E' };
+  const col = CAT_COLORS[cat.code] ?? { c: 'var(--color-unknown)' };
   const total = catTotal(cat, subcatAmounts);
   const allocated = totalIncome - porAsignar;
   const lowSubs = cat.subcategories.filter((s) => s.confidence === 'low' && !s.locked);
@@ -499,7 +499,7 @@ interface WizardFlowProps {
 function WizardFlow({ cats, goalContribution, activeIndex, porAsignar, totalIncome, subcatAmounts, onSetSub, onBack, onNext, onClose }: WizardFlowProps) {
   const cat = cats[activeIndex];
   if (!cat) return null;
-  const col = CAT_COLORS[cat.code] ?? { c: '#7A6E5E' };
+  const col = CAT_COLORS[cat.code] ?? { c: 'var(--color-unknown)' };
   const total = catTotal(cat, subcatAmounts);
   const isLast = activeIndex >= cats.length - 1;
   const allocated = totalIncome - porAsignar;
@@ -617,7 +617,7 @@ function LeftoverSheet({ amount, goalLabel, cats, subcatAmounts, onGoal, onCat, 
           <button
             type="button"
             className={styles.destRow}
-            style={{ '--dest-c': '#1A9E4A' } as CSSProperties}
+            style={{ '--dest-c': 'var(--color-investment)' } as CSSProperties}
             onClick={onGoal}
           >
             <div className={styles.destGem}>
@@ -628,7 +628,7 @@ function LeftoverSheet({ amount, goalLabel, cats, subcatAmounts, onGoal, onCat, 
           </button>
 
           {distributableCats.slice(0, 2).map((cat) => {
-            const col = CAT_COLORS[cat.code] ?? { c: '#7A6E5E' };
+            const col = CAT_COLORS[cat.code] ?? { c: 'var(--color-unknown)' };
             return (
               <button
                 key={cat.code}
@@ -649,7 +649,7 @@ function LeftoverSheet({ amount, goalLabel, cats, subcatAmounts, onGoal, onCat, 
           <button
             type="button"
             className={styles.destRow}
-            style={{ '--dest-c': '#0E96AD' } as CSSProperties}
+            style={{ '--dest-c': 'var(--color-income)' } as CSSProperties}
             onClick={onSplit}
           >
             <div className={styles.destGem}>

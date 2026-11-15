@@ -10,22 +10,22 @@ const LABELS: Record<StatusTone, string> = {
 const COLORS: Record<StatusTone, { bg: string; border: string; text: string }> = {
   success: {
     bg: 'var(--color-success-subtle)',
-    border: 'rgba(34, 197, 94, 0.35)',
+    border: 'color-mix(in srgb, var(--data-both) 35%, transparent)',
     text: 'var(--color-success)',
   },
   warning: {
     bg: 'var(--color-warning-subtle)',
-    border: 'rgba(245, 158, 11, 0.35)',
+    border: 'color-mix(in srgb, var(--data-lexical) 35%, transparent)',
     text: 'var(--color-warning)',
   },
   error: {
     bg: 'var(--color-error-subtle)',
-    border: 'rgba(239, 68, 68, 0.35)',
+    border: 'color-mix(in srgb, var(--data-lexical) 35%, transparent)',
     text: 'var(--color-error)',
   },
   neutral: {
-    bg: 'rgba(255, 255, 255, 0.04)',
-    border: 'rgba(255, 255, 255, 0.12)',
+    bg: 'color-mix(in srgb, var(--ink) 4%, transparent)',
+    border: 'color-mix(in srgb, var(--ink) 12%, transparent)',
     text: 'var(--color-text-secondary)',
   },
 };

@@ -8,22 +8,19 @@
 }
 
 .brand-alert::part(backdrop) {
-  background:
-    radial-gradient(circle at top left, rgba(var(--color-brand-rgb), 0.14), transparent 28%),
-    radial-gradient(circle at right 20%, rgba(var(--color-brand-rgb), 0.12), transparent 24%),
-    rgba(5, 7, 12, 0.9);
+  background: var(--surface);
   backdrop-filter: blur(14px);
 }
 
 .brand-alert .alert-wrapper {
   border: 1px solid var(--surface-border);
-  border-radius: 28px;
+  border-radius: var(--radius-lg);
   background:
     var(--surface-highlight),
     var(--surface-glow),
     var(--surface-panel-strong);
   color: var(--color-text-primary);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32), var(--shadow-surface);
+  box-shadow: 0 24px 64px color-mix(in srgb, var(--bg) 32%, transparent), var(--shadow-surface);
   overflow: hidden;
 }
 

@@ -21,16 +21,16 @@ import styles from './BudgetDetailPage.module.css';
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const CAT_CONFIG: Record<string, { name: string; color: string; soft: string; icon: string }> = {
-  committed:     { name: 'Comprometido', color: '#C0392B', soft: 'rgba(192,57,43,0.16)',   icon: homeOutline },
-  necessary:     { name: 'Necesario',    color: '#D4732A', soft: 'rgba(212,115,42,0.16)',  icon: cartOutline },
-  discretionary: { name: 'Flexible',     color: '#C9980A', soft: 'rgba(201,152,10,0.16)',  icon: heartOutline },
-  investment:    { name: 'Inversión',    color: '#1A9E4A', soft: 'rgba(26,158,74,0.16)',   icon: bookOutline },
-  social:        { name: 'Social',       color: '#8A4FD8', soft: 'rgba(138,79,216,0.16)',  icon: giftOutline },
-  income:        { name: 'Ingreso',      color: '#0E96AD', soft: 'rgba(14,150,173,0.16)',  icon: flashOutline },
+  committed:     { name: 'Comprometido', color: 'var(--color-committed)', soft: 'var(--color-committed-subtle)',   icon: homeOutline },
+  necessary:     { name: 'Necesario',    color: 'var(--color-necessary)', soft: 'var(--color-necessary-subtle)',  icon: cartOutline },
+  discretionary: { name: 'Flexible',     color: 'var(--color-discretionary)', soft: 'var(--color-discretionary-subtle)',  icon: heartOutline },
+  investment:    { name: 'Inversión',    color: 'var(--color-investment)', soft: 'var(--color-investment-subtle)',   icon: bookOutline },
+  social:        { name: 'Social',       color: 'var(--color-social)', soft: 'var(--color-social-subtle)',  icon: giftOutline },
+  income:        { name: 'Ingreso',      color: 'var(--color-income)', soft: 'var(--color-income-subtle)',  icon: flashOutline },
 };
 
 const catConfig = (code: string | null | undefined) =>
-  CAT_CONFIG[code ?? ''] ?? { name: code ?? '—', color: '#5B7280', soft: 'rgba(91,114,128,0.16)', icon: flashOutline };
+  CAT_CONFIG[code ?? ''] ?? { name: code ?? '—', color: 'var(--color-unknown)', soft: 'var(--color-unknown-subtle)', icon: flashOutline };
 
 // ── Transaction row ───────────────────────────────────────────────────────────
 

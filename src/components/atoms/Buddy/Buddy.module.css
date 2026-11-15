@@ -4,7 +4,7 @@
    ══════════════════════════════════════════════════════════════ */
 
 .buddy {
-  --ink: color-mix(in oklch, var(--c) 24%, #1c1409);
+  --ink: color-mix(in oklch, var(--c) 24%, var(--bg));
   --tint: var(--c);
   width: var(--size);
   height: var(--size);
@@ -14,8 +14,8 @@
   flex: none;
 }
 
-.buddy.worry { --tint: color-mix(in oklch, var(--c) 36%, #E2922C); }
-.buddy.sleep  { --tint: color-mix(in oklch, var(--c) 80%, #5b6a86); }
+.buddy.worry { --tint: color-mix(in oklch, var(--c) 36%, var(--data-lexical)); }
+.buddy.sleep  { --tint: color-mix(in oklch, var(--c) 80%, var(--line-strong)); }
 
 /* Stage — the part that floats / hops / tilts (shadow stays grounded).
    Use calc(var(--size) * 0.78) instead of 78% to avoid CSS Grid's
@@ -45,15 +45,12 @@
   width: calc(var(--size) * 0.78);
   height: calc(var(--size) * 0.78 * var(--round));
   border-radius: 50%;
-  background:
-    radial-gradient(58% 50% at 34% 27%, color-mix(in oklch, var(--tint) 12%, #ffffff) 0%, transparent 46%),
-    radial-gradient(120% 130% at 50% 128%, color-mix(in oklch, var(--tint) 62%, #000) 0%, transparent 62%),
-    radial-gradient(100% 100% at 50% 38%, color-mix(in oklch, var(--tint) 86%, #fff) 0%, var(--tint) 70%);
+  background: var(--tint);
   box-shadow:
     0 0 calc(var(--size) * 0.15 * var(--glow)) color-mix(in oklch, var(--tint) calc(72% * var(--glow)), transparent),
     0 calc(var(--size) * 0.04 * var(--glow)) calc(var(--size) * 0.11 * var(--glow)) color-mix(in oklch, var(--tint) calc(40% * var(--glow)), transparent),
-    inset 0 calc(var(--size) * -0.03) calc(var(--size) * 0.06) color-mix(in oklch, var(--tint) 55%, #000),
-    inset 0 calc(var(--size) * 0.02) calc(var(--size) * 0.04) color-mix(in oklch, #fff 28%, transparent);
+    inset 0 calc(var(--size) * -0.03) calc(var(--size) * 0.06) color-mix(in oklch, var(--tint) 55%, var(--bg)),
+    inset 0 calc(var(--size) * 0.02) calc(var(--size) * 0.04) color-mix(in oklch, var(--ink) 28%, transparent);
   animation: bdSquish var(--dur) ease-in-out infinite;
   transition: filter 0.4s ease;
 }
@@ -70,7 +67,7 @@
   width: 42%;
   height: 30%;
   border-radius: 50%;
-  background: radial-gradient(60% 60% at 40% 35%, rgba(255, 255, 255, 0.7), transparent 70%);
+  background: color-mix(in srgb, var(--ink) 70%, transparent);
   filter: blur(1px);
   pointer-events: none;
 }
@@ -98,7 +95,7 @@
   width: 15%;
   height: 9%;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(255, 150, 140, 0.5), transparent 75%);
+  background: color-mix(in srgb, var(--cat-coral) 50%, transparent);
   pointer-events: none;
 }
 .cheekL { left: 13%; }
@@ -111,7 +108,7 @@
   width: 50%;
   height: 9%;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.45), transparent 78%);
+  background: color-mix(in srgb, var(--bg) 45%, transparent);
   filter: blur(2px);
   animation: bdShadow var(--dur) ease-in-out infinite;
 }
@@ -131,7 +128,7 @@
   width: 7%;
   height: 7%;
   border-radius: 50%;
-  background: color-mix(in oklch, var(--c) 75%, #fff);
+  background: color-mix(in oklch, var(--c) 75%, var(--ink));
   opacity: 0;
   animation: bdThink 2.4s ease-in-out infinite;
 }
@@ -142,7 +139,7 @@
 .zLetter {
   position: absolute;
   font-weight: 600;
-  color: color-mix(in oklch, var(--c) 60%, #fff);
+  color: color-mix(in oklch, var(--c) 60%, var(--ink));
   opacity: 0;
   animation: bdZzz 3.4s ease-in-out infinite;
 }
@@ -154,7 +151,7 @@
   position: absolute;
   width: 8%;
   height: 8%;
-  background: color-mix(in oklch, var(--c) 60%, #fff);
+  background: color-mix(in oklch, var(--c) 60%, var(--ink));
   clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
   opacity: 0;
   animation: bdSpark 1.5s ease-out infinite;

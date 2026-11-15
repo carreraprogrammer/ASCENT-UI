@@ -755,7 +755,7 @@ export const BudgetsContent = () => {
       <LoadingOverlay isOpen={wizardOpen && wizardDataLoading && !wizardData} message="Cargando datos del asistente..." />
 
       {wizardOpen && wizardDataError && !wizardData ? (
-        <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', padding: 'var(--space-6)', background: 'rgba(5, 7, 12, 0.72)', zIndex: 'calc(var(--z-modal) + 1)' }}>
+        <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', padding: 'var(--space-6)', background: 'color-mix(in srgb, var(--bg) 72%, transparent)', zIndex: 'calc(var(--z-modal) + 1)' }}>
           <ErrorNotice
             title="No pudimos abrir el asistente"
             message={wizardDataError}

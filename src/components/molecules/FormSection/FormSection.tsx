@@ -12,9 +12,9 @@ export const FormSection = ({ title, description, children }: FormSectionProps) 
       display: 'grid',
       gap: 'var(--space-4)',
       padding: 'var(--space-5)',
-      border: '1px solid rgba(255, 255, 255, 0.08)',
+      border: '1px solid color-mix(in srgb, var(--ink) 8%, transparent)',
       borderRadius: 'var(--radius-xl)',
-      background: 'rgba(255, 255, 255, 0.03)',
+      background: 'color-mix(in srgb, var(--ink) 3%, transparent)',
     }}
   >
     <div style={{ display: 'grid', gap: 'var(--space-2)' }}>

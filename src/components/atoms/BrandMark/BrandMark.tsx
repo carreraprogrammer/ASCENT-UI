@@ -1,103 +1,23 @@
 import styles from './BrandMark.module.css';
 
+// TCW-1: Ascent is a cromo of The Cyborg Way, so its mark is the brand's: two circles, the solid one is the human
+// and the dashed one the machine; the lens where they overlap is the only part in colour (violet). Inline SVG
+// with the tokens, so it follows the theme. From 48 px up it blinks with a pupil every 30 s; below, it only blinks.
+// Nothing moves with reduced motion. `variant` is kept for the callers: both draw the same mark.
 export interface BrandMarkProps {
   variant?: 'principal' | 'monoline';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  label?: string;
 }
 
-const principalSvg = (
-  <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <defs>
-      <linearGradient id="brandmark-bg" x1="512" y1="64" x2="512" y2="960" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stopColor="var(--brandmark-bg-start)" />
-        <stop offset="0.48" stopColor="var(--brandmark-bg-mid)" />
-        <stop offset="0.78" stopColor="var(--brandmark-bg-warm)" />
-        <stop offset="1" stopColor="var(--brandmark-bg-end)" />
-      </linearGradient>
-
-      <radialGradient
-        id="brandmark-sunGlow"
-        cx="0"
-        cy="0"
-        r="1"
-        gradientUnits="userSpaceOnUse"
-        gradientTransform="translate(512 370) rotate(90) scale(220)"
-      >
-        <stop offset="0" stopColor="var(--brandmark-glow-start)" />
-        <stop offset="0.55" stopColor="var(--brandmark-glow-mid)" />
-        <stop offset="1" stopColor="var(--brandmark-glow-mid)" stopOpacity="0" />
-      </radialGradient>
-
-      <linearGradient id="brandmark-sunDisc" x1="512" y1="250" x2="512" y2="470" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stopColor="var(--brandmark-sun-start)" />
-        <stop offset="1" stopColor="var(--brandmark-sun-end)" />
-      </linearGradient>
-
-      <linearGradient id="brandmark-mountainBack" x1="256" y1="540" x2="820" y2="760" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stopColor="var(--brandmark-mountain-back-start)" />
-        <stop offset="1" stopColor="var(--brandmark-mountain-back-end)" />
-      </linearGradient>
-
-      <linearGradient id="brandmark-mountainFront" x1="360" y1="520" x2="760" y2="920" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stopColor="var(--brandmark-mountain-front-start)" />
-        <stop offset="1" stopColor="var(--brandmark-mountain-front-end)" />
-      </linearGradient>
-
-      <clipPath id="brandmark-clip">
-        <rect x="64" y="64" width="896" height="896" rx="220" />
-      </clipPath>
-    </defs>
-
-    <rect x="64" y="64" width="896" height="896" rx="220" fill="url(#brandmark-bg)" />
-
-    <g clipPath="url(#brandmark-clip)">
-      <circle cx="512" cy="370" r="220" fill="url(#brandmark-sunGlow)" />
-      <circle cx="512" cy="370" r="112" fill="url(#brandmark-sunDisc)" />
-      <path
-        d="M64 760C180 710 260 650 340 590C395 548 445 520 512 520C585 520 648 554 720 608C798 666 866 717 960 756V960H64V760Z"
-        fill="url(#brandmark-mountainBack)"
-        opacity="0.72"
-      />
-      <path
-        d="M180 960L470 630C492 606 532 606 554 630L620 699C639 719 671 719 690 699L806 575L960 960H180Z"
-        fill="url(#brandmark-mountainFront)"
-      />
-      <path
-        d="M470 630L554 630L620 699L690 699L806 575L732 724L620 830L526 736L470 630Z"
-        fill="var(--brandmark-shadow)"
-        opacity="0.32"
-      />
-      <circle cx="806" cy="575" r="18" fill="var(--brandmark-highlight)" />
-      <path
-        d="M180 640C292 600 390 570 512 570C642 570 746 603 860 650"
-        stroke="var(--brandmark-orbit)"
-        strokeOpacity="0.10"
-        strokeWidth="8"
-        strokeLinecap="round"
-      />
-    </g>
-  </svg>
-);
-
-const monolineSvg = (
-  <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <rect x="64" y="64" width="896" height="896" rx="220" fill="var(--brandmark-mono-bg)" />
-    <circle cx="512" cy="360" r="110" stroke="var(--brandmark-mono-sun)" strokeWidth="6" fill="none" opacity="0.9" />
-    <path
-      d="M200 720L420 520L600 680L780 500"
-      stroke="var(--brandmark-mono-line)"
-      strokeWidth="10"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path d="M200 720H820" stroke="var(--brandmark-mono-base)" strokeWidth="6" strokeLinecap="round" opacity="0.6" />
-    <circle cx="780" cy="500" r="16" fill="var(--brandmark-mono-dot)" />
-  </svg>
-);
-
-export const BrandMark = ({ variant = 'monoline', size = 'md', className }: BrandMarkProps) => (
+export const BrandMark = ({ size = 'md', className, label }: BrandMarkProps) => (
   <span className={[styles.brandMark, styles[size], className ?? ''].filter(Boolean).join(' ')}>
-    {variant === 'principal' ? principalSvg : monolineSvg}
+    <svg viewBox="0 0 100 100" role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : true}>
+      <path className={styles.lens} d="M50 24.7 A28 28 0 0 1 50 75.3 A28 28 0 0 1 50 24.7 Z" />
+      {size === 'lg' && <circle className={styles.pupil} cx="50" cy="50" r="6.5" />}
+      <circle className={styles.ring} cx="38" cy="50" r="28" />
+      <circle className={`${styles.ring} ${styles.machine}`} cx="62" cy="50" r="28" />
+    </svg>
   </span>
 );

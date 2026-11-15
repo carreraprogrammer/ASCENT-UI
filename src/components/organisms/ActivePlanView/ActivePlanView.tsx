@@ -213,7 +213,7 @@ const PlanlessDetailModal = ({
     <SheetModal isOpen={isOpen} title="Sin presupuesto" onClose={onClose} height="tall">
       <DrawerDetailContent
         color="var(--color-warning)"
-        soft="rgba(201,152,10,0.16)"
+        soft="color-mix(in srgb, var(--data-lexical) 16%, transparent)"
         spent={amount}
         pct={categoryShare}
         limit={null}

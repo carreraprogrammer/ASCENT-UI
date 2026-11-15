@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { IonContent, IonPage } from '@ionic/react';
 import { BrandMark } from '../../atoms/BrandMark';
+import { CromoSeal } from '../../atoms/CromoSeal';
 import styles from './AuthLayout.module.css';
 
 export const AuthLayout = ({ title, children }: { title: string; children: ReactNode }) => (
@@ -12,8 +13,8 @@ export const AuthLayout = ({ title, children }: { title: string; children: React
             <div className={styles.brandLockup}>
               <BrandMark variant="monoline" size="lg" />
               <div className={styles.brandText}>
-                <span className={styles.eyebrow}>Ascent</span>
-                <strong className={styles.brandTitle}>Ascent Finance</strong>
+                <span className={styles.eyebrow}>a cromo by The Cyborg Way</span>
+                <strong className={styles.brandTitle}>Ascent</strong>
               </div>
             </div>
             <div className={styles.copy}>
@@ -44,7 +45,10 @@ export const AuthLayout = ({ title, children }: { title: string; children: React
         </section>
         <section className={styles.panel}>
           <div className={styles.panelGlow} aria-hidden="true" />
-          <div className={styles.panelBody}>{children}</div>
+          <div className={styles.panelBody}>
+            {children}
+            <CromoSeal className={styles.seal} />
+          </div>
         </section>
       </main>
     </IonContent>

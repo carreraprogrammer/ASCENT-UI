@@ -31,7 +31,7 @@
 }
 
 .error {
-  color: var(--color-committed, #C0392B);
+  color: var(--color-committed, var(--data-lexical));
   font-size: 13px;
 }
 

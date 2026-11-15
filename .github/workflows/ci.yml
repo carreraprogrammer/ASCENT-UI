@@ -1,0 +1,36 @@
+# TCW-1: build, brand and iOS sync on every pull request and on main.
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  build-and-brand:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - run: node scripts/build-tokens.mjs --check
+      - run: npx vitest run src/test/brand.test.ts
+      - run: npx cap sync ios
+  # The whole suite: 9 test files failed to load on main before TCW-1 (jsdom has no matchMedia) and three of
+  # them hang once it is mocked (DynamicForm, LoginPage, RegisterPage). Ticket ASC-2 in the brain. Reported,
+  # not blocking, until that ticket closes.
+  suite:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx vitest run

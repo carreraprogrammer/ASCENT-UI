@@ -2,14 +2,14 @@ import type { CSSProperties } from 'react';
 import styles from './GavetaCard.module.css';
 
 export const CATEGORY_COLORS: Record<string, { c: string; s: string }> = {
-  committed:     { c: '#C0392B', s: 'rgba(192,57,43,0.16)' },
-  necessary:     { c: '#D4732A', s: 'rgba(212,115,42,0.16)' },
-  discretionary: { c: '#C9980A', s: 'rgba(201,152,10,0.16)' },
-  investment:    { c: '#1A9E4A', s: 'rgba(26,158,74,0.16)' },
-  social:        { c: '#8A4FD8', s: 'rgba(138,79,216,0.16)' },
+  committed:     { c: 'var(--color-committed)', s: 'var(--color-committed-subtle)' },
+  necessary:     { c: 'var(--color-necessary)', s: 'var(--color-necessary-subtle)' },
+  discretionary: { c: 'var(--color-discretionary)', s: 'var(--color-discretionary-subtle)' },
+  investment:    { c: 'var(--color-investment)', s: 'var(--color-investment-subtle)' },
+  social:        { c: 'var(--color-social)', s: 'var(--color-social-subtle)' },
 };
 
-const DEFAULT_COLOR = { c: '#7A6E5E', s: 'rgba(122,110,94,0.16)' };
+const DEFAULT_COLOR = { c: 'var(--color-unknown)', s: 'var(--color-unknown-subtle)' };
 
 export type GavetaState = 'empty' | 'filled' | 'locked' | 'highlighted';
 

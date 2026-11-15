@@ -5,8 +5,8 @@
   min-height: 2.75rem;
   padding: 0.72rem 1rem;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--chip-color, var(--color-brand)) 36%, rgba(255, 255, 255, 0.08));
-  background: color-mix(in srgb, var(--chip-color, var(--color-brand)) 12%, rgba(255, 255, 255, 0.03));
+  border: 1px solid color-mix(in srgb, var(--chip-color, var(--color-brand)) 36%, color-mix(in srgb, var(--ink) 8%, transparent));
+  background: color-mix(in srgb, var(--chip-color, var(--color-brand)) 12%, color-mix(in srgb, var(--ink) 3%, transparent));
   color: var(--chip-color, var(--color-brand));
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
@@ -24,11 +24,9 @@
   justify-content: space-between;
   gap: var(--space-4);
   padding: var(--space-4);
-  border-radius: 22px;
-  border: 1px solid color-mix(in srgb, var(--chip-color, var(--color-brand)) 18%, rgba(255, 255, 255, 0.06));
-  background:
-    linear-gradient(180deg, rgba(21, 18, 15, 0.92), rgba(14, 12, 11, 0.95)),
-    radial-gradient(circle at top left, color-mix(in srgb, var(--chip-color, var(--color-brand)) 12%, transparent), transparent 32%);
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--chip-color, var(--color-brand)) 18%, color-mix(in srgb, var(--ink) 6%, transparent));
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
 }
 
 .introCopy {
@@ -40,8 +38,8 @@
   color: var(--color-accent);
   font-size: var(--type-caption-size);
   font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .introTitle {
@@ -64,9 +62,9 @@
   display: grid;
   gap: var(--space-2);
   padding: var(--space-4);
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--ink) 6%, transparent);
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
 }
 
 .label {
@@ -75,7 +73,7 @@
   font-weight: var(--font-medium);
   color: var(--color-text-secondary);
   letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 /* ── Name input ───────────────────────────────────────────────────────────── */
@@ -204,7 +202,7 @@
 }
 
 .cancelBtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
   border-color: var(--color-border);
   color: var(--color-text-primary);
 }
@@ -223,7 +221,7 @@
   padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-lg);
   border: 1px solid transparent;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--chip-color, var(--color-brand)) 90%, #f4ddb3), var(--chip-color, var(--color-brand)));
+  background: var(--color-brand);
   color: var(--color-text-inverse);
   font-family: var(--font-sans);
   font-size: var(--text-base);
@@ -248,7 +246,7 @@
   display: inline-block;
   width: 1rem;
   height: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid color-mix(in srgb, var(--ink) 30%, transparent);
   border-top-color: var(--color-text-inverse);
   border-radius: var(--radius-full);
   animation: spin 0.7s linear infinite;

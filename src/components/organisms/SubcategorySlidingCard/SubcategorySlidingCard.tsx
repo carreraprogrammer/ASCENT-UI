@@ -18,7 +18,7 @@ export interface SubcategorySlidingCardProps {
 }
 
 export const SubcategorySlidingCard = ({ subcategory, onEdit, onDelete }: SubcategorySlidingCardProps) => {
-  const primaryColor = subcategory.categories[0]?.color ?? '#5B7280';
+  const primaryColor = subcategory.categories[0]?.color ?? 'var(--color-unknown)';
 
   const actions: SlideAction[] = [
     { type: 'edit', onPress: () => onEdit(subcategory) },
@@ -46,9 +46,9 @@ export const SubcategorySlidingCard = ({ subcategory, onEdit, onDelete }: Subcat
                   key={c.id}
                   className={styles.tierChip}
                   style={{
-                    backgroundColor: `${c.color ?? '#5B7280'}22`,
-                    color: c.color ?? '#5B7280',
-                    borderColor: `${c.color ?? '#5B7280'}55`,
+                    backgroundColor: `color-mix(in srgb, ${c.color ?? 'var(--color-unknown)'} 13%, transparent)`,
+                    color: c.color ?? 'var(--color-unknown)',
+                    borderColor: `color-mix(in srgb, ${c.color ?? 'var(--color-unknown)'} 33%, transparent)`,
                   }}
                 >
                   {TIER_LABEL[c.category_type] ?? c.category_type}

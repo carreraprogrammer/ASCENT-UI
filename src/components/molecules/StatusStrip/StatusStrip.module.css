@@ -26,7 +26,7 @@
   font-weight: 600;
   color: var(--text-on-surface-muted);
   letter-spacing: 0.04em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .value {

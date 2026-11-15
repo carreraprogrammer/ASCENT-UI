@@ -4,9 +4,9 @@
   justify-content: space-between;
   gap: var(--space-3);
   padding: 8px 16px;
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  border-radius: 14px;
-  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid color-mix(in srgb, var(--data-lexical) 40%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--data-lexical) 10%, transparent);
 }
 
 .label {
@@ -21,9 +21,9 @@
 .returnBtn {
   flex-shrink: 0;
   padding: 5px 14px;
-  border: 1px solid rgba(245, 158, 11, 0.5);
-  border-radius: 10px;
-  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid color-mix(in srgb, var(--data-lexical) 50%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--data-lexical) 15%, transparent);
   color: var(--color-text-primary);
   font-size: var(--type-label-size);
   font-weight: var(--font-semibold);
@@ -33,5 +33,5 @@
 }
 
 .returnBtn:hover {
-  background: rgba(245, 158, 11, 0.25);
+  background: color-mix(in srgb, var(--data-lexical) 25%, transparent);
 }

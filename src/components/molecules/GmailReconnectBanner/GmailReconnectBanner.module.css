@@ -8,11 +8,11 @@
   align-items: center;
   gap: 12px;
   padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px;
-  background: rgba(180, 83, 9, 0.96);
-  color: #fff7ed;
+  background: color-mix(in srgb, var(--data-lexical) 96%, transparent);
+  color: var(--ink);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.32);
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--bg) 32%, transparent);
 }
 
 .text {
