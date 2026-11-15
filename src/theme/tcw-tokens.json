@@ -376,34 +376,41 @@
   ]
  },
  "categorical": {
-  "usage": "Spaces of the brain and categories in charts: one colour each, in order; never violet (the open note), never the search-leg colours. All pass 4.5:1 on bg and surface in both themes.",
+  "usage": "Spaces of the brain and categories in charts, assigned in this order (global is always slate). Never violet (the one open note or lit node) and never the search-leg colours, which stay as result labels. Every colour passes 4.5:1 on bg and surface in both themes.",
   "tokens": [
    {
-    "name": "cat-rose",
+    "name": "cat-sky",
     "value": {
-     "dark": "#F07FA8",
-     "light": "#B8325F"
-    }
-   },
-   {
-    "name": "cat-gold",
-    "value": {
-     "dark": "#E3C35A",
-     "light": "#7D6200"
+     "dark": "#56C2E6",
+     "light": "#0B6E99"
     }
    },
    {
     "name": "cat-lime",
     "value": {
-     "dark": "#A8CF5C",
-     "light": "#4F7410"
+     "dark": "#A8D26B",
+     "light": "#4A7A12"
     }
    },
    {
-    "name": "cat-sky",
+    "name": "cat-slate",
     "value": {
-     "dark": "#6CC4E8",
-     "light": "#17708F"
+     "dark": "#9A9AA6",
+     "light": "#6B6B76"
+    }
+   },
+   {
+    "name": "cat-rose",
+    "value": {
+     "dark": "#F28DB2",
+     "light": "#B4235E"
+    }
+   },
+   {
+    "name": "cat-gold",
+    "value": {
+     "dark": "#E9B949",
+     "light": "#946200"
     }
    },
    {
@@ -418,13 +425,6 @@
     "value": {
      "dark": "#8FC9A3",
      "light": "#3F7352"
-    }
-   },
-   {
-    "name": "cat-slate",
-    "value": {
-     "dark": "#A3AEC8",
-     "light": "#535E79"
     }
    },
    {
