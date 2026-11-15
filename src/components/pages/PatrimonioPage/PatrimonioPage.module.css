@@ -18,15 +18,15 @@
   display: flex;
   gap: 6px;
   padding: 4px;
-  border: 1px solid var(--surface-border, rgba(255, 255, 255, 0.09));
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--surface-border, color-mix(in srgb, var(--ink) 9%, transparent));
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
 }
 
 .segBtn {
   flex: 1;
   padding: 9px 6px;
-  border-radius: 15px;
+  border-radius: var(--radius-lg);
   border: 1px solid transparent;
   background: none;
   font-family: var(--font-sans);
@@ -40,17 +40,13 @@
 }
 
 .segBtn:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
   color: var(--color-text-primary);
 }
 
 .segBtnActive {
   border-color: rgba(var(--color-brand-rgb, 230 182 86), 0.4);
-  background: linear-gradient(
-    135deg,
-    rgba(var(--color-brand-rgb, 230 182 86), 0.12),
-    rgba(var(--color-brand-rgb, 230 182 86), 0.06)
-  );
+  background: transparent;
   color: var(--color-text-primary);
 }
 
@@ -61,15 +57,15 @@
   gap: 4px;
   padding: 14px 16px;
   border: 1px solid var(--surface-border-muted);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.025);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
 }
 
 .viewLabel {
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
   color: var(--text-on-surface-muted);
 }
 
@@ -81,7 +77,7 @@
   line-height: 1.1;
 }
 
-.viewTotalIncome { color: var(--color-income, #0E96AD); }
+.viewTotalIncome { color: var(--color-income, var(--data-both)); }
 
 /* ── Recurring row ── */
 .recurringRow {
@@ -91,8 +87,8 @@
   gap: 12px;
   padding: 14px;
   border: 1px solid var(--surface-border-muted);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.025);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
 }
 
 .rowStatusActive {
@@ -101,8 +97,8 @@
   padding: 2px 8px;
   border-radius: 999px;
   white-space: nowrap;
-  background: rgba(26, 158, 74, 0.15);
-  color: var(--color-investment, #1A9E4A);
+  background: color-mix(in srgb, var(--data-both) 15%, transparent);
+  color: var(--color-investment, var(--data-both));
 }
 
 .rowStatusInactive {
@@ -111,7 +107,7 @@
   padding: 2px 8px;
   border-radius: 999px;
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.07);
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
   color: var(--text-on-surface-muted);
 }
 
@@ -125,8 +121,8 @@
 .obligationStat {
   padding: 12px 14px;
   border: 1px solid var(--surface-border-muted);
-  border-radius: 14px;
-  background: rgba(192, 57, 43, 0.05);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--data-lexical) 5%, transparent);
   display: grid;
   gap: 4px;
 }
@@ -134,8 +130,8 @@
 .obligationStatLabel {
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
   color: var(--text-on-surface-muted);
 }
 
@@ -143,7 +139,7 @@
   font-family: var(--font-mono);
   font-size: 18px;
   font-weight: 500;
-  color: var(--color-committed, #C0392B);
+  color: var(--color-committed, var(--data-lexical));
   letter-spacing: -0.01em;
 }
 
@@ -158,9 +154,9 @@
   display: grid;
   gap: 4px;
   padding: 14px 16px;
-  border: 1px solid var(--surface-border, rgba(255, 255, 255, 0.08));
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--surface-border, color-mix(in srgb, var(--ink) 8%, transparent));
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
   cursor: pointer;
   text-align: left;
   transition: border-color 0.15s ease, background 0.15s ease;
@@ -168,20 +164,20 @@
 
 .toggleChipActiveIncome {
   border-color: rgba(var(--color-income, 14, 150, 173), 0.4);
-  background: rgba(14, 150, 173, 0.08);
+  background: color-mix(in srgb, var(--data-both) 8%, transparent);
 }
 
 .toggleChipActiveDebt {
   border-color: rgba(var(--color-committed, 192, 57, 43), 0.4);
-  background: rgba(192, 57, 43, 0.08);
+  background: color-mix(in srgb, var(--data-lexical) 8%, transparent);
 }
 
 .toggleLabel {
   font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
   color: var(--text-on-surface-muted);
 }
 
@@ -193,8 +189,8 @@
   line-height: 1.1;
 }
 
-.toggleAmountIncome { color: var(--color-income, #0E96AD); }
-.toggleAmountDebt   { color: var(--color-committed, #C0392B); }
+.toggleAmountIncome { color: var(--color-income, var(--data-both)); }
+.toggleAmountDebt   { color: var(--color-committed, var(--data-lexical)); }
 
 /* ── Sections ── */
 .listSection {
@@ -206,8 +202,8 @@
   margin: 0;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
   color: var(--text-on-surface-muted);
 }
 
@@ -231,8 +227,8 @@
   gap: 8px;
   padding: 14px;
   border: 1px solid var(--surface-border-muted);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.025);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
 }
 
 .debtRowTop {
@@ -281,7 +277,7 @@
   font-family: var(--font-mono);
   font-size: 16px;
   font-weight: 500;
-  color: var(--color-income, #0E96AD);
+  color: var(--color-income, var(--data-both));
   letter-spacing: -0.01em;
 }
 
@@ -289,7 +285,7 @@
   font-family: var(--font-mono);
   font-size: 16px;
   font-weight: 500;
-  color: var(--color-committed, #C0392B);
+  color: var(--color-committed, var(--data-lexical));
   letter-spacing: -0.01em;
 }
 
@@ -312,8 +308,8 @@
 .debtStat {
   padding: 12px 14px;
   border: 1px solid var(--surface-border-muted);
-  border-radius: 14px;
-  background: rgba(192, 57, 43, 0.05);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--data-lexical) 5%, transparent);
   display: grid;
   gap: 4px;
 }
@@ -321,8 +317,8 @@
 .debtStatLabel {
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
   color: var(--text-on-surface-muted);
 }
 
@@ -330,7 +326,7 @@
   font-family: var(--font-mono);
   font-size: 18px;
   font-weight: 500;
-  color: var(--color-committed, #C0392B);
+  color: var(--color-committed, var(--data-lexical));
   letter-spacing: -0.01em;
 }
 
@@ -338,14 +334,14 @@
 .pressureTrack {
   height: 3px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
   overflow: hidden;
 }
 
 .pressureFill {
   height: 100%;
   border-radius: 999px;
-  background: var(--color-investment, #1A9E4A);
+  background: var(--color-investment, var(--data-both));
   transition: width 0.3s ease;
 }
 

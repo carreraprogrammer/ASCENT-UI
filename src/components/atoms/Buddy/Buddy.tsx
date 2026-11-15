@@ -14,7 +14,7 @@ interface Props {
 const INK = 'var(--ink)'
 
 function catch_(cx: number, cy: number, pf: number) {
-  return <circle cx={cx} cy={cy} r={1.7 * pf} fill="rgba(255,255,255,0.92)" />
+  return <circle cx={cx} cy={cy} r={1.7 * pf} fill="color-mix(in srgb, var(--ink) 92%, transparent)" />
 }
 
 function roundEyes(y: number, r: number, pf: number, lookY = 0) {
@@ -49,7 +49,7 @@ function faceFor(emotion: Emotion, pf: number) {
               fill="none" strokeLinecap="round" />
           </g>
           <path d="M39 62 Q50 75 61 62 Q50 67.5 39 62 Z" fill={INK} />
-          <path d="M44.5 70.5 Q50 73 55.5 70.5" stroke="rgba(255,160,150,0.55)"
+          <path d="M44.5 70.5 Q50 73 55.5 70.5" stroke="color-mix(in srgb, var(--cat-coral) 55%, transparent)"
             strokeWidth="2.4" fill="none" strokeLinecap="round" />
         </g>
       )

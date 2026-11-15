@@ -54,7 +54,7 @@ export const SubcategoriesContent = () => {
           id: Number(c.id),
           type: String(c.attributes.category_type),
           label: TIER_LABEL[String(c.attributes.category_type)] ?? String(c.attributes.name),
-          color: String(c.attributes.color ?? '#5B7280'),
+          color: String(c.attributes.color ?? 'var(--color-unknown)'),
         }));
       setSubs(subRows);
       setTiers(tierList);
@@ -208,7 +208,7 @@ export const SubcategoriesContent = () => {
                   onClick={() => toggleTier(t.id)}
                   style={{
                     backgroundColor: active ? t.color : `${t.color}18`,
-                    color: active ? '#0B1220' : t.color,
+                    color: active ? 'var(--on-violet)' : t.color,
                     borderColor: t.color,
                   }}
                 >

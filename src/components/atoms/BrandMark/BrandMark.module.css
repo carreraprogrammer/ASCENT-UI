@@ -1,71 +1,30 @@
-.brandMark {
-  --brandmark-bg-start: #060606;
-  --brandmark-bg-mid: #111111;
-  --brandmark-bg-warm: #7c2d12;
-  --brandmark-bg-end: #f59e0b;
-  --brandmark-glow-start: #fff7d6;
-  --brandmark-glow-mid: #fdba74;
-  --brandmark-sun-start: #fff8db;
-  --brandmark-sun-end: #fed7aa;
-  --brandmark-mountain-back-start: #312e81;
-  --brandmark-mountain-back-end: #18120a;
-  --brandmark-mountain-front-start: #101010;
-  --brandmark-mountain-front-end: #030712;
-  --brandmark-shadow: #18120a;
-  --brandmark-highlight: #f8fafc;
-  --brandmark-orbit: #ffffff;
-  --brandmark-mono-bg: #050505;
-  --brandmark-mono-sun: var(--color-accent);
-  --brandmark-mono-line: #e5e7eb;
-  --brandmark-mono-base: #9ca3af;
-  --brandmark-mono-dot: #f9fafb;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
+/* The Cyborg Way mark (design system: Mark). Colours from the tokens only. */
+.brandMark { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.brandMark svg { width: 100%; height: 100%; display: block; }
+.ring { fill: none; stroke: var(--ink); stroke-width: 4; }
+.machine { stroke-dasharray: 5 4; }
+.lens {
+  fill: var(--violet);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 30s linear infinite;
+  animation-delay: -26s; /* the first blink comes about 4 s after load, then every 30 s */
 }
+.pupil { fill: var(--bg); opacity: 0; animation: pupil 30s linear infinite; animation-delay: -26s; }
+.sm { width: 32px; height: 32px; }
+.md { width: 44px; height: 44px; }
+.lg { width: 72px; height: 72px; }
 
-:global(:root[data-theme='light']) .brandMark {
-  --brandmark-bg-start: #fffdf7;
-  --brandmark-bg-mid: #f7f3ea;
-  --brandmark-bg-warm: #ead7b2;
-  --brandmark-bg-end: #d6a84a;
-  --brandmark-glow-start: #fff8db;
-  --brandmark-glow-mid: #e7c36d;
-  --brandmark-sun-start: #f7dda0;
-  --brandmark-sun-end: #d6a84a;
-  --brandmark-mountain-back-start: #d8cec0;
-  --brandmark-mountain-back-end: #9a6a18;
-  --brandmark-mountain-front-start: #3a342b;
-  --brandmark-mountain-front-end: #171512;
-  --brandmark-shadow: #5e584f;
-  --brandmark-highlight: #171512;
-  --brandmark-orbit: #171512;
-  --brandmark-mono-bg: #fffdf7;
-  --brandmark-mono-sun: var(--color-brand);
-  --brandmark-mono-line: #171512;
-  --brandmark-mono-base: #5e584f;
-  --brandmark-mono-dot: #171512;
+@keyframes blink {
+  0%, 90% { transform: scaleY(1); } 90.5% { transform: scaleY(0.06); } 91% { transform: scaleY(1); }
+  97.3% { transform: scaleY(1); } 97.8% { transform: scaleY(0.06); } 98.3%, 100% { transform: scaleY(1); }
 }
+@keyframes pupil { 0%, 90.5% { opacity: 0; } 90.7% { opacity: 1; } 97.6% { opacity: 1; } 97.8%, 100% { opacity: 0; } }
 
-.brandMark svg {
-  display: block;
-  width: 100%;
-  height: 100%;
+@media (prefers-reduced-motion: reduce) {
+  .lens, .pupil { animation: none; }
+  .pupil { opacity: 0; }
 }
-
-.sm {
-  width: 32px;
-  height: 32px;
-}
-
-.md {
-  width: 44px;
-  height: 44px;
-}
-
-.lg {
-  width: 72px;
-  height: 72px;
+@media print {
+  .lens, .pupil { animation: none; }
 }

@@ -1,0 +1,1 @@
+export { CromoSeal } from './CromoSeal';

@@ -1,57 +1,62 @@
 /* ─────────────────────────────────────────────
-   DESIGN TOKENS — Daniel 15K
-   Personalidad: Relajante · Dark · Fantasy-calm
-   Referencia visual: BRAND.md en la raíz del proyecto
+   DESIGN TOKENS — Ascent, a cromo by The Cyborg Way (TCW-1)
+   Every colour comes from the design system of The Cyborg Way: src/theme/tcw.css, generated from
+   src/theme/tcw-tokens.json (scripts/build-tokens.mjs). Here the app's own names point at those tokens, so
+   both themes follow data-theme on <html>. No colour is written as a value in this file (test: brand.test.ts).
+   Product rules: amounts in mono; income uses data-both, expense uses data-lexical; violet only for the one
+   primary action of a view; danger only for errors.
 ───────────────────────────────────────────────── */
+@import './tcw.css';
 
 :root {
-  /* ── COLORES BASE ── */
-  --color-bg-primary:     #0B0B0E;   /* fondo principal */
-  --color-bg-secondary:   #131318;   /* fondo de cards, sidebars */
-  --color-bg-elevated:    #1B1B22;   /* fondo de modales, dropdowns */
-  --color-bg-input:       #1B1B22;   /* fondo de inputs */
+  /* ── Surfaces ── */
+  --color-bg-primary:     var(--bg);
+  --color-bg-secondary:   var(--surface);
+  --color-bg-elevated:    var(--surface-raised);
+  --color-bg-input:       var(--bg);
 
-  /* ── COLORES DE MARCA (cambiar por cliente) ── */
-  --color-brand:          #E6B656;   /* primario — dorado cálido ASCENT */
-  --color-brand-rgb:      230, 182, 86;
-  --color-brand-hover:    #F0C96A;
-  --color-brand-active:   #C49430;
-  --color-brand-subtle:   #2B1E08;   /* fondo sutil con tono de marca */
-
-  /* ── COLORES DE ACENTO (alias de brand — sigue al accent picker) ── */
+  /* ── The one accent: violet ── */
+  --color-brand:          var(--violet);
+  --color-brand-rgb:      139, 123, 255;
+  --color-brand-hover:    var(--violet-hover);
+  --color-brand-active:   var(--violet-hover);
+  --color-brand-subtle:   var(--violet-soft);
   --color-accent:         var(--color-brand);
   --color-accent-rgb:     var(--color-brand-rgb);
   --color-accent-subtle:  var(--color-brand-subtle);
 
-  /* ── COLORES SEMÁNTICOS ── */
-  --color-success:        #22C55E;
-  --color-success-subtle: #052E16;
-  --color-warning:        #F59E0B;
-  --color-warning-subtle: #2D1F00;
-  --color-error:          #EF4444;
-  --color-error-subtle:   #2D0A0A;
-  --color-info:           var(--color-brand);
-  --color-info-subtle:    var(--color-brand-subtle);
-  --color-flow:           var(--color-brand);
-  --color-flow-rgb:       var(--color-brand-rgb);
-  --color-flow-subtle:    rgba(var(--color-brand-rgb), 0.1);
+  /* ── Meaning ── */
+  --color-success:        var(--data-both);
+  --color-success-subtle: color-mix(in srgb, var(--data-both) 14%, var(--bg));
+  --color-warning:        var(--data-lexical);
+  --color-warning-subtle: color-mix(in srgb, var(--data-lexical) 14%, var(--bg));
+  --color-error:          var(--danger);
+  --color-error-subtle:   color-mix(in srgb, var(--danger) 14%, var(--bg));
+  --color-info:           var(--data-semantic);
+  --color-info-subtle:    color-mix(in srgb, var(--data-semantic) 14%, var(--bg));
+  --color-flow:           var(--data-semantic);
+  --color-flow-rgb:       76, 154, 255;
+  --color-flow-subtle:    color-mix(in srgb, var(--data-semantic) 10%, transparent);
+  --color-income:         var(--data-both);
+  --color-income-subtle:  color-mix(in srgb, var(--data-both) 14%, var(--bg));
+  --color-expense:        var(--data-lexical);
 
-  /* ── TEXTO ── */
-  --color-text-primary:   #F4F1EA;   /* texto principal */
-  --color-text-secondary: #ADA89F;   /* texto secundario, labels */
-  --color-text-disabled:  #5C5C5C;   /* texto deshabilitado */
-  --color-text-inverse:   #050505;   /* texto sobre fondos claros */
+  /* ── Text ── */
+  --color-text-primary:   var(--ink);
+  --color-text-secondary: var(--ink-muted);
+  --color-text-disabled:  color-mix(in srgb, var(--ink-muted) 55%, var(--bg));
+  --color-text-inverse:   var(--on-violet);
 
-  /* ── BORDES ── */
-  --color-border:         #282828;   /* borde por defecto */
-  --color-border-focus:   #FB923C;   /* borde en foco (= brand) */
-  --color-border-error:   #EF4444;
-  --color-border-subtle:  #1A1A1A;
+  /* ── Lines ── */
+  --color-border:         var(--line);
+  --color-border-focus:   var(--violet);
+  --color-border-error:   var(--danger);
+  --color-border-subtle:  var(--line);
 
-  /* ── TIPOGRAFÍA ── */
-  --font-sans:    'DM Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-display: 'Sora', var(--font-sans);
-  --font-mono:    'DM Mono', 'SF Mono', 'Fira Code', monospace;
+  /* ── Type: the two voices of the brand ── */
+  --font-sans:    var(--tcw-font-sans);
+  --font-display: var(--tcw-font-sans);
+  --font-mono:    var(--tcw-font-mono);
 
   --text-xs:      0.75rem;    /* 12px */
   --text-sm:      0.875rem;   /* 14px */
@@ -65,7 +70,7 @@
   --font-regular:  400;
   --font-medium:   500;
   --font-semibold: 600;
-  --font-bold:     700;
+  --font-bold:     600;   /* Inter Tight is loaded up to 600 */
 
   --leading-heading: 1.2;
   --leading-tight:  1.25;
@@ -89,13 +94,13 @@
   --type-amount-large-size:  clamp(1.75rem, 9vw, 2.25rem);
   --type-amount-medium-size: clamp(1.125rem, 5vw, 1.35rem);
 
-  --type-display-weight:       800;
-  --type-page-title-weight:    750;
-  --type-section-title-weight: 700;
-  --type-card-title-weight:    700;
+  --type-display-weight:       600;
+  --type-page-title-weight:    600;
+  --type-section-title-weight: 600;
+  --type-card-title-weight:    600;
   --type-body-weight:          500;
-  --type-label-weight:         700;
-  --type-amount-weight:        800;
+  --type-label-weight:         600;
+  --type-amount-weight:        600;
 
   /* ── ESPACIADO (escala 4px) ── */
   --space-1:   0.25rem;   /* 4px */
@@ -112,51 +117,14 @@
 
   /* ── BORDER RADIUS ── */
   --radius-sm:   6px;
-  --radius-md:   10px;
-  --radius-lg:   14px;
-  --radius-xl:   20px;
-  --radius-2xl:  24px;
-  --radius-3xl:  32px;
+  --radius-md:   var(--tcw-radius-md);
+  --radius-lg:   var(--tcw-radius-lg);
+  --radius-xl:   var(--tcw-radius-lg);   /* the brand keeps corners small: 12px at most */
+  --radius-2xl:  var(--tcw-radius-lg);
+  --radius-3xl:  var(--tcw-radius-lg);
   --radius-full: 9999px;   /* para pills y avatares */
 
   /* ── SOMBRAS ── */
-  --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md:  0 4px 12px rgba(0, 0, 0, 0.5);
-  --shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.6);
-  --shadow-brand: 0 0 0 3px rgba(var(--color-brand-rgb), 0.24);  /* glow en foco */
-  --shadow-float: 0 18px 48px rgba(0, 0, 0, 0.46), 0 4px 14px rgba(0, 0, 0, 0.28);
-  --shadow-float-hover: 0 26px 64px rgba(0, 0, 0, 0.52), 0 8px 18px rgba(0, 0, 0, 0.32);
-  --shadow-surface: 0 12px 26px rgba(0, 0, 0, 0.24);
-  --surface-panel: rgba(9, 9, 9, 0.92);
-  --surface-panel-strong: rgba(8, 8, 8, 0.96);
-  --surface-panel-soft: rgba(255, 255, 255, 0.028);
-  --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 24%);
-  --surface-glow: radial-gradient(circle at top left, rgba(var(--color-brand-rgb), 0.1), transparent 34%),
-                  radial-gradient(circle at 82% 14%, rgba(var(--color-brand-rgb), 0.08), transparent 30%);
-  --surface-shell-bg:
-    radial-gradient(circle at 12% 8%, rgba(var(--color-brand-rgb), 0.08), transparent 18%),
-    radial-gradient(circle at top left, rgba(var(--color-brand-rgb), 0.07), transparent 22%),
-    radial-gradient(circle at right 18%, rgba(107, 78, 25, 0.1), transparent 24%),
-    linear-gradient(180deg, #0B0B0E 0%, #0F0F14 48%, #0B0B0E 100%);
-  --surface-grid-line: rgba(255, 255, 255, 0.018);
-  --surface-overlay: rgba(9, 9, 9, 0.88);
-  --surface-header: rgba(8, 8, 8, 0.86);
-  --surface-header-mobile: rgba(7, 7, 7, 0.9);
-  --surface-tabbar: rgba(6, 6, 6, 0.96);
-  --surface-control: rgba(255, 255, 255, 0.03);
-  --surface-control-hover: rgba(255, 255, 255, 0.05);
-  --surface-brand-tint: color-mix(in srgb, var(--color-brand) 10%, var(--surface-panel));
-  --surface-brand-tint-strong: color-mix(in srgb, var(--color-brand) 16%, var(--surface-panel-strong));
-  --surface-border: rgba(255, 255, 255, 0.08);
-  --surface-border-strong: rgba(255, 255, 255, 0.14);
-  --surface-border-soft: rgba(255, 255, 255, 0.025);
-  --surface-border-muted: rgba(255, 255, 255, 0.06);
-  --text-on-surface: #fff;
-  --text-on-surface-soft: rgba(240, 240, 248, 0.76);
-  --text-on-surface-muted: rgba(240, 240, 248, 0.62);
-  --text-on-accent: #10141b;
-  --tabbar-text: rgba(240, 240, 248, 0.58);
-  --tabbar-text-active: #fff8e7;
 
   /* ── TRANSICIONES ── */
   --transition-fast:   100ms ease;
@@ -170,24 +138,57 @@
   --z-modal:   200;
   --z-toast:   300;
 
-  /* ── COLORES DE CATEGORÍAS CONDUCTUALES ── */
-  /* Cada categoría es un elemento del mundo. Ver BRAND.md para la lógica. */
-  --color-committed:           #C0392B;   /* Granada — piedra, peso */
-  --color-committed-subtle:    #2D0A0A;
-  --color-necessary:           #D4732A;   /* Ámbar — tierra, sustento */
-  --color-necessary-subtle:    #2D1500;
-  --color-discretionary:       #14B8A6;   /* Teal — flexible, libre de elegir (frío: contrasta con committed/necessary cálidos) */
-  --color-discretionary-subtle: #04312C;
-  --color-investment:          #1A9E4A;   /* Esmeralda — bosque, crecimiento */
-  --color-investment-subtle:   #052E16;
-  --color-social:              #8A4FD8;   /* Amatista — magia, vínculo */
-  --color-social-subtle:       #1A0B36;
-  --color-income:              #0E96AD;   /* Zafiro — agua, flujo */
-  --color-income-subtle:       #0A1F28;
-  --color-unknown:             #5B7280;   /* Niebla — pendiente */
-  --color-unknown-subtle:      #141E2D;
+  /* ── Shadows: menus and popovers only; cards use lines ── */
+  --shadow-sm:  none;
+  --shadow-md:  var(--shadow-pop);
+  --shadow-lg:  var(--shadow-pop);
+  --shadow-brand: var(--focus-ring);
+  --shadow-float: var(--shadow-pop);
+  --shadow-float-hover: var(--shadow-pop);
+  --shadow-surface: none;
 
-  /* ── IONIC OVERRIDES ── */
+  /* ── Panels, headers and controls (no gradients: graphite does the work) ── */
+  --surface-panel: var(--surface);
+  --surface-panel-strong: var(--surface-raised);
+  --surface-panel-soft: color-mix(in srgb, var(--ink) 3%, transparent);
+  --surface-highlight: none;
+  --surface-glow: none;
+  --surface-shell-bg: var(--bg);
+  --surface-grid-line: var(--graph-edge);
+  --surface-overlay: color-mix(in srgb, var(--bg) 88%, transparent);
+  --surface-header: color-mix(in srgb, var(--bg) 86%, transparent);
+  --surface-header-mobile: color-mix(in srgb, var(--bg) 92%, transparent);
+  --surface-tabbar: color-mix(in srgb, var(--bg) 96%, transparent);
+  --surface-control: color-mix(in srgb, var(--ink) 4%, transparent);
+  --surface-control-hover: color-mix(in srgb, var(--ink) 7%, transparent);
+  --surface-brand-tint: var(--violet-soft);
+  --surface-brand-tint-strong: var(--violet-soft);
+  --surface-border: var(--line);
+  --surface-border-strong: var(--line-strong);
+  --surface-border-soft: var(--line);
+  --surface-border-muted: var(--line);
+  --text-on-surface: var(--ink);
+  --text-on-surface-soft: var(--ink-muted);
+  --text-on-surface-muted: var(--ink-muted);
+  --text-on-accent: var(--on-violet);
+  --tabbar-text: var(--ink-muted);
+  --tabbar-text-active: var(--ink);
+
+  /* ── Behavioural categories: the categorical palette of the brand ── */
+  --color-committed:            var(--cat-rose);
+  --color-committed-subtle:     color-mix(in srgb, var(--cat-rose) 14%, var(--bg));
+  --color-necessary:            var(--cat-gold);
+  --color-necessary-subtle:     color-mix(in srgb, var(--cat-gold) 14%, var(--bg));
+  --color-discretionary:        var(--cat-sky);
+  --color-discretionary-subtle: color-mix(in srgb, var(--cat-sky) 14%, var(--bg));
+  --color-investment:           var(--cat-lime);
+  --color-investment-subtle:    color-mix(in srgb, var(--cat-lime) 14%, var(--bg));
+  --color-social:               var(--cat-coral);
+  --color-social-subtle:        color-mix(in srgb, var(--cat-coral) 14%, var(--bg));
+  --color-unknown:              var(--cat-slate);
+  --color-unknown-subtle:       color-mix(in srgb, var(--cat-slate) 14%, var(--bg));
+
+  /* ── Ionic ── */
   --ion-background-color:       var(--color-bg-primary);
   --ion-text-color:             var(--color-text-primary);
   --ion-color-primary:          var(--color-brand);
@@ -199,92 +200,8 @@
 }
 
 :root[data-theme='light'] {
-  --color-bg-primary:     #F7F3EA;
-  --color-bg-secondary:   #FFFDF7;
-  --color-bg-elevated:    #FFFFFF;
-  --color-bg-input:       #F3EDE1;
-
-  --color-brand:          #9A6A18;
-  --color-brand-rgb:      154, 106, 24;
-  --color-brand-hover:    #7B520F;
-  --color-brand-active:   #68460D;
-  --color-brand-subtle:   #F3E5C6;
-
-  --color-accent:         var(--color-brand);
-  --color-accent-rgb:     var(--color-brand-rgb);
-  --color-accent-subtle:  var(--color-brand-subtle);
-
-  --color-success:        #147A3A;
-  --color-success-subtle: #DDF6E7;
-  --color-warning:        #A76400;
-  --color-warning-subtle: #F9E7C4;
-  --color-error:          #B42318;
-  --color-error-subtle:   #FCE3E0;
-
-  --color-text-primary:   #171512;
-  --color-text-secondary: #5E584F;
-  --color-text-disabled:  #958E83;
-  --color-text-inverse:   #FFFDF7;
-
-  --color-border:         #D8CEC0;
-  --color-border-focus:   var(--color-brand);
-  --color-border-error:   var(--color-error);
-  --color-border-subtle:  #E9E0D2;
-
-  --shadow-sm:  0 1px 2px rgba(55, 43, 25, 0.08);
-  --shadow-md:  0 4px 12px rgba(55, 43, 25, 0.12);
-  --shadow-lg:  0 8px 32px rgba(55, 43, 25, 0.16);
-  --shadow-brand: 0 0 0 3px rgba(var(--color-brand-rgb), 0.2);
-  --shadow-float: 0 18px 48px rgba(55, 43, 25, 0.16), 0 4px 14px rgba(55, 43, 25, 0.08);
-  --shadow-float-hover: 0 26px 64px rgba(55, 43, 25, 0.2), 0 8px 18px rgba(55, 43, 25, 0.1);
-  --shadow-surface: 0 12px 26px rgba(55, 43, 25, 0.1);
-  --surface-panel: rgba(255, 253, 247, 0.92);
-  --surface-panel-strong: rgba(255, 255, 255, 0.96);
-  --surface-panel-soft: rgba(55, 43, 25, 0.035);
-  --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0) 30%);
-  --surface-glow: radial-gradient(circle at top left, rgba(var(--color-brand-rgb), 0.16), transparent 34%),
-                  radial-gradient(circle at 82% 14%, rgba(var(--color-brand-rgb), 0.08), transparent 30%);
-  --surface-shell-bg:
-    radial-gradient(circle at 12% 8%, rgba(var(--color-brand-rgb), 0.16), transparent 18%),
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.72), transparent 25%),
-    radial-gradient(circle at right 18%, rgba(var(--color-brand-rgb), 0.1), transparent 24%),
-    linear-gradient(180deg, #FAF6ED 0%, #F2E9DA 48%, #EFE3D0 100%);
-  --surface-grid-line: rgba(55, 43, 25, 0.045);
-  --surface-overlay: rgba(255, 253, 247, 0.88);
-  --surface-header: rgba(255, 253, 247, 0.88);
-  --surface-header-mobile: rgba(255, 253, 247, 0.92);
-  --surface-tabbar: rgba(255, 253, 247, 0.96);
-  --surface-control: rgba(55, 43, 25, 0.045);
-  --surface-control-hover: rgba(55, 43, 25, 0.075);
-  --surface-brand-tint: color-mix(in srgb, var(--color-brand) 10%, var(--surface-panel));
-  --surface-brand-tint-strong: color-mix(in srgb, var(--color-brand) 16%, var(--surface-panel-strong));
-  --surface-border: rgba(55, 43, 25, 0.12);
-  --surface-border-strong: rgba(55, 43, 25, 0.2);
-  --surface-border-soft: rgba(55, 43, 25, 0.04);
-  --surface-border-muted: rgba(55, 43, 25, 0.08);
-  --text-on-surface: #171512;
-  --text-on-surface-soft: rgba(23, 21, 18, 0.76);
-  --text-on-surface-muted: rgba(23, 21, 18, 0.58);
-  --text-on-accent: #FFFDF7;
-  --tabbar-text: rgba(23, 21, 18, 0.58);
-  --tabbar-text-active: #171512;
-
-  --color-committed-subtle:    #FCE3E0;
-  --color-necessary-subtle:    #F8E5D3;
-  --color-discretionary-subtle: #CFF5EF;
-  --color-investment-subtle:   #DDF6E7;
-  --color-social-subtle:       #EEE5FA;
-  --color-income-subtle:       #DDF3F6;
-  --color-unknown-subtle:      #E8EDF0;
-
-  --ion-background-color:       var(--color-bg-primary);
-  --ion-text-color:             var(--color-text-primary);
-  --ion-color-primary:          var(--color-brand);
-  --ion-color-primary-contrast: var(--color-text-inverse);
-  --ion-toolbar-background:     var(--color-bg-secondary);
-  --ion-item-background:        var(--color-bg-secondary);
-  --ion-card-background:        var(--color-bg-secondary);
-  --ion-border-color:           var(--color-border);
+  --color-brand-rgb: 91, 61, 245;
+  --color-flow-rgb:  31, 100, 214;
 }
 
 @media (min-width: 768px) {

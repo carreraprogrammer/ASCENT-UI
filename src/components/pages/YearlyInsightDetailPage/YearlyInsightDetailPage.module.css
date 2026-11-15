@@ -41,8 +41,8 @@
   font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
   color: var(--text-on-surface-muted);
 }
 
@@ -131,7 +131,7 @@
 .yearBar {
   flex: 1;
   border-radius: 4px 4px 2px 2px;
-  background: linear-gradient(180deg, var(--color-brand), color-mix(in srgb, var(--color-brand) 30%, transparent));
+  background: var(--color-brand);
   min-width: 0;
   transition: opacity 150ms ease;
 }
@@ -147,7 +147,7 @@
   font-size: 9px;
   color: var(--text-on-surface-muted);
   letter-spacing: 0.04em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .chartCaption {
@@ -235,7 +235,7 @@
   width: 34px;
   height: 34px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--color-brand), var(--color-necessary));
+  background: var(--color-brand);
   color: var(--text-on-accent);
   display: flex;
   align-items: center;
@@ -270,9 +270,7 @@
 
 .cta {
   margin-top: var(--space-6);
-  background:
-    radial-gradient(120% 80% at 50% -30%, color-mix(in srgb, var(--color-brand) 14%, transparent), transparent 60%),
-    var(--surface-panel-soft);
+  background: color-mix(in srgb, var(--color-brand) 14%, transparent);
   border: 1px solid color-mix(in srgb, var(--color-brand) 28%, transparent);
   border-radius: var(--radius-xl);
   padding: var(--space-5);
@@ -288,8 +286,8 @@
   font-size: 11.5px;
   font-weight: 600;
   color: var(--color-brand);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .ctaIcon {

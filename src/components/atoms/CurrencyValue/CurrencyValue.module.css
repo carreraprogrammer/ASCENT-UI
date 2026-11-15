@@ -3,3 +3,6 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+/* TCW-1: amounts in the machine voice */
+.value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }

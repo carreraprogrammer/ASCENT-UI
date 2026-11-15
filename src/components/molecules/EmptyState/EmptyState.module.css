@@ -4,7 +4,7 @@
   gap: var(--space-3);
   padding: var(--space-6);
   border: 1px dashed var(--surface-border);
-  border-radius: 24px;
+  border-radius: var(--radius-lg);
   background: var(--surface-control);
 }
 
@@ -26,8 +26,8 @@
   color: var(--color-accent);
   font-size: var(--text-xs);
   font-weight: var(--font-semibold);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .badgeError {

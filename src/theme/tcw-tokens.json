@@ -1,0 +1,439 @@
+{
+ "name": "The Cyborg Way",
+ "version": 1,
+ "color": {
+  "themes": [
+   {
+    "id": "dark",
+    "name": "Dark"
+   },
+   {
+    "id": "light",
+    "name": "Light"
+   }
+  ],
+  "tokens": [
+   {
+    "name": "bg",
+    "value": {
+     "dark": "#111113",
+     "light": "#FAFAFA"
+    },
+    "usage": "Page ground. Dark is the default theme."
+   },
+   {
+    "name": "surface",
+    "value": {
+     "dark": "#18181B",
+     "light": "#F1F1F3"
+    },
+    "usage": "Cards, panels, inputs on bg."
+   },
+   {
+    "name": "surface-raised",
+    "value": {
+     "dark": "#1F1F23",
+     "light": "#FFFFFF"
+    },
+    "usage": "Menus and popovers above surface."
+   },
+   {
+    "name": "ink",
+    "value": {
+     "dark": "#F4F4F5",
+     "light": "#111113"
+    },
+    "usage": "Primary text and the logo strokes. 17.2:1 on bg dark, 18.1:1 on bg light."
+   },
+   {
+    "name": "ink-muted",
+    "value": {
+     "dark": "#A1A1AA",
+     "light": "#52525B"
+    },
+    "usage": "Secondary text, labels, metadata. 7.4:1 on bg in both themes."
+   },
+   {
+    "name": "line",
+    "value": {
+     "dark": "#27272A",
+     "light": "#E4E4E7"
+    },
+    "usage": "Hairlines, dividers, card borders."
+   },
+   {
+    "name": "line-strong",
+    "value": {
+     "dark": "#3F3F46",
+     "light": "#C4C4CC"
+    },
+    "usage": "Input borders and strong dividers."
+   },
+   {
+    "name": "violet",
+    "value": {
+     "dark": "#8B7BFF",
+     "light": "#5B3DF5"
+    },
+    "usage": "The cyborg colour: the lens of the logo, the one primary action, the one lit node or result. 5.7:1 dark, 5.9:1 light. Never large fills or body text."
+   },
+   {
+    "name": "violet-hover",
+    "value": {
+     "dark": "#A396FF",
+     "light": "#4A2DE0"
+    },
+    "usage": "Hover state of violet controls."
+   },
+   {
+    "name": "on-violet",
+    "value": {
+     "dark": "#111113",
+     "light": "#FFFFFF"
+    },
+    "usage": "Text on a violet fill. 5.7:1 dark, 6.1:1 light."
+   },
+   {
+    "name": "violet-soft",
+    "value": {
+     "dark": "#24203F",
+     "light": "#ECE8FE"
+    },
+    "usage": "Tinted background for a selected row or a violet badge; text on it stays ink or violet."
+   },
+   {
+    "name": "graph-edge",
+    "value": {
+     "dark": "#232327",
+     "light": "#E7E7EA"
+    },
+    "usage": "Background graph edges. Decorative only, never carries meaning."
+   },
+   {
+    "name": "graph-node",
+    "value": {
+     "dark": "#34343A",
+     "light": "#CFCFD6"
+    },
+    "usage": "Background graph nodes. Decorative only."
+   },
+   {
+    "name": "data-lexical",
+    "value": {
+     "dark": "#F2994A",
+     "light": "#9A4A08"
+    },
+    "usage": "Charts and search results found by keywords (BM25)."
+   },
+   {
+    "name": "data-semantic",
+    "value": {
+     "dark": "#4C9AFF",
+     "light": "#1F64D6"
+    },
+    "usage": "Charts and search results found by meaning (vectors)."
+   },
+   {
+    "name": "data-both",
+    "value": {
+     "dark": "#2BB8A4",
+     "light": "#0A6B5F"
+    },
+    "usage": "Results found by both legs. Differs from the other two in lightness too."
+   },
+   {
+    "name": "danger",
+    "value": {
+     "dark": "#FF8A7A",
+     "light": "#C2321F"
+    },
+    "usage": "Errors and destructive actions only. Text-size use passes 4.5:1 on bg."
+   }
+  ]
+ },
+ "type": {
+  "fonts": [],
+  "families": {
+   "sans": "\"Inter Tight\", Inter, system-ui, sans-serif",
+   "mono": "\"Geist Mono\", ui-monospace, SFMono-Regular, Menlo, monospace"
+  },
+  "groups": [
+   {
+    "name": "Display",
+    "family": "sans",
+    "styles": [
+     {
+      "name": "display-xl",
+      "fontSize": "120px",
+      "lineHeight": 0.92,
+      "fontWeight": 600,
+      "letterSpacing": "-0.05em",
+      "sample": "the cyborg way",
+      "usage": "Covers and hero only."
+     },
+     {
+      "name": "display",
+      "fontSize": "72px",
+      "lineHeight": 0.98,
+      "fontWeight": 600,
+      "letterSpacing": "-0.045em",
+      "sample": "Augmented, not replaced."
+     }
+    ]
+   },
+   {
+    "name": "Headings",
+    "family": "sans",
+    "styles": [
+     {
+      "name": "h1",
+      "fontSize": "48px",
+      "lineHeight": 1.02,
+      "fontWeight": 600,
+      "letterSpacing": "-0.035em",
+      "sample": "Your judgment, with more reach"
+     },
+     {
+      "name": "h2",
+      "fontSize": "32px",
+      "lineHeight": 1.1,
+      "fontWeight": 600,
+      "letterSpacing": "-0.03em",
+      "sample": "How the brain answers"
+     },
+     {
+      "name": "h3",
+      "fontSize": "22px",
+      "lineHeight": 1.25,
+      "fontWeight": 600,
+      "letterSpacing": "-0.02em",
+      "sample": "Capture, store, retrieve, use"
+     }
+    ]
+   },
+   {
+    "name": "Text",
+    "family": "sans",
+    "styles": [
+     {
+      "name": "body-lg",
+      "fontSize": "20px",
+      "lineHeight": 1.5,
+      "fontWeight": 400,
+      "sample": "The brain captures your work and gives it back when you need it."
+     },
+     {
+      "name": "body",
+      "fontSize": "16px",
+      "lineHeight": 1.5,
+      "fontWeight": 400,
+      "sample": "Cromos turn your context into superpowers."
+     },
+     {
+      "name": "body-sm",
+      "fontSize": "14px",
+      "lineHeight": 1.45,
+      "fontWeight": 400,
+      "sample": "Signed in with GitHub."
+     }
+    ]
+   },
+   {
+    "name": "Machine",
+    "family": "mono",
+    "styles": [
+     {
+      "name": "label",
+      "fontSize": "13px",
+      "lineHeight": 1.4,
+      "fontWeight": 400,
+      "letterSpacing": "0.01em",
+      "sample": "01 — Essence",
+      "usage": "Eyebrows, metadata, section numbers."
+     },
+     {
+      "name": "data",
+      "fontSize": "15px",
+      "lineHeight": 1.4,
+      "fontWeight": 500,
+      "sample": "recall@5 0.70 · hybrid",
+      "usage": "Numbers, product names like cyborg-brain, code."
+     }
+    ]
+   }
+  ]
+ },
+ "spacing": {
+  "tokens": [
+   {
+    "name": "space-1",
+    "value": "4px",
+    "usage": "Icon to label."
+   },
+   {
+    "name": "space-2",
+    "value": "8px",
+    "usage": "Tight groups, badge padding."
+   },
+   {
+    "name": "space-3",
+    "value": "12px",
+    "usage": "Control padding, list gaps."
+   },
+   {
+    "name": "space-4",
+    "value": "16px",
+    "usage": "Default gap between related items."
+   },
+   {
+    "name": "space-6",
+    "value": "24px",
+    "usage": "Card padding."
+   },
+   {
+    "name": "space-8",
+    "value": "32px",
+    "usage": "Between groups inside a section."
+   },
+   {
+    "name": "space-12",
+    "value": "48px",
+    "usage": "Between sections on small screens."
+   },
+   {
+    "name": "space-24",
+    "value": "96px",
+    "usage": "Between page sections on desktop; page margin on slides."
+   }
+  ]
+ },
+ "radius": {
+  "tokens": [
+   {
+    "name": "radius-sm",
+    "value": "6px",
+    "usage": "Badges, small controls."
+   },
+   {
+    "name": "radius-md",
+    "value": "8px",
+    "usage": "Buttons, inputs."
+   },
+   {
+    "name": "radius-lg",
+    "value": "12px",
+    "usage": "Cards, panels, browser frames."
+   },
+   {
+    "name": "radius-pill",
+    "value": "999px",
+    "usage": "Status dots and pills only."
+   }
+  ]
+ },
+ "shadow": {
+  "tokens": [
+   {
+    "name": "shadow-pop",
+    "value": {
+     "dark": "0 12px 32px rgba(0,0,0,0.45)",
+     "light": "0 12px 32px rgba(17,17,19,0.12)"
+    },
+    "usage": "Menus and popovers only. Cards use borders, not shadows."
+   },
+   {
+    "name": "focus-ring",
+    "value": {
+     "dark": "0 0 0 2px #111113, 0 0 0 4px #8B7BFF",
+     "light": "0 0 0 2px #FAFAFA, 0 0 0 4px #5B3DF5"
+    },
+    "usage": "Keyboard focus on every interactive element."
+   }
+  ]
+ },
+ "duration": {
+  "tokens": [
+   {
+    "name": "dur-blink",
+    "value": "150ms",
+    "usage": "Each half of the logo blink."
+   },
+   {
+    "name": "dur-reveal",
+    "value": "600ms",
+    "usage": "Content appearing on scroll, once."
+   },
+   {
+    "name": "dur-stagger",
+    "value": "80ms",
+    "usage": "Delay between siblings in a reveal."
+   },
+   {
+    "name": "dur-synapse",
+    "value": "1500ms",
+    "usage": "One signal travelling a chain of edges in the background graph."
+   }
+  ]
+ },
+ "categorical": {
+  "usage": "Spaces of the brain and categories in charts: one colour each, in order; never violet (the open note), never the search-leg colours. All pass 4.5:1 on bg and surface in both themes.",
+  "tokens": [
+   {
+    "name": "cat-rose",
+    "value": {
+     "dark": "#F07FA8",
+     "light": "#B8325F"
+    }
+   },
+   {
+    "name": "cat-gold",
+    "value": {
+     "dark": "#E3C35A",
+     "light": "#7D6200"
+    }
+   },
+   {
+    "name": "cat-lime",
+    "value": {
+     "dark": "#A8CF5C",
+     "light": "#4F7410"
+    }
+   },
+   {
+    "name": "cat-sky",
+    "value": {
+     "dark": "#6CC4E8",
+     "light": "#17708F"
+    }
+   },
+   {
+    "name": "cat-sand",
+    "value": {
+     "dark": "#D8B48E",
+     "light": "#86603A"
+    }
+   },
+   {
+    "name": "cat-sage",
+    "value": {
+     "dark": "#8FC9A3",
+     "light": "#3F7352"
+    }
+   },
+   {
+    "name": "cat-slate",
+    "value": {
+     "dark": "#A3AEC8",
+     "light": "#535E79"
+    }
+   },
+   {
+    "name": "cat-coral",
+    "value": {
+     "dark": "#F09A86",
+     "light": "#A3412B"
+    }
+   }
+  ]
+ }
+}

@@ -23,10 +23,8 @@
     border-top: var(--border);
     border-radius: 0;
     overflow: hidden;
-    background:
-      linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 7%, transparent), color-mix(in srgb, var(--text-on-surface) 2%, transparent)),
-      var(--background);
-    box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.32);
+    background: color-mix(in srgb, var(--text-on-surface) 7%, transparent);
+    box-shadow: 0 -8px 20px color-mix(in srgb, var(--bg) 32%, transparent);
     backdrop-filter: blur(18px) saturate(135%);
     padding:
       0

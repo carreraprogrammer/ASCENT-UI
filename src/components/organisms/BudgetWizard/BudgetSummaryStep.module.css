@@ -92,13 +92,13 @@
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-xl);
   background: var(--cat-subtle);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid color-mix(in srgb, var(--ink) 5%, transparent);
   transition: border-color var(--transition-fast);
 }
 
 .categoryRowWarning {
-  border-color: rgba(245, 158, 11, 0.25);
-  background: rgba(245, 158, 11, 0.05);
+  border-color: color-mix(in srgb, var(--data-lexical) 25%, transparent);
+  background: color-mix(in srgb, var(--data-lexical) 5%, transparent);
 }
 
 /* ── Progress bar ─────────────────────────────────────────────────────────── */
@@ -106,7 +106,7 @@
 .barTrack {
   height: 4px;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.07);
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
   overflow: hidden;
 }
 

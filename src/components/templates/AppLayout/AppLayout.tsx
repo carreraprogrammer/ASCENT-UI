@@ -1,3 +1,4 @@
+import { CromoSeal } from '../../atoms/CromoSeal';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { IonIcon, IonPage } from '@ionic/react';
 import { closeOutline, logOutOutline, personCircleOutline } from 'ionicons/icons';
@@ -97,6 +98,9 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
             <main className={styles.main}>
               <div className={styles.contentShell} data-agent-drag-surface="content">
                 {children}
+                <footer className={styles.footer}>
+                  <CromoSeal />
+                </footer>
               </div>
             </main>
           </div>

@@ -7,6 +7,8 @@ import { ErrorState } from '../../molecules/ErrorState';
 import { Spinner } from '../../atoms/Spinner';
 import { DynamicForm } from '../../organisms/DynamicForm';
 import { GoogleButton } from '../../atoms/GoogleButton';
+import { CyborgWayButton } from '../../atoms/CyborgWayButton';
+import { startCyborgWayLogin } from '../../../services/cyborgWayAuth';
 import { useAuthStore } from '../../../store/authStore';
 import { useFormStore } from '../../../store/formStore';
 import { useToast } from '../../../hooks/useToast';
@@ -98,12 +100,7 @@ export const LoginPage = () => {
                   onClick={() => void handleMobileGoogleLogin()}
                   aria-label="Iniciar sesión con Google"
                 >
-                  <svg className={nativeStyles.gIcon} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 10.2v3.9h5.4c-.2 1.2-.9 2.2-1.9 2.9v2.4h3.1c1.8-1.7 2.9-4.1 2.9-7 0-.7-.1-1.4-.2-2.1H12Z" fill="#4285F4"/>
-                    <path d="M12 21c2.6 0 4.8-.9 6.4-2.4l-3.1-2.4c-.9.6-2 .9-3.3.9-2.5 0-4.7-1.7-5.5-4h-3.2v2.5A9.7 9.7 0 0 0 12 21Z" fill="#34A853"/>
-                    <path d="M6.5 13.1A5.8 5.8 0 0 1 6.2 12c0-.4.1-.8.2-1.1V8.4H3.2A9.1 9.1 0 0 0 2.2 12c0 1.4.3 2.8 1 4l3.3-2.9Z" fill="#FBBC05"/>
-                    <path d="M12 6.8c1.4 0 2.7.5 3.7 1.4l2.8-2.8A9.5 9.5 0 0 0 12 3a9.7 9.7 0 0 0-8.8 5.4l3.2 2.5c.8-2.4 3-4.1 5.6-4.1Z" fill="#EA4335"/>
-                  </svg>
+                  <img className={nativeStyles.gIcon} src="/icons/google-g.svg" alt="" aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -127,9 +124,10 @@ export const LoginPage = () => {
       <div className={styles.stack}>
         <div className={styles.contentHeader}>
           <span className={styles.contentEyebrow}>Acceso rápido</span>
-          <p className={styles.contentText}>Continúa con Google o entra con tu correo.</p>
+          <p className={styles.contentText}>Entra con The Cyborg Way, con Google o con tu correo.</p>
         </div>
 
+        <CyborgWayButton onClick={() => void startCyborgWayLogin()} />
         <GoogleButton onClick={startGoogleOAuth} />
 
         <div className={styles.divider} aria-hidden="true">

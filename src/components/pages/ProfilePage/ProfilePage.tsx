@@ -4,7 +4,6 @@ import { useToast } from '../../../hooks/useToast';
 import { useAuthStore } from '../../../store/authStore';
 import { Button } from '../../atoms/Button';
 import { useThemeStore, type ThemePreference } from '../../../store/themeStore';
-import { useAccentStore, ACCENT_PRESETS } from '../../../store/accentStore';
 import { useProgressStore } from '../../../store/progressStore';
 import { useEmailConnectionStore } from '../../../store/emailConnectionStore';
 import { Buddy } from '../../atoms/Buddy';
@@ -43,8 +42,6 @@ export const ProfileContent = () => {
   const logout  = useAuthStore((state) => state.logout);
   const themePreference = useThemeStore((state) => state.preference);
   const setThemePreference = useThemeStore((state) => state.setPreference);
-  const accentPreset = useAccentStore((state) => state.preset);
-  const setAccentPreset = useAccentStore((state) => state.setPreset);
   const { fetchProgress } = useProgressStore();
   const { persona, setPersona } = useBuddyStore();
   const {
@@ -175,27 +172,6 @@ export const ProfileContent = () => {
                   >
                     {mode === 'system' ? 'Auto' : mode === 'dark' ? 'Oscuro' : 'Claro'}
                   </button>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.preferenceBlock}>
-              <div>
-                <span className={styles.metaLabel}>Apariencia</span>
-                <strong>Color de acento</strong>
-              </div>
-              <div className={styles.accentPicker} role="group" aria-label="Color de acento">
-                {ACCENT_PRESETS.map((preset) => (
-                  <button
-                    key={preset.color}
-                    type="button"
-                    className={`${styles.accentSwatch} ${accentPreset.color === preset.color ? styles.accentSwatchActive : ''}`}
-                    style={{ '--swatch-color': preset.color } as React.CSSProperties}
-                    onClick={() => setAccentPreset(preset)}
-                    aria-pressed={accentPreset.color === preset.color}
-                    aria-label={preset.label}
-                    title={preset.label}
-                  />
                 ))}
               </div>
             </div>

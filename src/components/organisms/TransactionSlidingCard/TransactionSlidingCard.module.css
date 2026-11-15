@@ -1,5 +1,5 @@
 .sliding {
-  border-radius: 22px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -18,7 +18,7 @@
 }
 
 .item::part(native) {
-  border-radius: 22px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--surface-border-muted);
   background: var(--surface-control);
   box-shadow: var(--shadow-surface);
@@ -264,7 +264,7 @@
   gap: 0.3rem;
   padding: 0.32rem 0.7rem;
   border-radius: 999px;
-  border: 1px solid var(--border-color, rgba(127, 127, 127, 0.35));
+  border: 1px solid var(--border-color, color-mix(in srgb, var(--ink-muted) 35%, transparent));
   background: transparent;
   color: inherit;
   font-size: 0.78rem;

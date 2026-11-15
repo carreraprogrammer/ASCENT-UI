@@ -1,6 +1,6 @@
 .row {
   padding: 11px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 6%, transparent);
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
@@ -8,14 +8,14 @@
 }
 
 .rowSystem {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
 }
 
 .bullet {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.25);
+  background: color-mix(in srgb, var(--ink) 25%, transparent);
   flex-shrink: 0;
   margin-top: 6px;
 }
@@ -26,7 +26,7 @@
   justify-content: center;
   flex-shrink: 0;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.45);
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
   margin-top: 1px;
 }
 
@@ -124,9 +124,9 @@
 }
 
 .chip_success {
-  background: rgba(26, 158, 74, 0.12);
-  color: #1A9E4A;
-  border-color: rgba(26, 158, 74, 0.25);
+  background: color-mix(in srgb, var(--data-both) 12%, transparent);
+  color: var(--data-both);
+  border-color: color-mix(in srgb, var(--data-both) 25%, transparent);
 }
 
 .chip_brand {
@@ -162,8 +162,8 @@
   width: 30px;
   height: 30px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
   color: var(--color-text-primary);
   display: grid;
   place-items: center;
@@ -175,9 +175,9 @@
 }
 
 .stepBtnPlus {
-  background: var(--color-brand, #E6B656);
+  background: var(--color-brand, var(--cat-gold));
   border-color: transparent;
-  color: rgba(0, 0, 0, 0.85);
+  color: color-mix(in srgb, var(--bg) 85%, transparent);
 }
 
 .stepAmt {
@@ -200,7 +200,7 @@
 /* ── Tap-to-edit styles ── */
 
 .rowEditing {
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
 }
 
 .amtTap {
@@ -210,7 +210,7 @@
   background: none;
   border: none;
   padding: 4px 6px;
-  border-radius: 6px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   font-family: var(--font-mono, monospace);
   font-size: var(--text-sm);
@@ -221,7 +221,7 @@
 }
 
 .amtTap:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .editPencil {
@@ -233,9 +233,9 @@
 .amtInput {
   width: 90px;
   padding: 4px 8px;
-  border-radius: 6px;
-  border: 1px solid var(--color-brand, #E6B656);
-  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-brand, var(--cat-gold));
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
   color: var(--color-text-primary);
   font-family: var(--font-mono, monospace);
   font-size: var(--text-sm);
@@ -259,8 +259,8 @@
 .nudgeChip {
   padding: 3px 9px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
   color: var(--color-text-secondary);
   font-family: var(--font-mono, monospace);
   font-size: 11px;
@@ -270,6 +270,6 @@
 }
 
 .nudgeChip:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
   color: var(--color-text-primary);
 }

@@ -9,7 +9,7 @@
   gap: 1.15rem;
   padding: 1.3rem;
   border: 1px solid var(--surface-border-muted);
-  border-radius: 26px;
+  border-radius: var(--radius-lg);
   background:
     var(--surface-highlight),
     var(--surface-panel);
@@ -26,8 +26,8 @@
   color: var(--color-accent);
   font-size: var(--type-caption-size);
   font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .sectionTitle {
@@ -94,7 +94,7 @@
   border-color: color-mix(in srgb, var(--category-accent, var(--color-accent)) 56%, var(--surface-border));
   background: color-mix(in srgb, var(--category-accent, var(--color-accent)) 16%, var(--surface-control));
   color: var(--color-text-primary);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.24);
+  box-shadow: 0 14px 36px color-mix(in srgb, var(--bg) 24%, transparent);
 }
 
 .categorySwatch {
@@ -117,12 +117,9 @@
   display: grid;
   gap: 0.95rem;
   padding: 1rem;
-  border-radius: 22px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--category-accent, var(--color-accent)) 18%, var(--surface-border-muted));
-  background:
-    var(--surface-highlight),
-    var(--surface-panel),
-    radial-gradient(circle at top left, color-mix(in srgb, var(--category-accent, var(--color-accent)) 12%, transparent), transparent 34%);
+  background: var(--surface-highlight);
 }
 
 .subcategoryHeader {
@@ -137,7 +134,7 @@
   font-size: var(--type-body-size);
   font-weight: 600;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .addSubcategoryBtn {
@@ -175,7 +172,7 @@
 .hint {
   margin: 0;
   padding: 0.92rem 1rem;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--surface-border-muted);
   background: var(--surface-control);
   color: var(--color-text-secondary);
@@ -201,7 +198,7 @@
 .dateInput {
   width: 100%;
   padding: 0.65rem 0.85rem;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--surface-border);
   background: var(--surface-control);
   color: var(--color-text-primary);
@@ -227,7 +224,7 @@
   min-width: 0;
   min-height: 3rem;
   padding: 0.6rem 0.85rem;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--surface-border);
   background: var(--surface-control);
   color: var(--text-on-surface-soft);
@@ -262,7 +259,7 @@
 .error {
   margin: 0;
   padding: 0.95rem 1rem;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--color-error) 28%, var(--surface-border-soft));
   background: color-mix(in srgb, var(--color-error) 10%, var(--surface-control));
   color: var(--color-error);
@@ -273,7 +270,7 @@
 @media (max-width: 720px) {
   .section {
     padding: 1rem;
-    border-radius: 22px;
+    border-radius: var(--radius-lg);
   }
 
   .grid {

@@ -107,7 +107,7 @@
   padding: 1.3rem;
   border: 1px solid var(--surface-border-strong);
   border-bottom-color: var(--surface-border-muted);
-  border-radius: 28px;
+  border-radius: var(--radius-lg);
   background:
     var(--surface-highlight),
     var(--surface-glow),
@@ -128,9 +128,7 @@
   inset: 1px;
   border-radius: inherit;
   pointer-events: none;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 8%, transparent), transparent 18%),
-    radial-gradient(circle at top center, color-mix(in srgb, var(--text-on-surface) 6%, transparent), transparent 42%);
+  background: color-mix(in srgb, var(--text-on-surface) 8%, transparent);
   opacity: 0.95;
 }
 
@@ -260,7 +258,7 @@
   gap: 0.3rem;
   padding: 0.42rem 0.7rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
   color: var(--color-text-primary);
   font-size: var(--type-label-size);
   font-weight: 600;
@@ -283,19 +281,15 @@
   display: grid;
   gap: var(--finance-space-sm);
   padding: var(--finance-space-md);
-  border-radius: 20px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
-    rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent),
     var(--shadow-surface);
 }
 
 .focusSupportWarn {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--category-accent, var(--color-warning)) 12%, transparent), color-mix(in srgb, var(--color-error) 6%, transparent)),
-    rgba(255, 255, 255, 0.03);
+  background: var(--color-warning);
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--category-accent, var(--color-warning)) 16%, transparent),
     var(--shadow-surface);
@@ -311,7 +305,7 @@
   height: 8px;
   border-radius: 999px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
   gap: 2px;
 }
 
@@ -370,8 +364,8 @@
   color: var(--color-text-primary);
   font-size: var(--type-label-size);
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .focusSupportValue {
@@ -399,10 +393,8 @@
   min-width: 0;
   padding: var(--finance-space-md);
   border: 1px solid rgba(var(--color-brand-rgb), 0.16);
-  border-radius: 18px;
-  background:
-    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.12), rgba(var(--color-accent-rgb), 0.045)),
-    var(--surface-brand-tint);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
 }
 
 .executionHeader {
@@ -418,8 +410,8 @@
   color: var(--text-on-surface-soft);
   font-size: var(--type-caption-size);
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .executionPct {
@@ -439,7 +431,7 @@
 .executionFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(var(--color-brand-rgb), 0.9), rgba(var(--color-accent-rgb), 0.86));
+  background: var(--surface);
 }
 
 .executionAmount {
@@ -462,10 +454,8 @@
   gap: var(--finance-space-md);
   padding: var(--finance-space-md);
   border: 1px solid rgba(var(--color-brand-rgb), 0.2);
-  border-radius: 18px;
-  background:
-    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.13), rgba(var(--color-accent-rgb), 0.05)),
-    var(--surface-brand-tint-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
 }
 
 .creditPoolHeader {
@@ -489,7 +479,7 @@
   width: 2.1rem;
   height: 2.1rem;
   flex: 0 0 2.1rem;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   background: rgba(var(--color-brand-rgb), 0.12);
   color: var(--color-accent);
 }
@@ -560,17 +550,17 @@
   height: 10px;
   border-radius: 999px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .focusRailFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--category-accent, var(--color-brand)) 92%, transparent), color-mix(in srgb, var(--category-accent, var(--color-accent)) 84%, transparent));
+  background: var(--color-brand);
 }
 
 .focusRailFillWarn {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--category-accent, var(--color-warning)) 88%, transparent), color-mix(in srgb, var(--category-accent, var(--color-error)) 80%, transparent));
+  background: var(--color-warning);
 }
 
 .detailStage {
@@ -637,9 +627,7 @@
 
 .detailTabBtnActive {
   border-color: rgba(var(--color-accent-rgb), 0.42);
-  background:
-    linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.16), rgba(var(--color-brand-rgb), 0.08)),
-    color-mix(in srgb, rgba(var(--color-accent-rgb), 0.06) 68%, var(--surface-panel));
+  background: var(--surface);
   color: var(--color-accent);
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-on-surface) 7%, transparent);
 }
@@ -680,7 +668,7 @@
   gap: var(--finance-space-md);
   padding: var(--finance-space-md);
   border: 1px solid var(--surface-border);
-  border-radius: 22px;
+  border-radius: var(--radius-lg);
   background:
     var(--surface-highlight),
     var(--surface-panel-soft);
@@ -700,8 +688,8 @@
   color: var(--color-text-primary);
   font-size: var(--type-caption-size);
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .filterComposerHint {
@@ -768,9 +756,7 @@
 .categoryTokenActive,
 .subcategoryTokenActive {
   border-color: color-mix(in srgb, var(--category-accent) 48%, var(--surface-border));
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--category-accent) 18%, transparent), var(--surface-panel-soft)),
-    var(--surface-panel);
+  background: color-mix(in srgb, var(--category-accent) 18%, transparent);
   color: var(--category-accent);
   box-shadow: var(--shadow-surface);
 }
@@ -808,8 +794,8 @@
   color: color-mix(in srgb, var(--category-accent) 62%, var(--text-on-surface-soft));
   font-size: var(--type-caption-size);
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .subcategoryReset {
@@ -830,9 +816,9 @@
   height: 1.9rem;
   flex: 0 0 1.9rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--category-accent) 14%, rgba(255, 255, 255, 0.04));
+  background: color-mix(in srgb, var(--category-accent) 14%, color-mix(in srgb, var(--ink) 4%, transparent));
   color: var(--category-accent);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent);
 }
 
 .subcategoryIcon {
@@ -847,9 +833,7 @@
 }
 
 .subcategoryTokenActive {
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--category-accent) 14%, transparent), var(--surface-panel-soft)),
-    var(--surface-panel);
+  background: color-mix(in srgb, var(--category-accent) 14%, transparent);
 }
 
 .subcategoryTokenText {
@@ -867,7 +851,7 @@
   gap: var(--finance-space-md);
   padding: var(--finance-space-md);
   border: 1px solid var(--surface-border);
-  border-radius: 24px;
+  border-radius: var(--radius-lg);
   background: var(--surface-panel-soft);
 }
 
@@ -898,8 +882,8 @@
   color: var(--text-on-surface-soft);
   font-size: var(--type-label-size);
   font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .quickFilters {
@@ -917,7 +901,7 @@
   display: grid;
   padding: var(--finance-space-xs);
   border: 1px solid color-mix(in srgb, rgba(var(--color-accent-rgb), 0.24) 72%, var(--surface-border));
-  border-radius: 24px;
+  border-radius: var(--radius-lg);
   background: var(--surface-panel-soft);
 }
 
@@ -930,12 +914,12 @@
   --color-checked: var(--color-accent);
   --indicator-color: transparent;
   min-height: 46px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
 }
 
 .segmentWrap ion-segment-button::part(native) {
   border: 1px solid transparent;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   font-weight: 600;
   transition:
     background-color var(--transition-base),
@@ -951,9 +935,7 @@
 
 .segmentWrap ion-segment-button.segment-button-checked::part(native) {
   border-color: rgba(var(--color-accent-rgb), 0.42);
-  background:
-    linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.16), rgba(var(--color-brand-rgb), 0.08)),
-    color-mix(in srgb, rgba(var(--color-accent-rgb), 0.06) 68%, var(--surface-panel));
+  background: var(--surface);
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-on-surface) 7%, transparent);
 }
 
@@ -975,8 +957,8 @@
   color: var(--color-accent);
   font-size: var(--type-caption-size);
   font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .metrics {
@@ -992,11 +974,11 @@
   isolation: isolate;
   overflow: hidden;
   border: 1px solid var(--surface-border-strong);
-  border-radius: 24px;
+  border-radius: var(--radius-lg);
   background:
     var(--surface-highlight),
     var(--surface-panel-soft);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--bg) 28%, transparent);
   backdrop-filter: blur(14px) saturate(118%);
   transition:
     transform 180ms ease,
@@ -1012,9 +994,7 @@
   inset: 1px;
   border-radius: inherit;
   pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 16%),
-    radial-gradient(circle at top left, rgba(252, 211, 77, 0.04), transparent 28%);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
 .metricCard > *,
@@ -1094,8 +1074,8 @@
   color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .transactionGroupCard {
@@ -1103,7 +1083,7 @@
   gap: 0;
   overflow: hidden;
   border: 1px solid var(--surface-border);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background:
     var(--surface-highlight),
     var(--surface-panel-soft);
@@ -1123,12 +1103,9 @@
   isolation: isolate;
   overflow: hidden;
   padding: 1.15rem 1.25rem;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(var(--color-brand-rgb), 0.24);
-  background:
-    var(--surface-highlight),
-    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.12), rgba(var(--color-accent-rgb), 0.05)),
-    var(--surface-brand-tint);
+  background: var(--surface-highlight);
   box-shadow: var(--shadow-surface);
   transition:
     transform 160ms ease,
@@ -1142,9 +1119,7 @@
   inset: 1px;
   border-radius: inherit;
   pointer-events: none;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 5%, transparent), transparent 20%),
-    radial-gradient(circle at top right, rgba(var(--color-accent-rgb), 0.08), transparent 42%);
+  background: color-mix(in srgb, var(--text-on-surface) 5%, transparent);
 }
 
 .pocketCard > * {
@@ -1198,7 +1173,7 @@
 }
 
 .pillMuted {
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
   color: var(--text-on-surface-muted);
   font-weight: 500;
 }
@@ -1221,7 +1196,7 @@
   isolation: isolate;
   overflow: hidden;
   padding: var(--finance-space-md);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--surface-border-muted);
   background:
     var(--surface-highlight),
@@ -1239,7 +1214,7 @@
   inset: 1px;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 5%, transparent), transparent 18%);
+  background: color-mix(in srgb, var(--text-on-surface) 5%, transparent);
 }
 
 .listItem > * {
@@ -1274,10 +1249,8 @@
   min-height: 8.25rem;
   padding: 1.2rem 1.35rem;
   border: 1px solid var(--surface-border);
-  border-radius: 18px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.016)),
-    rgba(12, 12, 12, 0.68);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
   box-shadow: var(--shadow-surface);
   cursor: pointer;
   outline: none;
@@ -1294,7 +1267,7 @@
   inset: 1px;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.052), transparent 20%);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
 }
 
 .historyItem > * {
@@ -1306,14 +1279,12 @@
   border-color: rgba(var(--color-brand-rgb), 0.42);
   box-shadow:
     0 0 0 3px rgba(var(--color-brand-rgb), 0.14),
-    0 16px 30px rgba(0, 0, 0, 0.28);
+    0 16px 30px color-mix(in srgb, var(--bg) 28%, transparent);
 }
 
 .historyItemActive {
   border-color: rgba(var(--color-brand-rgb), 0.28);
-  background:
-    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.08), rgba(255, 255, 255, 0.02)),
-    rgba(12, 12, 12, 0.72);
+  background: var(--surface);
 }
 
 .historyPrimary {
@@ -1416,13 +1387,13 @@
   height: 0.55rem;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .progressFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(var(--color-brand-rgb), 0.95), rgba(var(--color-accent-rgb), 0.9));
+  background: var(--surface);
 }
 
 .pill {
@@ -1455,13 +1426,13 @@
   .listItem:hover {
     transform: translateY(-2px);
     border-color: var(--surface-border);
-    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.28);
+    box-shadow: 0 16px 28px color-mix(in srgb, var(--bg) 28%, transparent);
   }
 
   .historyItem:hover {
     transform: translateY(-2px);
     border-color: var(--surface-border-strong);
-    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 18px 32px color-mix(in srgb, var(--bg) 30%, transparent);
   }
 }
 
@@ -1492,8 +1463,8 @@
   color: var(--text-on-surface-soft);
   font-size: var(--type-caption-size);
   font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .table td {
@@ -1578,7 +1549,7 @@
   .focusCard {
     gap: 0.9rem;
     padding: 1rem;
-    border-radius: 22px;
+    border-radius: var(--radius-lg);
   }
 
   .focusTitle {
@@ -1625,12 +1596,12 @@
 
   .eyebrow {
     font-size: var(--type-caption-size);
-    letter-spacing: 0.14em;
+    letter-spacing: 0.01em;
   }
 
   .panel {
     padding: 1rem;
-    border-radius: 20px;
+    border-radius: var(--radius-lg);
   }
 
   .categoryRail,

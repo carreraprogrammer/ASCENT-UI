@@ -24,7 +24,7 @@ export const LoadingOverlay = ({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 'var(--space-4)',
-        background: 'rgba(5, 7, 12, 0.72)',
+        background: 'color-mix(in srgb, var(--bg) 72%, transparent)',
         zIndex,
       }}
     >

@@ -13,12 +13,12 @@
 
 .agentModal::part(content) {
   border: 1px solid var(--surface-border);
-  border-radius: 24px;
+  border-radius: var(--radius-lg);
   background:
     var(--surface-highlight),
     var(--surface-glow),
     var(--surface-panel-strong);
-  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.4), var(--shadow-surface);
+  box-shadow: 0 28px 72px color-mix(in srgb, var(--bg) 40%, transparent), var(--shadow-surface);
   color: var(--color-text-primary);
   overflow: hidden;
 }
@@ -47,7 +47,7 @@
 .stepBarWrap {
   background: var(--surface-panel-strong);
   padding: 0.75rem 1.25rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 7%, transparent);
 }
 
 .stepBar {
@@ -64,7 +64,7 @@
   left: 7px;
   right: 7px;
   height: 2px;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
   z-index: 0;
 }
 
@@ -82,27 +82,27 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+  border: 2px solid color-mix(in srgb, var(--ink) 15%, transparent);
   transition: background 0.2s, border-color 0.2s;
 }
 
 .stepDone .stepDot {
-  background: #48bb78;
+  background: var(--data-both);
   border-color: var(--color-success);
 }
 
 .stepActive .stepDot {
-  background: #fff;
+  background: var(--ink);
   border-color: var(--color-text-primary);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 15%, transparent);
 }
 
 .stepLabel {
   font-size: var(--type-caption-size);
   font-weight: 600;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--text-on-surface-muted);
   transition: color 0.2s;
   text-align: center;
@@ -172,9 +172,9 @@
   display: grid;
   gap: 0.6rem;
   padding: 1.25rem;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 7%, transparent);
 }
 
 .summaryItem {
@@ -191,7 +191,7 @@
 .summaryResult {
   margin-top: 0.5rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
 }
 
 .summaryLabel {
@@ -231,8 +231,8 @@
   color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .distributionGrid {
@@ -246,8 +246,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.55rem 0.75rem;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
 }
 
 .distributionLabel {
@@ -273,9 +273,9 @@
   gap: 0.6rem;
   align-items: flex-start;
   padding: 0.7rem 0.9rem;
-  border-radius: 10px;
-  background: rgba(246, 173, 85, 0.08);
-  border: 1px solid rgba(246, 173, 85, 0.2);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--data-lexical) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--data-lexical) 20%, transparent);
 }
 
 .warningIcon {
@@ -293,15 +293,15 @@
 /* ── Info card ────────────────────────────────────────────────────────────── */
 
 .tone_info {
-  border-top: 3px solid rgba(99, 179, 237, 0.4);
+  border-top: 3px solid color-mix(in srgb, var(--cat-sky) 40%, transparent);
 }
 
 .tone_warning {
-  border-top: 3px solid rgba(246, 173, 85, 0.5);
+  border-top: 3px solid color-mix(in srgb, var(--data-lexical) 50%, transparent);
 }
 
 .tone_success {
-  border-top: 3px solid rgba(72, 187, 120, 0.4);
+  border-top: 3px solid color-mix(in srgb, var(--data-both) 40%, transparent);
 }
 
 .infoBody {
@@ -317,7 +317,7 @@
   font-family: var(--font-mono, monospace);
   font-size: 0.92em;
   padding: 1px 5px;
-  border-radius: 5px;
+  border-radius: var(--radius-lg);
   background: rgba(var(--color-brand-rgb), 0.1);
 }
 
@@ -357,10 +357,10 @@
   align-items: center;
   gap: 7px;
   padding: 13px 6px;
-  border-radius: 15px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  background: var(--surface-control, rgba(255, 255, 255, 0.06));
-  border: 1px solid var(--surface-border, rgba(255, 255, 255, 0.1));
+  background: var(--surface-control, color-mix(in srgb, var(--ink) 6%, transparent));
+  border: 1px solid var(--surface-border, color-mix(in srgb, var(--ink) 10%, transparent));
   color: var(--text-on-surface-soft);
   font-family: inherit;
   font-size: 13px;
@@ -391,7 +391,7 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   border: 1px solid var(--surface-border);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
 }
 
 .mdTable {
@@ -450,8 +450,8 @@
   color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
   margin-bottom: 0.1rem;
 }
 
@@ -460,14 +460,14 @@
   align-items: center;
   gap: 0.8rem;
   padding: 0.65rem 0.75rem;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   border: 1px solid transparent;
   transition: background 0.15s, border-color 0.15s;
 }
 
 .categoryItem:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
 }
 
 .categoryCheckbox {
@@ -513,9 +513,9 @@
 .amountInput {
   width: 140px;
   padding: 0.45rem 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
   color: var(--color-text-primary);
   font-size: var(--type-body-small-size);
   text-align: right;
@@ -524,7 +524,7 @@
 }
 
 .amountInput:focus {
-  border-color: rgba(104, 211, 145, 0.55);
+  border-color: color-mix(in srgb, var(--cat-sage) 55%, transparent);
 }
 
 .amountFixed {
@@ -537,7 +537,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.85rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
 }
 
 /* ── Modal actions ────────────────────────────────────────────────────────── */

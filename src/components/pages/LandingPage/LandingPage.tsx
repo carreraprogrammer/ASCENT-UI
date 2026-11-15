@@ -60,7 +60,7 @@ export const LandingPage = () => {
             <BrandMark variant="monoline" size="md" />
             <span className={styles.brandText}>
               <span>Ascent</span>
-              <strong>Ascent Finance</strong>
+              <strong>Ascent</strong>
             </span>
           </Link>
 

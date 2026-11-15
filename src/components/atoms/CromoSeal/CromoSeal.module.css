@@ -1,0 +1,8 @@
+.seal {
+  display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px;
+  font: 400 13px/1.4 var(--font-mono); color: var(--ink-muted); text-decoration: none;
+}
+.seal strong { font-weight: 500; color: var(--ink); }
+.seal:hover strong { color: var(--violet); }
+.seal:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--tcw-radius-sm); }
+.mark { width: 20px; height: 20px; }

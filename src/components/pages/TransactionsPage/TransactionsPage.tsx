@@ -319,7 +319,7 @@ export const TransactionsContent = () => {
         code: category.attributes.code,
         type: category.attributes.category_type,
       }),
-      color: category.attributes.color ?? '#7ce0d3',
+      color: category.attributes.color ?? 'var(--color-unknown)',
     })),
     [categories],
   );

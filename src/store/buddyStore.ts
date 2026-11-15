@@ -8,7 +8,7 @@ export const PERSONAS = {
   nilo: {
     name: 'Nilo',
     trait: 'el calmado',
-    color: '#5FB58A',
+    color: 'var(--cat-sage)',
     line: 'Va contigo despacio. Respira hondo y te baja las pulsaciones.',
     voice: 'Paciente, en voz baja. Nunca te apura.',
     motion: 0.78,
@@ -18,7 +18,7 @@ export const PERSONAS = {
   pip: {
     name: 'Pip',
     trait: 'el juguetón',
-    color: '#E6B656',
+    color: 'var(--cat-gold)',
     line: 'Celebra cada paso. Rebota cuando algo te sale bien.',
     voice: 'Cálido y animado. Le pone chispa al día.',
     motion: 1.28,
@@ -28,7 +28,7 @@ export const PERSONAS = {
   teo: {
     name: 'Teo',
     trait: 'el analítico',
-    color: '#7CA6E0',
+    color: 'var(--cat-sky)',
     line: 'Te da los números claros. Mira, calcula y asiente.',
     voice: 'Directo y preciso. Va al grano sin frialdad.',
     motion: 1.0,

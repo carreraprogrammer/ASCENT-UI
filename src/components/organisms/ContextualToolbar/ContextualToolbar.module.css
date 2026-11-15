@@ -3,10 +3,8 @@
   gap: 0.55rem;
   padding: 0.9rem 1rem;
   border: 1px solid var(--surface-border);
-  border-radius: 22px;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 6%, transparent), color-mix(in srgb, var(--text-on-surface) 2%, transparent)),
-    var(--surface-header-mobile);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--text-on-surface) 6%, transparent);
   box-shadow: var(--shadow-float);
   backdrop-filter: blur(16px) saturate(118%);
 }
@@ -29,8 +27,8 @@
   color: var(--text-on-surface-muted);
   font-size: var(--type-label-size);
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .title {
@@ -92,9 +90,7 @@
 .searchShellOpen {
   width: min(48vw, 18rem);
   border-color: rgba(var(--color-brand-rgb), 0.22);
-  background:
-    linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.1), rgba(var(--color-brand-rgb), 0.08)),
-    var(--surface-panel);
+  background: var(--surface);
   box-shadow: var(--shadow-surface);
 }
 
@@ -141,7 +137,7 @@
 
 @media (max-width: 767px) {
   .toolbar {
-    border-radius: 18px;
+    border-radius: var(--radius-lg);
   }
 
   .mainRow {

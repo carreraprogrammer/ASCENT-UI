@@ -91,8 +91,8 @@ export const Header = ({
               </div>
             ) : (
               <>
-                <span className={styles.kicker}>Ascent</span>
-                <strong className={styles.brand}>Ascent Finance</strong>
+                <span className={styles.kicker}>a cromo by The Cyborg Way</span>
+                <strong className={styles.brand}>Ascent</strong>
                 {currentSection ? <span className={styles.section}>{currentSection}</span> : null}
               </>
             )}
