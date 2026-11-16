@@ -11,6 +11,10 @@ import { financeService } from '../../../services/financeService';
 import type { CategoryResource, ManageableSubcategory } from '../../../types/finance.types';
 import pageStyles from '../FinancePage.module.css';
 import styles from './SubcategoriesPage.module.css';
+import { InstButton, Num, Sub, Two } from '../../atoms/Inst';
+import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
+import { CellWithActions, instDeskStyles as desk } from '../TransactionsPage/instDesk';
 
 // Tiers de gasto a los que se puede vincular una función (no income/unknown).
 const TIER_TYPES = ['committed', 'necessary', 'discretionary'];
@@ -133,50 +137,23 @@ export const SubcategoriesContent = () => {
     }
   };
 
-  return (
-    <IonContent className={pageStyles.pageContent}>
-      <section className={pageStyles.stack}>
-        <div className={pageStyles.focusStage}>
-          <div className={`${pageStyles.focusCard} ${pageStyles.focusCardFull}`}>
-            <div className={pageStyles.focusCopy}>
-              <span className={pageStyles.eyebrow}>Subcategorías</span>
-              <p className={pageStyles.focusQuestion}>¿Qué funciones agrupan tus gastos y a qué tiers pertenecen?</p>
-              <h2 className={pageStyles.focusTitle}>{subs.length} subcategorías</h2>
-              <p className={pageStyles.focusText}>
-                Una función (ej. "salud") puede pertenecer a varios tiers. Deslizá una tarjeta para editarla o borrarla.
-              </p>
-            </div>
-            <div className={pageStyles.focusActions}>
-              <Button label="Nueva subcategoría" onClick={openNew} />
-            </div>
-          </div>
-        </div>
+  // ── TCW-5 "Instrumento": escritorio sin islas (hereda el armazón). Mismos datos, formularios y acciones. ──
+  const isDesktop = useDesktopLayout();
+  const heads = ['Subcategoría', 'Gavetas', 'Tipo', 'Movimientos'];
+  const aligns: Align[] = ['left', 'left', 'left', 'right'];
+  const tierName = (type: string) => TIER_LABEL[type] ?? (type === 'income' ? 'Ingreso' : type);
+  const rows = subs.map((sub) => [
+    <Two a={sub.name} b={sub.description || undefined} />,
+    <Sub>{sub.categories.map((c) => tierName(c.category_type)).join(' · ') || '—'}</Sub>,
+    <Sub>{sub.is_system ? 'del sistema' : 'propia'}</Sub>,
+    <CellWithActions actions={[{ label: 'Borrar', danger: true, onClick: () => { setDeleting(sub); setReassignTo(''); } }]}>
+      <Num strong>{sub.transaction_count}</Num>
+    </CellWithActions>,
+  ]);
+  const used = subs.filter((sub) => sub.transaction_count > 0).length;
 
-        <DataState
-          loading={loading}
-          error={error}
-          data={subs}
-          emptyTitle="No hay subcategorías"
-          emptyDescription="Creá una función y vinculala a uno o más tiers."
-          emptyActionLabel="Nueva subcategoría"
-          onEmptyAction={openNew}
-          onRetry={() => void load()}
-        >
-          {(items) => (
-            <IonList className={styles.list}>
-              {items.map((s) => (
-                <SubcategorySlidingCard
-                  key={s.id}
-                  subcategory={s}
-                  onEdit={openEdit}
-                  onDelete={(sub) => { setDeleting(sub); setReassignTo(''); }}
-                />
-              ))}
-            </IonList>
-          )}
-        </DataState>
-      </section>
-
+  const overlays = (
+    <>
       {/* Crear / editar */}
       <CrudModal
         isOpen={formOpen}
@@ -254,12 +231,92 @@ export const SubcategoriesContent = () => {
           </div>
         </div>
       </CrudModal>
+    </>
+  );
+
+  if (isDesktop) {
+    return (
+      <>
+        <div className={desk.page} data-testid="subcategories-desktop">
+          <InstPageHeader title="Subcategorías" sub="¿Qué funciones agrupan tus gastos y a qué gavetas pertenecen?"
+            actions={<InstButton primary onClick={openNew}>+ Nueva subcategoría</InstButton>} />
+          <InstStats items={[
+            { label: 'Subcategorías', value: subs.length, sub: 'una función puede vivir en varias gavetas' },
+            { label: 'Con movimientos', value: used, sub: `${subs.length - used} sin usar todavía` },
+            { label: 'Movimientos clasificados', value: subs.reduce((n, sub) => n + sub.transaction_count, 0), sub: 'suma de todas las subcategorías' },
+          ]} />
+          <InstSection title={`Detalle · ${subs.length} registradas`} id="subcats-detalle">
+            {loading ? (
+              <InstTableSkeleton heads={heads} aligns={aligns} rows={8} />
+            ) : error ? (
+              <InstNote error onRetry={() => void load()}>{error}</InstNote>
+            ) : !subs.length ? (
+              <InstNote>
+                Todavía no hay subcategorías.
+                <InstButton className={desk.noteBtn} onClick={openNew}>Nueva subcategoría</InstButton>
+              </InstNote>
+            ) : (
+              <InstTable caption="Subcategorías" heads={heads} aligns={aligns} rows={rows}
+                rowKeys={subs.map((sub) => sub.id)} onRowClick={(i) => openEdit(subs[i])} />
+            )}
+          </InstSection>
+        </div>
+        {overlays}
+      </>
+    );
+  }
+
+  return (
+    <IonContent className={pageStyles.pageContent}>
+      <section className={pageStyles.stack}>
+        <div className={pageStyles.focusStage}>
+          <div className={`${pageStyles.focusCard} ${pageStyles.focusCardFull}`}>
+            <div className={pageStyles.focusCopy}>
+              <span className={pageStyles.eyebrow}>Subcategorías</span>
+              <p className={pageStyles.focusQuestion}>¿Qué funciones agrupan tus gastos y a qué tiers pertenecen?</p>
+              <h2 className={pageStyles.focusTitle}>{subs.length} subcategorías</h2>
+              <p className={pageStyles.focusText}>
+                Una función (ej. "salud") puede pertenecer a varios tiers. Deslizá una tarjeta para editarla o borrarla.
+              </p>
+            </div>
+            <div className={pageStyles.focusActions}>
+              <Button label="Nueva subcategoría" onClick={openNew} />
+            </div>
+          </div>
+        </div>
+
+        <DataState
+          loading={loading}
+          error={error}
+          data={subs}
+          emptyTitle="No hay subcategorías"
+          emptyDescription="Creá una función y vinculala a uno o más tiers."
+          emptyActionLabel="Nueva subcategoría"
+          onEmptyAction={openNew}
+          onRetry={() => void load()}
+        >
+          {(items) => (
+            <IonList className={styles.list}>
+              {items.map((s) => (
+                <SubcategorySlidingCard
+                  key={s.id}
+                  subcategory={s}
+                  onEdit={openEdit}
+                  onDelete={(sub) => { setDeleting(sub); setReassignTo(''); }}
+                />
+              ))}
+            </IonList>
+          )}
+        </DataState>
+      </section>
+
+      {overlays}
     </IonContent>
   );
 };
 
 export const SubcategoriesPage = () => (
-  <AppLayout title="Subcategorías">
+  <AppLayout title="Subcategorías" ownHeader>
     <SubcategoriesContent />
   </AppLayout>
 );

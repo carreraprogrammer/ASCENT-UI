@@ -24,6 +24,11 @@ import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type { Debt, DebtPayload, DebtQueryParams, RecurringObligation } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
 import formStyles from '../../organisms/ComposerForm.module.css';
+import { Bar, InstButton, Num, StateTag, Sub, Two } from '../../atoms/Inst';
+import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
+import { fmtAmount } from '../../../utils/instrumento';
+import { CellWithActions, SortHead, instDeskStyles as desk } from '../TransactionsPage/instDesk';
+import { debtState, fmtRate, nextSort } from '../TransactionsPage/instDeskData';
 
 const initialFilters: DebtQueryParams = {
   q: '',
@@ -445,93 +450,73 @@ export const DebtsContent = () => {
     </div>
   );
 
-  return (
-    <IonContent className={styles.pageContent}>
-      {isDesktop ? (
-        <section className={styles.stack}>
-          <div className={styles.splitLayout} data-testid="debts-desktop">
-            <aside className={styles.splitAside}>
-              <div className={styles.focusCard}>
-                {summaryBody}
-                <div className={styles.focusActions}>
-                  {newDebtButton}
-                </div>
-              </div>
-            </aside>
-            <div className={styles.splitMain}>
-              <div className={styles.splitMainHeader}>
-                <h3 className={styles.splitMainTitle}>Detalle</h3>
-                <span className={styles.splitMainMeta}>{metrics.totalCount} registradas</span>
-              </div>
-              {debtFilters}
-              {loading ? <div className={styles.centeredState}><Spinner size="lg" /></div> : null}
-              {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
-              {!loading && !error && !debts.length ? (
-                <EmptyState
-                  title="No hay deudas registradas"
-                  description="Empieza con tu primera deuda para ver presión mensual, saldo activo y relación con obligaciones." 
-                  actionLabel="Nueva deuda"
-                  onAction={() => {
-                    setEditingDebt(null);
-                    setComposerOpen(true);
-                  }}
-                />
-              ) : null}
+  // ── TCW-5 "Instrumento": vista de escritorio (mockup U_AscentDeudas). Mismos datos, modales y acciones. ──
+  const openNewDebt = () => { setEditingDebt(null); setComposerOpen(true); };
+  const sortIsDefault = (filters.sort_by ?? 'created_at') === 'created_at' && (filters.sort_dir ?? 'desc') === 'desc';
+  const onSort = (column: string) => setFilters((current) => ({
+    ...current,
+    ...nextSort(current, column, column === 'name' ? 'asc' : 'desc'),
+  }));
+  const sortHead = (label: string, column: string) => (
+    <SortHead label={label} column={column} sortBy={filters.sort_by} sortDir={filters.sort_dir}
+      isDefault={sortIsDefault} onSort={onSort} />
+  );
+  const debtHeads = [sortHead('Deuda', 'name'), 'Estado', sortHead('Pago mensual', 'monthly_payment'), 'Tasa mensual',
+    'Obligación vinculada', sortHead('Saldo (COP)', 'current_balance')];
+  const debtAligns: Align[] = ['left', 'left', 'right', 'right', 'left', 'right'];
+  const debtRows = debts.map((debt) => {
+    const linked = linkedObligationByDebtId.get(debt.id);
+    return [
+      <Two a={debt.attributes.name} b={formatDebtType(debt.attributes.debt_type)} />,
+      <StateTag state={debtState(debt.attributes.status)} />,
+      <Num>{fmtAmount(debt.attributes.monthly_payment)}</Num>,
+      <Num>{fmtRate(debt.attributes.interest_rate)}</Num>,
+      <Sub>{linked ? linked.attributes.name : 'sin recurrente'}</Sub>,
+      <CellWithActions actions={[
+        { label: linked ? 'Cambiar cuota' : 'Vincular cuota', onClick: () => handleOpenLinkModal(debt) },
+        { label: 'Borrar', danger: true, onClick: () => setDeletingDebt(debt) },
+      ]}>
+        <Num strong>{fmtAmount(debt.attributes.current_balance)}</Num>
+      </CellWithActions>,
+    ];
+  });
+  const settledCount = metrics.totalCount - metrics.activeCount;
 
-              {!loading && !error && debts.length ? debtList : null}
-            </div>
-          </div>
-        </section>
-      ) : (
-      <section className={`${styles.stack} ${!detailsOpen ? styles.stackFill : ''}`}>
-        {!detailsOpen ? (
-          <div className={styles.focusStage}>
-            <div className={`${styles.focusCard} ${styles.focusCardFull} ${styles.focusCardCentered}`}>
-              {summaryBody}
-              <div className={styles.focusActions}>
-                {newDebtButton}
-                <Button
-                  label="Explorar detalle"
-                  variant="ghost"
-                  onClick={() => setDetailsOpen(true)}
-                />
-              </div>
-            </div>
-          </div>
-        ) : null}
+  const desktopView = (
+    <div className={desk.page} data-testid="debts-desktop">
+      <InstPageHeader title="Deudas" sub="¿Cuánta presión de deuda tengo hoy?"
+        actions={<InstButton primary onClick={openNewDebt}>+ Nueva deuda</InstButton>} />
+      <InstStats items={[
+        { label: 'Saldo activo acumulado', value: fmtAmount(metrics.totalBalance), sub: `${metrics.activeCount} ${metrics.activeCount === 1 ? 'deuda activa' : 'deudas activas'}` },
+        { label: 'Carga mensual fija', value: fmtAmount(metrics.totalMonthly), sub: 'suma de las cuotas' },
+        {
+          label: 'Deuda ya resuelta',
+          value: <span className={desk.statBar}>{settledPct} %<Bar pct={settledPct} width="120px" label="Deuda ya resuelta" /></span>,
+          sub: `${settledCount} de ${metrics.totalCount} deudas ya no están activas`,
+        },
+      ]} />
+      <InstSection title={`Detalle · ${metrics.totalCount} ${metrics.totalCount === 1 ? 'registrada' : 'registradas'}`} id="debts-detalle">
+        {loading ? (
+          <InstTableSkeleton heads={debtHeads} aligns={debtAligns} rows={5} />
+        ) : error ? (
+          <InstNote error onRetry={() => void load()}>{error}</InstNote>
+        ) : !debts.length ? (
+          <InstNote>
+            {filters.q || filters.status || filters.debt_type ? 'No hay deudas con estos filtros.' : 'Todavía no hay deudas registradas.'}
+            <InstButton className={desk.noteBtn} onClick={filters.q || filters.status || filters.debt_type ? () => setFilters(initialFilters) : openNewDebt}>
+              {filters.q || filters.status || filters.debt_type ? 'Limpiar filtros' : 'Nueva deuda'}
+            </InstButton>
+          </InstNote>
+        ) : (
+          <InstTable caption="Deudas registradas" heads={debtHeads} aligns={debtAligns} rows={debtRows}
+            rowKeys={debts.map((d) => d.id)} onRowClick={(i) => { setEditingDebt(debts[i]); setComposerOpen(true); }} />
+        )}
+      </InstSection>
+    </div>
+  );
 
-        {detailsOpen ? (
-          <div className={styles.detailStage}>
-            <BreadcrumbTrail items={[
-              { label: 'Deudas', onClick: () => setDetailsOpen(false) },
-              { label: 'Detalle' },
-            ]} />
-            <div className={styles.detailPanel}>
-            {debtFilters}
-            </div>
-          </div>
-        ) : null}
-
-        {loading ? <div className={styles.centeredState}><Spinner size="lg" /></div> : null}
-        {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
-        {!loading && !error && !debts.length ? (
-          <EmptyState
-            title="No hay deudas registradas"
-            description="Empieza con tu primera deuda para ver presión mensual, saldo activo y relación con obligaciones." 
-            actionLabel="Nueva deuda"
-            onAction={() => {
-              setEditingDebt(null);
-              setComposerOpen(true);
-            }}
-          />
-        ) : null}
-
-        {!loading && !error && debts.length && detailsOpen ? (
-          debtList
-        ) : null}
-      </section>
-      )}
-
+  const overlays = (
+    <>
       <SortSheet
         isOpen={sortOpen}
         title="Ordenar deudas"
@@ -630,12 +615,75 @@ export const DebtsContent = () => {
         </section>
       </CrudModal>
       {toast}
+    </>
+  );
+
+  if (isDesktop) {
+    return (
+      <>
+        {desktopView}
+        {overlays}
+      </>
+    );
+  }
+
+  return (
+    <IonContent className={styles.pageContent}>
+      <section className={`${styles.stack} ${!detailsOpen ? styles.stackFill : ''}`}>
+        {!detailsOpen ? (
+          <div className={styles.focusStage}>
+            <div className={`${styles.focusCard} ${styles.focusCardFull} ${styles.focusCardCentered}`}>
+              {summaryBody}
+              <div className={styles.focusActions}>
+                {newDebtButton}
+                <Button
+                  label="Explorar detalle"
+                  variant="ghost"
+                  onClick={() => setDetailsOpen(true)}
+                />
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {detailsOpen ? (
+          <div className={styles.detailStage}>
+            <BreadcrumbTrail items={[
+              { label: 'Deudas', onClick: () => setDetailsOpen(false) },
+              { label: 'Detalle' },
+            ]} />
+            <div className={styles.detailPanel}>
+            {debtFilters}
+            </div>
+          </div>
+        ) : null}
+
+        {loading ? <div className={styles.centeredState}><Spinner size="lg" /></div> : null}
+        {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
+        {!loading && !error && !debts.length ? (
+          <EmptyState
+            title="No hay deudas registradas"
+            description="Empieza con tu primera deuda para ver presión mensual, saldo activo y relación con obligaciones." 
+            actionLabel="Nueva deuda"
+            onAction={() => {
+              setEditingDebt(null);
+              setComposerOpen(true);
+            }}
+          />
+        ) : null}
+
+        {!loading && !error && debts.length && detailsOpen ? (
+          debtList
+        ) : null}
+      </section>
+
+      {overlays}
     </IonContent>
   );
 };
 
 export const DebtsPage = () => (
-  <AppLayout title="Deudas">
+  <AppLayout title="Deudas" ownHeader>
     <DebtsContent />
   </AppLayout>
 );

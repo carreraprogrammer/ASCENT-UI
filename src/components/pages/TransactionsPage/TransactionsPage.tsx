@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useLocation } from 'react-router-dom';
 import { IonContent, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, useIonAlert, useIonRouter, useIonToast } from '@ionic/react';
 import { addOutline, optionsOutline, warningOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
@@ -24,6 +25,11 @@ import { financeService } from '../../../services/financeService';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import formStyles from '../../organisms/ComposerForm.module.css';
 import styles from '../FinancePage.module.css';
+import { DateCell, InstButton, Num, OriginTag, StateTag, Sub } from '../../atoms/Inst';
+import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
+import { fmtAmount, fmtDay, fmtSigned, originOf } from '../../../utils/instrumento';
+import { CellWithActions, Chip, ChipSelect, PlainButton, SortHead, instDeskStyles as desk, type RowAction } from './instDesk';
+import { SOURCE_OPTIONS, monthLong, monthShort, nextSort, txQuickFilters, txQuickOf, type TxQuick } from './instDeskData';
 
 const periodFormatter = new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' });
 const dayFormatter = new Intl.DateTimeFormat('es-CO', { weekday: 'short', day: 'numeric' });
@@ -186,6 +192,7 @@ export const TransactionsContent = () => {
     summary,
     categories,
     loading,
+    loadingMore,
     submitting,
     error,
     filters,
@@ -821,116 +828,159 @@ export const TransactionsContent = () => {
     </>
   );
 
-  return (
+  // ── TCW-5 "Instrumento": vista de escritorio (mockup U_AscentTransacciones). Mismos datos, filtros y acciones. ──
+  const location = useLocation();
+  // El buscador de la cabecera (⌘K) y "N movimientos por revisar" navegan con ?q= / ?status= también estando aquí.
+  useEffect(() => {
+    if (!isDesktop) return;
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q');
+    const status = params.get('status');
+    if (q === null && status === null) return;
+    setFilters((current) => ({
+      ...current,
+      ...(q !== null ? { q } : {}),
+      ...(status !== null ? { status, transaction_type: '' } : {}),
+    }));
+  }, [isDesktop, location.search]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Más movimientos al llegar al final del documento (en escritorio el scroll es el de la página).
+  const moreRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const node = moreRef.current;
+    if (!isDesktop || !node || !hasNextPage || typeof IntersectionObserver === 'undefined') return undefined;
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) void loadMore();
+    }, { rootMargin: '200px' });
+    io.observe(node);
+    return () => io.disconnect();
+  }); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const orderedTransactions = useMemo(() => groupedTransactions.flatMap((g) => g.items), [groupedTransactions]);
+  const quick = txQuickOf(filters);
+  const setQuick = (q: TxQuick) => setFilters((current) => ({ ...current, ...txQuickFilters(q) }));
+  const prevPeriod = shiftPeriod(period.year, period.month, -1);
+  const nextPeriod = shiftPeriod(period.year, period.month, 1);
+  const sortIsDefault = (filters.sort_by ?? 'date') === 'date' && (filters.sort_dir ?? 'desc') === 'desc';
+  const onSort = (column: string) => setFilters((current) => ({
+    ...current,
+    ...nextSort(current, column, column === 'date' || column === 'amount' ? 'desc' : 'asc'),
+  }));
+  const sortHead = (label: string, column: string) => (
+    <SortHead label={label} column={column} sortBy={filters.sort_by} sortDir={filters.sort_dir}
+      isDefault={sortIsDefault} onSort={onSort} />
+  );
+  const txHeads = [sortHead('Fecha', 'date'), sortHead('Movimiento', 'concept'), 'Gaveta · categoría', 'Origen',
+    sortHead('Estado', 'status'), sortHead('Monto (COP)', 'amount')];
+  const txAligns: Align[] = ['left', 'left', 'left', 'left', 'left', 'right'];
+  const openNew = () => { setEditingTransaction(null); setComposerOpen(true); };
+  const openEdit = (transaction: Transaction) => { setEditingTransaction(transaction); setComposerOpen(true); };
+  const filtered = Boolean(activeFilterCount || filters.q || filters.status || filters.transaction_type || filters.source);
+
+  const gavetaLabel = (transaction: Transaction) => {
+    const cat = resolveTransactionCategory(transaction, categoryLookup);
+    if (!cat.categoryId && !cat.subcategoryName) return 'Sin clasificar';
+    const tier = getCategoryDisplayName({ name: cat.categoryName, code: cat.categoryCode, type: cat.categoryType });
+    return cat.subcategoryName ? `${tier} · ${cat.subcategoryName}` : tier;
+  };
+
+  const rowActions = (transaction: Transaction): RowAction[] => {
+    const acts: RowAction[] = [];
+    if (transaction.attributes.status === 'pending') {
+      const suggested = suggestedFor(transaction) ?? [];
+      suggested.slice(0, 2).forEach((sug) => acts.push({ label: `✓ ${sug.name}`, onClick: () => void handleQuickConfirm(transaction, sug.code) }));
+      acts.push(suggested.length
+        ? { label: 'Otra', onClick: () => openEdit(transaction) }
+        : { label: 'Confirmar', onClick: () => void handleQuickConfirm(transaction) });
+    }
+    acts.push({ label: 'Vincular', onClick: () => handleOpenLink(transaction) });
+    acts.push({ label: 'Borrar', danger: true, onClick: () => void requestDelete(transaction) });
+    return acts;
+  };
+
+  const txRows = orderedTransactions.map((transaction) => {
+    const income = transaction.attributes.transaction_type === 'income';
+    const pending = transaction.attributes.status === 'pending';
+    return [
+      <DateCell>{fmtDay(resolveTransactionDate(transaction))}</DateCell>,
+      <span style={{ fontWeight: 500 }}>{transaction.attributes.concept}</span>,
+      <Sub>{gavetaLabel(transaction)}</Sub>,
+      <OriginTag origin={originOf(transaction.attributes)} />,
+      <StateTag state={pending ? 'pendiente' : 'confirmado'} />,
+      <CellWithActions actions={rowActions(transaction)}>
+        <Num strong tone={income ? 'ok' : undefined}>{fmtSigned(transaction.attributes.amount, income)}</Num>
+      </CellWithActions>,
+    ];
+  });
+
+  const desktopView = (
+    <div className={desk.page} data-testid="transactions-desktop">
+      <InstPageHeader
+        title="Transacciones"
+        sub="Flujo del mes: lo que entró, lo que salió y de dónde vino cada dato"
+        actions={<InstButton primary onClick={openNew}>+ Nueva transacción</InstButton>}
+      />
+      <InstStats items={[
+        { label: 'Ingresos', value: fmtAmount(metrics.incomeTotal), sub: monthLong(period) },
+        { label: 'Gastos', value: fmtAmount(metrics.expenseTotal), sub: `${metrics.count} ${metrics.count === 1 ? 'movimiento' : 'movimientos'}` },
+        { label: 'Balance del mes', value: fmtAmount(monthBalance, { sign: 'always' }), sub: 'ingresos − gastos' },
+        { label: 'Disponible real', value: fmtAmount(realAvailable), sub: `balance + saldo arrastrado (${fmtAmount(carryover, { sign: 'always' })})` },
+      ]} />
+      <InstSection title={`Movimientos · ${monthLong(period)}`} id="tx-movimientos">
+        <div className={desk.filters}>
+          <PlainButton onClick={() => setPeriod(prevPeriod)} label={`Ver ${monthLong(prevPeriod)}`}>‹ {monthShort(prevPeriod.month)}</PlainButton>
+          {!isCurrentPeriod ? (
+            <PlainButton onClick={() => setPeriod(nextPeriod)} label={`Ver ${monthLong(nextPeriod)}`}>{monthShort(nextPeriod.month)} ›</PlainButton>
+          ) : null}
+          <Chip on={quick === 'all'} onClick={() => setQuick('all')}>Todo</Chip>
+          <Chip on={quick === 'income'} onClick={() => setQuick('income')}>Ingresos</Chip>
+          <Chip on={quick === 'expense'} onClick={() => setQuick('expense')}>Gastos</Chip>
+          <Chip on={quick === 'pending'} onClick={() => setQuick('pending')}>Por revisar · {metrics.pendingCount}</Chip>
+          <ChipSelect label="Gaveta" value={selectedCategoryId}
+            options={categoryFilters.map((c) => ({ value: c.id, label: c.name }))}
+            onChange={(id) => setFilters((current) => ({ ...current, category_id: id, subcategory_id: '' }))} />
+          <ChipSelect label="Origen" value={String(filters.source ?? '')} options={SOURCE_OPTIONS}
+            onChange={(source) => setFilters((current) => ({ ...current, source }))} />
+          {filters.q ? (
+            <Chip on onClick={() => setFilters((current) => ({ ...current, q: '' }))}>
+              <span aria-label={`Quitar búsqueda ${filters.q}`}>“{filters.q}” ✕</span>
+            </Chip>
+          ) : null}
+          <span className={desk.spacer} />
+          <PlainButton onClick={() => ionRouter.push('/subcategories', 'forward')}>Subcategorías</PlainButton>
+        </div>
+        {loading ? (
+          <InstTableSkeleton heads={txHeads} aligns={txAligns} rows={8} />
+        ) : error ? (
+          <InstNote error onRetry={() => void reload()}>{error}</InstNote>
+        ) : !orderedTransactions.length ? (
+          <InstNote>
+            {filtered
+              ? `No hay movimientos en ${monthLong(period)} con estos filtros.`
+              : `Todavía no hay movimientos en ${monthLong(period)}.`}
+            <InstButton className={desk.noteBtn} onClick={filtered ? () => setFilters(initialTransactionFilters) : openNew}>
+              {filtered ? 'Limpiar filtros' : 'Nueva transacción'}
+            </InstButton>
+          </InstNote>
+        ) : (
+          <>
+            <InstTable caption={`Movimientos de ${monthLong(period)}`} heads={txHeads} aligns={txAligns} rows={txRows}
+              rowKeys={orderedTransactions.map((t) => t.id)} onRowClick={(i) => openEdit(orderedTransactions[i])} />
+            {hasNextPage ? (
+              <div ref={moreRef} className={desk.more}>
+                <InstButton onClick={() => void loadMore()} disabled={loadingMore}>
+                  {loadingMore ? 'Cargando…' : 'Cargar más'}
+                </InstButton>
+              </div>
+            ) : null}
+          </>
+        )}
+      </InstSection>
+    </div>
+  );
+
+  const overlays = (
     <>
-      <IonContent className={styles.pageContent}>
-      {isDesktop ? (
-        <section className={styles.stack}>
-          <div className={styles.splitLayout} data-testid="transactions-desktop">
-            <aside className={styles.splitAside}>
-              <div className={styles.focusCard}>
-                {summaryBody}
-                <div className={styles.focusActions}>
-                  {newTransactionButton}
-                  {subcategoriesButton}
-                </div>
-              </div>
-            </aside>
-            <div className={styles.splitMain}>
-              <div className={styles.splitMainHeader}>
-                <h3 className={styles.splitMainTitle}>Detalle</h3>
-                <span className={styles.splitMainMeta}>{monthName}</span>
-              </div>
-              {transactionDetail}
-              {loading ? <div className={styles.centeredState}><Spinner size="lg" /></div> : null}
-              {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}
-              {!loading && !error && !transactions.length ? (
-                <EmptyState
-                  title="No hay transacciones en este período"
-                  description={activeFilterCount || filters.q ? 'No encontramos movimientos con esos filtros. Limpia criterios o registra una transacción nueva.' : 'Empieza registrando el primer movimiento del período para ver progreso y lectura conductual.'}
-                  actionLabel={activeFilterCount || filters.q ? 'Limpiar filtros' : 'Nueva transacción'}
-                  onAction={() => {
-                    if (activeFilterCount || filters.q) {
-                      setFilters(initialTransactionFilters);
-                      return;
-                    }
-                    setEditingTransaction(null);
-                    setComposerOpen(true);
-                  }}
-                />
-              ) : null}
-            </div>
-          </div>
-        </section>
-      ) : (
-      <section className={`${styles.stack} ${!detailsOpen ? styles.stackFill : ''}`}>
-        {!detailsOpen ? (
-          <div className={styles.focusStage}>
-            <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
-              {summaryBody}
-
-              {/* Actions */}
-              <div className={styles.focusActions}>
-                  {newTransactionButton}
-                <Button
-                  label="Explorar detalle"
-                  variant="ghost"
-                  onClick={() => setDetailsOpen(true)}
-                />
-                  {subcategoriesButton}
-              </div>
-
-            </div>
-          </div>
-        ) : null}
-
-        {detailsOpen ? (
-          <div className={styles.detailStage}>
-            <BreadcrumbTrail items={[
-              { label: 'Transacciones', onClick: () => setDetailsOpen(false) },
-              { label: monthName },
-            ]} />
-            <div className={styles.detailPanel}>
-              {transactionDetail}
-            </div>
-          </div>
-        ) : null}
-
-        {loading ? <div className={styles.centeredState}><Spinner size="lg" /></div> : null}
-        {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}
-        {!loading && !error && !transactions.length ? (
-          <EmptyState
-            title="No hay transacciones en este período"
-            description={activeFilterCount || filters.q ? 'No encontramos movimientos con esos filtros. Limpia criterios o registra una transacción nueva.' : 'Empieza registrando el primer movimiento del período para ver progreso y lectura conductual.'}
-            actionLabel={activeFilterCount || filters.q ? 'Limpiar filtros' : 'Nueva transacción'}
-            onAction={() => {
-              if (activeFilterCount || filters.q) {
-                setFilters(initialTransactionFilters);
-                return;
-              }
-              setEditingTransaction(null);
-              setComposerOpen(true);
-            }}
-          />
-        ) : null}
-
-      </section>
-      )}
-
-      {detailsOpen || isDesktop ? (
-        <IonInfiniteScroll
-          onIonInfinite={async (ev) => {
-            await loadMore();
-            void ev.target.complete();
-          }}
-          threshold="200px"
-          disabled={!hasNextPage}
-        >
-          <IonInfiniteScrollContent loadingText="Cargando más transacciones..." />
-        </IonInfiniteScroll>
-      ) : null}
-      </IonContent>
-
       <SortSheet
         isOpen={sortOpen}
         title="Ordenar transacciones"
@@ -1083,10 +1133,92 @@ export const TransactionsContent = () => {
       </CrudModal>
     </>
   );
+
+  if (isDesktop) {
+    return (
+      <>
+        {desktopView}
+        {overlays}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <IonContent className={styles.pageContent}>
+      <section className={`${styles.stack} ${!detailsOpen ? styles.stackFill : ''}`}>
+        {!detailsOpen ? (
+          <div className={styles.focusStage}>
+            <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
+              {summaryBody}
+
+              {/* Actions */}
+              <div className={styles.focusActions}>
+                  {newTransactionButton}
+                <Button
+                  label="Explorar detalle"
+                  variant="ghost"
+                  onClick={() => setDetailsOpen(true)}
+                />
+                  {subcategoriesButton}
+              </div>
+
+            </div>
+          </div>
+        ) : null}
+
+        {detailsOpen ? (
+          <div className={styles.detailStage}>
+            <BreadcrumbTrail items={[
+              { label: 'Transacciones', onClick: () => setDetailsOpen(false) },
+              { label: monthName },
+            ]} />
+            <div className={styles.detailPanel}>
+              {transactionDetail}
+            </div>
+          </div>
+        ) : null}
+
+        {loading ? <div className={styles.centeredState}><Spinner size="lg" /></div> : null}
+        {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}
+        {!loading && !error && !transactions.length ? (
+          <EmptyState
+            title="No hay transacciones en este período"
+            description={activeFilterCount || filters.q ? 'No encontramos movimientos con esos filtros. Limpia criterios o registra una transacción nueva.' : 'Empieza registrando el primer movimiento del período para ver progreso y lectura conductual.'}
+            actionLabel={activeFilterCount || filters.q ? 'Limpiar filtros' : 'Nueva transacción'}
+            onAction={() => {
+              if (activeFilterCount || filters.q) {
+                setFilters(initialTransactionFilters);
+                return;
+              }
+              setEditingTransaction(null);
+              setComposerOpen(true);
+            }}
+          />
+        ) : null}
+
+      </section>
+
+      {detailsOpen ? (
+        <IonInfiniteScroll
+          onIonInfinite={async (ev) => {
+            await loadMore();
+            void ev.target.complete();
+          }}
+          threshold="200px"
+          disabled={!hasNextPage}
+        >
+          <IonInfiniteScrollContent loadingText="Cargando más transacciones..." />
+        </IonInfiniteScroll>
+      ) : null}
+      </IonContent>
+      {overlays}
+    </>
+  );
 };
 
 export const TransactionsPage = () => (
-  <AppLayout title="Flujo">
+  <AppLayout title="Flujo" ownHeader>
     <TransactionsContent />
   </AppLayout>
 );
