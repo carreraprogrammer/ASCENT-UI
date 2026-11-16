@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { Browser } from '@capacitor/browser'
+import { Capacitor } from '@capacitor/core'
 import { api } from '../services/api'
 
 interface EmailConnectionState {
@@ -50,7 +51,8 @@ export const useEmailConnectionStore = create<EmailConnectionState>((set) => ({
   startOAuth: async () => {
     set({ actionLoading: true, error: null })
     try {
-      const { data } = await api.post('/api/v1/auth/gmail')
+      // ASC-4: en web la API vuelve a /auth/gmail/callback solo si se lo pedimos; iOS sigue con su deep link.
+      const { data } = await api.post('/api/v1/auth/gmail', Capacitor.isNativePlatform() ? undefined : { platform: 'web' })
       const d = data as { data: { authorization_url: string } }
       // Browser.open usa ASWebAuthenticationSession en iOS — maneja el deep-link
       // de vuelta a la app automáticamente después de que Google aprueba.

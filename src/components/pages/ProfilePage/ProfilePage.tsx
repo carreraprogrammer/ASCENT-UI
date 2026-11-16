@@ -62,6 +62,30 @@ export const ProfileContent = () => {
   const [contextLoading, setContextLoading] = useState(true);
   const [contextError, setContextError] = useState<string | null>(null);
   const startImpersonation = useAuthStore((state) => state.startImpersonation);
+  // ASC-4 fase 6: interruptor "Modo demo", solo para el superadministrador (también mientras ve la demo, para volver).
+  const demoStash = useAuthStore((state) => state.demoStash);
+  const enterDemoMode = useAuthStore((state) => state.enterDemoMode);
+  const exitDemoMode = useAuthStore((state) => state.exitDemoMode);
+  const canSwitchDemo = Boolean(user?.superAdmin || demoStash?.user.superAdmin);
+  const inDemo = user?.demo === true && demoStash !== null;
+  const [demoSwitching, setDemoSwitching] = useState(false);
+
+  const handleDemoToggle = async () => {
+    if (inDemo) {
+      exitDemoMode();
+      // Recarga completa: nada de la cuenta demo queda en memoria.
+      window.location.assign('/profile');
+      return;
+    }
+    setDemoSwitching(true);
+    try {
+      await enterDemoMode();
+      window.location.assign('/dashboard');
+    } catch {
+      showError('No pudimos abrir el modo demo.');
+      setDemoSwitching(false);
+    }
+  };
   const [accounts, setAccounts] = useState<AdminAccount[]>([]);
   const [accountsLoading, setAccountsLoading] = useState(false);
   const [impersonatingId, setImpersonatingId] = useState<number | null>(null);
@@ -233,6 +257,29 @@ export const ProfileContent = () => {
                 {!accountsLoading && accounts.filter((a) => a.user_id !== user.id).length === 0 && (
                   <span className={styles.controlLabel}>No hay otras cuentas.</span>
                 )}
+              </div>
+            )}
+
+            {canSwitchDemo && (
+              <div className={styles.preferenceBlock}>
+                <div>
+                  <span className={styles.metaLabel}>Herramientas</span>
+                  <strong>Modo demo</strong>
+                </div>
+                <label className={styles.demoSwitchRow}>
+                  <span className={styles.demoSwitchText}>
+                    Muestra Ascent con datos de ejemplo. Tus datos reales no se consultan mientras está activo.
+                  </span>
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    className={styles.demoSwitch}
+                    checked={inDemo}
+                    aria-checked={inDemo}
+                    disabled={demoSwitching}
+                    onChange={() => void handleDemoToggle()}
+                  />
+                </label>
               </div>
             )}
 

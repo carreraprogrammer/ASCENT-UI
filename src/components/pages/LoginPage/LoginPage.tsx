@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { IonContent, IonPage, isPlatform } from '@ionic/react';
 import { AuthLayout } from '../../templates/AuthLayout';
@@ -14,6 +14,8 @@ import { useFormStore } from '../../../store/formStore';
 import { useToast } from '../../../hooks/useToast';
 import { startGoogleOAuth, loginWithGoogleMobile, initGoogleAuth } from '../../../services/authService';
 import { getLastAuthPath } from '../../../utils/navigation';
+import { localizeAuthSchema } from '../../../utils/authFormCopy';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import styles from '../AuthPage.module.css';
 import nativeStyles from './LoginPageNative.module.css';
 
@@ -34,6 +36,9 @@ export const LoginPage = () => {
   const schemaError = useFormStore((state) => state.error);
   const fetchSchema = useFormStore((state) => state.fetchSchema);
   const hydrateAuth = useAuthStore((state) => state.hydrateAuth);
+  const startDemo = useAuthStore((state) => state.startDemo);
+  const isDesktop = useDesktopLayout();
+  const [demoLoading, setDemoLoading] = useState(false);
   const location = useLocation();
   const history = useHistory();
   const { showError, toast } = useToast();
@@ -54,6 +59,24 @@ export const LoginPage = () => {
     showError(oauthError);
     history.replace(location.pathname, {});
   }, [history, location.pathname, oauthError, showError]);
+
+  // ASC-4 fase 6: "Ver demo" abre una sesión de solo lectura en la cuenta demo, sin credenciales.
+  const formSchema = useMemo(() => {
+    const base = schema ?? fallbackSchema;
+    return isDesktop ? localizeAuthSchema(base) : base;
+  }, [schema, isDesktop]);
+
+  const handleDemo = async () => {
+    setDemoLoading(true);
+    try {
+      await startDemo();
+      history.replace('/dashboard');
+    } catch {
+      showError('No pudimos abrir la demo. Intenta de nuevo.');
+    } finally {
+      setDemoLoading(false);
+    }
+  };
 
   const handleMobileGoogleLogin = async () => {
     setMobileLoading(true);
@@ -120,9 +143,9 @@ export const LoginPage = () => {
   }
 
   return (
-    <AuthLayout title="Iniciar sesión">
+    <AuthLayout title="Iniciar sesión" section="Iniciar sesión" heading="Sigue tu ascenso">
       <div className={styles.stack}>
-        <div className={styles.contentHeader}>
+        <div className={`${styles.contentHeader} ${styles.mobileOnly}`}>
           <span className={styles.contentEyebrow}>Acceso rápido</span>
           <p className={styles.contentText}>Entra con The Cyborg Way, con Google o con tu correo.</p>
         </div>
@@ -132,15 +155,19 @@ export const LoginPage = () => {
 
         <div className={styles.divider} aria-hidden="true">
           <span className={styles.line} />
-          <span className={styles.dividerText}>o con email</span>
+          <span className={styles.dividerText}>
+            <span className={styles.mobileOnly}>o con email</span>
+            <span className={styles.desktopOnly}>o con tu correo</span>
+          </span>
           <span className={styles.line} />
         </div>
 
         <FormSection
+          className={styles.emailSection}
           title="Acceso con email"
           description="Usa tu correo para entrar. Si el esquema dinámico no carga, el formulario base sigue disponible."
         >
-          {schemaError && !schema ? (
+          {schemaError && !schema && !isDesktop ? (
             <ErrorState
               title="No pudimos cargar el formulario dinámico"
               message={schemaError}
@@ -155,7 +182,7 @@ export const LoginPage = () => {
           ) : null}
 
           <DynamicForm
-            schema={schema ?? fallbackSchema}
+            schema={formSchema}
             submitLabel="Entrar"
             onSuccess={(response) => {
               hydrateAuth(response);
@@ -168,8 +195,18 @@ export const LoginPage = () => {
         </FormSection>
 
         <Link className={styles.link} to="/register">
-          ¿No tienes cuenta? Regístrate
+          ¿No tienes cuenta? <span className={styles.linkAccent}>Regístrate</span>
         </Link>
+
+        <button
+          type="button"
+          className={`${styles.demoLink} ${styles.desktopOnly}`}
+          onClick={() => void handleDemo()}
+          disabled={demoLoading}
+        >
+          <span className={styles.demoText}>{demoLoading ? 'Abriendo la demo…' : 'Ver demo'}</span>
+          <span className={styles.demoHint}>datos de ejemplo, sin cuenta</span>
+        </button>
         {toast}
       </div>
     </AuthLayout>

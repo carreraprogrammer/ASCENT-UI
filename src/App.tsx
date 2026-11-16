@@ -18,6 +18,7 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { AppRouter } from './router/AppRouter';
 import { AgentUIProvider } from './contexts/AgentUIContext';
 import { FloatingAgent } from './components/organisms/FloatingAgent';
+import { DemoReadOnlyNotice } from './components/molecules/DemoReadOnlyNotice';
 import { GmailReconnectBanner } from './components/molecules/GmailReconnectBanner';
 import { QuickCaptureShortcut } from './plugins/quickCaptureShortcut';
 import { applyThemeMode, getThemeMediaQuery, useThemeStore } from './store/themeStore';
@@ -120,6 +121,7 @@ export default function App() {
           <GmailReconnectBanner />
           <AppRouter />
           <FloatingAgent />
+          <DemoReadOnlyNotice />
         </AgentUIProvider>
       </IonReactRouter>
     </IonApp>

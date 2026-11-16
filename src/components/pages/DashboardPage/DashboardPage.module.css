@@ -803,23 +803,16 @@
 .d2MtnTickLbl { position: absolute; right: 10px; font-family: var(--font-mono); font-size: 9.5px; color: color-mix(in srgb, var(--ink) 30%, transparent); }
 .d2MtnTickLblTop { top: 10%; }
 .d2MtnTickLblBottom { bottom: 30%; }
+/* ASC-4 fase 3: el escalador es atoms/Climber; aquí solo su posición en la ladera. */
 .d2MtnAvatar {
-  position: absolute; width: 28px; height: 28px; border-radius: 999px;
-  transform: translate(-50%, 40%);
-  background: color-mix(in srgb, var(--ink) 60%, transparent);
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--cat-gold) 40%, transparent), 0 0 0 4px var(--color-bg-secondary);
-  display: grid; place-items: center; z-index: 3;
+  position: absolute; width: 32px; height: 32px; line-height: 0;
+  transform: translate(-50%, 6%);
+  z-index: 3;
   animation: d2AvatarBob 3.2s ease-in-out infinite;
 }
-.d2MtnAvatarSm { width: 20px; height: 20px; }
-.d2MtnAvatarEyes { width: 15px; height: 15px; overflow: visible; }
-.d2MtnAvatarSm .d2MtnAvatarEyes { width: 11px; height: 11px; }
-.d2Pupil { fill: var(--text-on-accent); animation: d2Blink 4.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-.d2Catch { fill: color-mix(in srgb, var(--ink) 92%, transparent); }
 @keyframes d2AvatarBob { 0%, 100% { margin-top: 0; } 50% { margin-top: -3px; } }
-@keyframes d2Blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
 @media (prefers-reduced-motion: reduce) {
-  .d2MtnAvatar, .d2Pupil { animation: none !important; }
+  .d2MtnAvatar { animation: none !important; }
 }
 .d2MtnFoot { position: absolute; left: 16px; right: 16px; bottom: 12px; z-index: 4; display: flex; align-items: flex-end; justify-content: space-between; }
 .d2MtnFootVal { font-family: var(--font-display); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--color-text-primary); }

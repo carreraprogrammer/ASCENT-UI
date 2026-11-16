@@ -3,11 +3,13 @@ import type { ReactNode } from 'react';
 interface FormSectionProps {
   title: string;
   description?: string;
+  className?: string;
   children: ReactNode;
 }
 
-export const FormSection = ({ title, description, children }: FormSectionProps) => (
+export const FormSection = ({ title, description, className, children }: FormSectionProps) => (
   <section
+    className={className}
     style={{
       display: 'grid',
       gap: 'var(--space-4)',
@@ -17,7 +19,7 @@ export const FormSection = ({ title, description, children }: FormSectionProps) 
       background: 'color-mix(in srgb, var(--ink) 3%, transparent)',
     }}
   >
-    <div style={{ display: 'grid', gap: 'var(--space-2)' }}>
+    <div data-form-section-head="" style={{ display: 'grid', gap: 'var(--space-2)' }}>
       <h3 style={{ margin: 0, fontSize: 'var(--text-lg)' }}>{title}</h3>
       {description ? (
         <p style={{ margin: 0, color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>

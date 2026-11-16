@@ -21,6 +21,7 @@ import { ProfilePage } from '../components/pages/ProfilePage';
 import { NotFoundPage } from '../components/pages/NotFoundPage/NotFoundPage';
 import { OAuthCallbackPage } from '../components/pages/OAuthCallbackPage';
 import { CyborgWayCallbackPage } from '../components/pages/CyborgWayCallbackPage';
+import { GmailCallbackPage } from '../components/pages/GmailCallbackPage';
 import { TransactionsPage } from '../components/pages/TransactionsPage';
 import { DebtsPage } from '../components/pages/DebtsPage';
 import { PlannedExpensesPage } from '../components/pages/PlannedExpensesPage';
@@ -229,6 +230,7 @@ export const AppRouter = () => {
         <GuestRoute exact path="/register" component={RegisterPage} />
         <Route exact path="/auth/callback" component={OAuthCallbackPage} />
         <Route exact path="/auth/tcw/callback" component={CyborgWayCallbackPage} />
+        <Route exact path="/auth/gmail/callback" component={GmailCallbackPage} />
         <OnboardingPreviewRoute />
         <OnboardingResetRoute />
         <OnboardingRoute />

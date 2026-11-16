@@ -1,0 +1,80 @@
+/* ASC-4 fase 3: el escalador. Colores solo de los tokens (cat-gold, bg, ink); el dorado claro y el profundo son
+   mezclas del mismo token. */
+.climber {
+  --climber-gold: var(--cat-gold);
+  --climber-gold-light: color-mix(in srgb, var(--cat-gold) 55%, white);
+  --climber-gold-deep: color-mix(in srgb, var(--cat-gold) 78%, black);
+  --climber-ring: var(--bg);
+  --climber-eye: var(--bg);
+  --climber-glint: var(--ink);
+  --climber-shine: color-mix(in srgb, var(--cat-gold) 18%, white);
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
+/* En el tema claro cat-gold es un ocre oscuro (pensado para texto): el personaje conserva su dorado. */
+:global(:root[data-theme='light']) .climber {
+  --climber-gold: color-mix(in srgb, var(--cat-gold) 35%, gold);
+  --climber-gold-light: color-mix(in srgb, var(--cat-gold) 10%, color-mix(in srgb, gold 45%, white));
+  --climber-gold-deep: color-mix(in srgb, var(--cat-gold) 75%, gold);
+  --climber-eye: var(--ink);
+  --climber-glint: var(--bg);
+}
+
+.svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+.stopLight { stop-color: var(--climber-gold-light); }
+.stopMid { stop-color: var(--climber-gold); }
+.stopDeep { stop-color: var(--climber-gold-deep); }
+.glowIn { stop-color: var(--climber-gold); stop-opacity: 0.45; }
+.glowOut { stop-color: var(--climber-gold); stop-opacity: 0; }
+
+.shadow { fill: black; opacity: 0.35; }
+.ring { fill: var(--climber-ring); }
+.shine { fill: none; stroke: var(--climber-shine); stroke-width: 1.6; stroke-linecap: round; opacity: 0.7; }
+.pupil { fill: var(--climber-eye); }
+.glint { fill: var(--climber-glint); }
+
+.eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: climberBlink 5.2s ease-in-out infinite;
+}
+
+@keyframes climberBlink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.08); }
+}
+
+/* "Tú · 40%": solo en escritorio. */
+.label {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .label {
+    position: absolute;
+    left: calc(100% + 2px);
+    bottom: calc(100% - 6px);
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 10px;
+    border-radius: var(--tcw-radius-pill);
+    border: 1px solid var(--line-strong);
+    background: var(--line);
+    color: var(--ink);
+    font-family: var(--tcw-font-mono);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eyes { animation: none; }
+}

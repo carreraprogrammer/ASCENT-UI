@@ -1,0 +1,28 @@
+.mountain { position: relative; width: 100%; }
+.svg { display: block; width: 100%; height: auto; overflow: hidden; }
+
+.peakTop { stop-color: var(--line); }
+.peakBottom { stop-color: var(--surface); stop-opacity: 0.2; }
+.tick { stroke: var(--line); stroke-dasharray: 3 5; }
+.slope { stroke: var(--line-strong); stroke-width: 1.5; }
+.slopeDone { stroke: var(--violet); stroke-width: 3; stroke-linecap: round; }
+.pole { stroke: var(--ink-muted); stroke-width: 1.6; }
+.flag { fill: var(--violet); }
+
+.stageDot,
+.stageDotDone { fill: var(--bg); stroke-width: 2; }
+.stageDot { stroke: var(--line-strong); }
+.stageDotDone { stroke: var(--violet); }
+.stageText,
+.stageTextDone { font-family: var(--tcw-font-sans); font-size: 12px; }
+.stageText { fill: var(--ink-muted); }
+.stageTextDone { fill: var(--ink); }
+.edgeLabel { fill: var(--ink-muted); font-family: var(--tcw-font-mono); font-size: 11px; }
+
+/* The climber sits on the slope: its centre on the point, a little above (as in the mockup). */
+.climber {
+  position: absolute;
+  transform: translate(-50%, -55%);
+  line-height: 0;
+  z-index: 1;
+}
