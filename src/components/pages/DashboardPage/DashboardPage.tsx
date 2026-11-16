@@ -823,9 +823,9 @@ export const DashboardContent = () => {
           summary={summary} loading={loading} error={error} onRetry={() => void reload()} onReload={() => void reload()}
           pending={pending} recent={monthTransactions} lookup={categoryLookup}
           health={health} statusLabel={health ? `${statusLabel} — ${tail}` : statusLabel}
-          stages={ascent?.stages ?? null} active={ascent?.active ?? 0} oblItems={oblItems}
+          ascent={ascent ? <div className={styles.dkAscent}><AscentWidget goal={ascent} onOpen={() => setModal('ascent')} /></div> : null} oblItems={oblItems}
           burn={runway ? { daily: runway.daily_necessary_burn ?? 0, sufficient: runway.has_sufficient_history !== false } : null}
-          onOpenFlow={() => setModal('flow')} onOpenAscent={() => setModal('ascent')} onOpenObligations={() => setModal('obl')}
+          onOpenFlow={() => setModal('flow')} onOpenObligations={() => setModal('obl')}
         />
         {modals}
       </>

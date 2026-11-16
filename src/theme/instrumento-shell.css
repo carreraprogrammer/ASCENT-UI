@@ -1,7 +1,9 @@
 /* TCW-5: en escritorio web el scroll es el del documento, no el de un contenedor. html.inst-desktop lo pone el
    armazón de escritorio (InstShell) solo mientras está montado; en móvil y en Capacitor nada de esto aplica. */
 html.inst-desktop { height: auto; overflow-y: auto; }
-html.inst-desktop body { position: static; height: auto; max-height: none; overflow: visible; background: var(--bg); }
+html.inst-desktop body { position: static; height: auto; max-height: none; overflow: visible; transform: none; background: var(--bg); }
+/* Ionic (structure.css) pone transform: translateZ(0) en body: cualquier position: fixed (hojas, cajones, el
+   asistente) quedaría medido contra el body y no contra la ventana. */
 html.inst-desktop ion-app,
 html.inst-desktop ion-tabs,
 html.inst-desktop ion-router-outlet,

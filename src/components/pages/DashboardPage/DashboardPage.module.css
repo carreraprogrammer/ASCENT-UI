@@ -910,6 +910,7 @@
     gap: 20px;
     align-items: start;
   }
+  .dkAscent { min-width: 0; }
   .dkCol { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
   .dkCard {
     min-width: 0;
@@ -923,26 +924,27 @@
   .dkCard > .d2Widget > .d2Sec:first-child,
   .dkCard > div > .d2Widget > .d2Sec:first-child { margin-top: 0; }
 
+  /* TCW-5 comment-90: .dkAscent lleva el mismo "Tu ascenso" real al armazón Instrumento. */
   /* Montaña: escala con el ancho de la columna (proporción fija, tope de alto) y nunca
      se desborda. El valor y el porcentaje quedan debajo del gráfico, como en el mockup. */
-  .dkGrid .d2MtnWrap {
+  :is(.dkGrid, .dkAscent) .d2MtnWrap {
     height: auto;
     aspect-ratio: 5 / 2;
     max-height: 420px;
     overflow: visible;
     margin-bottom: 62px;
   }
-  .dkGrid .d2MtnTickLbl { font-size: 11px; right: 14px; }
-  .dkGrid .d2MtnFoot { left: 4px; right: 4px; bottom: -58px; text-align: left; }
-  .dkGrid .d2MtnFootVal { font-size: 30px; }
-  .dkGrid .d2MtnFootValMuted { font-size: 15px; }
-  .dkGrid .d2MtnFootLbl { font-size: 12.5px; }
-  .dkGrid .d2MtnFootPct { font-size: 17px; }
-  .dkGrid .d2AscentHead { margin-bottom: 14px; }
-  .dkGrid .d2AscentEyebrow { font-size: 12px; }
-  .dkGrid .d2AscentStage { font-size: 17px; }
-  .dkGrid .d2AscentStages { gap: 8px; margin-top: 14px; padding: 0; }
-  .dkGrid .d2AscentChip { font-size: 12px; padding: 10px 6px; white-space: nowrap; min-width: 0; }
+  :is(.dkGrid, .dkAscent) .d2MtnTickLbl { font-size: 11px; right: 14px; }
+  :is(.dkGrid, .dkAscent) .d2MtnFoot { left: 4px; right: 4px; bottom: -58px; text-align: left; }
+  :is(.dkGrid, .dkAscent) .d2MtnFootVal { font-size: 30px; }
+  :is(.dkGrid, .dkAscent) .d2MtnFootValMuted { font-size: 15px; }
+  :is(.dkGrid, .dkAscent) .d2MtnFootLbl { font-size: 12.5px; }
+  :is(.dkGrid, .dkAscent) .d2MtnFootPct { font-size: 17px; }
+  :is(.dkGrid, .dkAscent) .d2AscentHead { margin-bottom: 14px; }
+  :is(.dkGrid, .dkAscent) .d2AscentEyebrow { font-size: 12px; }
+  :is(.dkGrid, .dkAscent) .d2AscentStage { font-size: 17px; }
+  :is(.dkGrid, .dkAscent) .d2AscentStages { gap: 8px; margin-top: 14px; padding: 0; }
+  :is(.dkGrid, .dkAscent) .d2AscentChip { font-size: 12px; padding: 10px 6px; white-space: nowrap; min-width: 0; }
 
   /* Ritmo diario y gastado: una sola tarjeta, apilados. */
   .dkSide .d2Stats { flex-direction: column; margin-top: 0; gap: 18px; }
@@ -956,6 +958,6 @@
 
 /* ASC-4: en escritorio el escalador se apoya en la ladera (su base en el punto) y la bandera en la cima. */
 @media (min-width: 1024px) {
-  .dkGrid .d2MtnAvatar[data-desktop] { transform: translate(-50%, -88%); }
-  .dkGrid .d2MtnFlag[data-desktop] { transform: translate(-12%, -94%); }
+  :is(.dkGrid, .dkAscent) .d2MtnAvatar[data-desktop] { transform: translate(-50%, -88%); }
+  :is(.dkGrid, .dkAscent) .d2MtnFlag[data-desktop] { transform: translate(-12%, -94%); }
 }
