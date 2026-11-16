@@ -3,8 +3,10 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
 import { Climber } from '../../atoms/Climber'
+import type { ClimberEmotion } from '../../atoms/Climber'
 import { useAuthStore } from '../../../store/authStore'
 import { ChatPortal } from '../../pages/ChatPage/ChatPage'
+import { financeService } from '../../../services/financeService'
 import styles from './FloatingAgent.module.css'
 
 type Point = { x: number; y: number }
@@ -61,6 +63,7 @@ export const FloatingAgent = () => {
   const location = useLocation()
   const [isOpen, setIsOpen] = useState(false)
   const [wizardOpen, setWizardOpen] = useState(() => document.body.hasAttribute('data-wizard-open'))
+  const [emotion, setEmotion] = useState<ClimberEmotion>('calm')
   const [position, setPosition] = useState<Point | null>(readStoredPosition)
   const [isDragging, setIsDragging] = useState(false)
   const positionRef = useRef<Point | null>(position)
@@ -88,6 +91,16 @@ export const FloatingAgent = () => {
     observer.observe(document.body, { attributes: true, attributeFilter: ['data-wizard-open'] })
     return () => observer.disconnect()
   }, [])
+
+  // TCW-2: el ánimo que tenía Buddy. Si el último insight del agente está sin ver ('new'), el escalador anima.
+  useEffect(() => {
+    if (!isAuthenticated) return
+    let alive = true
+    financeService.fetchLatestInsight()
+      .then((insight) => { if (alive && insight?.status === 'new') setEmotion('cheer') })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [isAuthenticated])
 
   const syncPosition = (candidate?: Point | null) => {
     if (typeof window === 'undefined') return
@@ -220,7 +233,7 @@ export const FloatingAgent = () => {
             onDragStart={(e) => e.preventDefault()}
             aria-label="Abrir asistente"
           >
-            <Climber size={CLIMBER_SIZE} />
+            <Climber size={CLIMBER_SIZE} emotion={emotion} />
           </button>
         </div>,
         document.body,

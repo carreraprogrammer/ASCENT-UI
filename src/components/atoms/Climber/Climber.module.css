@@ -75,6 +75,72 @@
   }
 }
 
+/* ── TCW-2 fase 3: expresiones (las de Buddy, solo con ojos y movimiento). ── */
+.lid {
+  fill: none;
+  stroke: var(--climber-eye);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+
+.spark { fill: var(--climber-gold-light); }
+
+/* Ojos en arco o cerrados: no parpadean. */
+.happy .eyes,
+.cheer .eyes,
+.sleep .eyes { animation: none; }
+
+/* El cuerpo se mueve; la sombra se queda en el suelo. Solo con movimiento permitido (clase .animated). */
+.figure {
+  transform-box: view-box;
+  transform-origin: 24px 42px;
+}
+
+.animated.happy .figure { animation: climberHop 1.15s ease-in-out infinite; }
+.animated.cheer .figure { animation: climberCheer 0.95s ease-in-out infinite; }
+.animated.think .figure { animation: climberTilt 3s ease-in-out infinite; }
+.animated.worry .figure { animation: climberFret 1.5s ease-in-out infinite; }
+.animated.sleep .figure { animation: climberSnooze 5.2s ease-in-out infinite; }
+.animated.cheer .spark { transform-box: fill-box; transform-origin: center; animation: climberSpark 1.5s ease-out infinite; }
+.animated.cheer .spark:nth-child(2) { animation-delay: 0.5s; }
+
+@keyframes climberHop {
+  0%, 100% { transform: translateY(0) scale(1.03, 0.97); }
+  40% { transform: translateY(-3px) scale(0.97, 1.03); }
+  70% { transform: translateY(0) scale(1, 1); }
+}
+
+@keyframes climberCheer {
+  0%, 100% { transform: translateY(0) rotate(-3deg) scale(1.03, 0.97); }
+  50% { transform: translateY(-3.5px) rotate(3deg) scale(0.97, 1.03); }
+}
+
+@keyframes climberTilt {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(3deg) translateY(-1px); }
+}
+
+@keyframes climberFret {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-1px); }
+  40% { transform: translateX(1px); }
+  60% { transform: translateX(-0.7px); }
+  80% { transform: translateX(0.5px); }
+}
+
+@keyframes climberSnooze {
+  0%, 100% { transform: scale(1.02, 0.98); }
+  50% { transform: scale(1.04, 0.96); }
+}
+
+@keyframes climberSpark {
+  0% { opacity: 0.2; transform: scale(0.4) rotate(0deg); }
+  35% { opacity: 1; transform: scale(1) rotate(40deg); }
+  100% { opacity: 0.2; transform: scale(0.5) rotate(90deg); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .eyes { animation: none; }
+  .eyes,
+  .figure,
+  .spark { animation: none !important; }
 }
