@@ -8,6 +8,7 @@ import './theme/tokens.css';
 import './theme/reset.css';
 import './theme/typography.css';
 import './theme/utilities.css';
+import './theme/instrumento-shell.css';
 import { useEffect } from 'react';
 import { IonApp } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';

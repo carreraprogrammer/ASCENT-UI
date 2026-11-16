@@ -1,0 +1,36 @@
+/* TCW-5 "Instrumento": átomos de escritorio. Un solo acento (violeta) para la acción; verde, ámbar y rosa solo
+   para estados. Radio 8 px en controles. Sin sombras ni brillos. */
+.eyebrow { font-family: var(--tcw-font-mono); font-size: 11px; letter-spacing: .02em; color: var(--ink-muted); }
+.num { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; font-size: 14px; white-space: nowrap; }
+.strong { font-weight: 600; }
+.ok { color: var(--data-both); }
+.amber { color: var(--cat-gold); }
+.rose { color: var(--cat-rose); }
+.violet { color: var(--violet); }
+.muted { color: var(--ink-muted); }
+.tag { font-family: var(--tcw-font-mono); font-size: 11px; white-space: nowrap; color: var(--ink-muted); }
+.tagIcon { margin-right: 4px; }
+.tagIconAgent { color: var(--violet); }
+.bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--line); vertical-align: middle; }
+.barFill { display: block; height: 6px; border-radius: 3px; background: var(--violet); }
+.barOver { background: var(--cat-rose); }
+.btn {
+  height: 34px; padding: 0 14px; border-radius: var(--tcw-radius-md); font: inherit; font-size: 13px; font-weight: 600;
+  border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover:not(:disabled) { border-color: var(--line-strong); }
+.btnPrimary { border: 0; background: var(--violet); color: var(--on-violet); }
+.btnPrimary:hover:not(:disabled) { background: var(--violet-hover); }
+.btn:disabled { opacity: .5; cursor: default; }
+.link {
+  font: inherit; font-size: 13px; color: var(--ink); text-decoration: none; background: none; border: 0; padding: 0;
+  cursor: pointer; white-space: nowrap;
+}
+.link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.btn:focus-visible, .link:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--tcw-radius-md); }
+.date { font-family: var(--tcw-font-mono); font-size: 12px; color: var(--ink-muted); white-space: nowrap; }
+.sub { font-size: 13px; color: var(--ink-muted); }
+.two1 { font-weight: 500; }
+.two2 { font-size: 12px; color: var(--ink-muted); }
+.pct { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--ink-muted); margin-left: 8px; }

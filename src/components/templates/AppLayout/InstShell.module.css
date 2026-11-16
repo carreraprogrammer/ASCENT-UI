@@ -1,0 +1,60 @@
+/* TCW-5 "Instrumento": el armazón de escritorio. Una sola superficie: cabecera y menú pegados a los bordes,
+   franja de estado, scroll del documento, pie. Solo se monta en escritorio web (≥ 1024 px, no Capacitor). */
+.root { min-height: 100vh; background: var(--bg); color: var(--ink); font-family: var(--tcw-font-sans); font-size: 15px; }
+.header {
+  position: sticky; top: 0; z-index: 20; height: 56px; box-sizing: border-box; display: flex; align-items: center; gap: 12px;
+  padding: 0 24px; border-bottom: 1px solid var(--line); background: var(--bg);
+}
+.mark { width: 24px; height: 24px; }
+.brand { font-size: 16px; font-weight: 600; color: var(--ink); text-decoration: none; }
+.cromo { font-family: var(--tcw-font-mono); font-size: 11px; color: var(--violet); text-decoration: none; }
+.cromo:hover, .brand:hover { text-decoration: underline; text-underline-offset: 3px; }
+.spacer { flex: 1; }
+.search { position: relative; }
+.searchInput {
+  font-family: var(--tcw-font-mono); font-size: 12px; color: var(--ink); background: transparent; border: 1px solid var(--line);
+  border-radius: var(--tcw-radius-md); padding: 7px 34px 7px 10px; width: 242px; box-sizing: border-box;
+}
+.searchInput::placeholder { color: var(--ink-muted); opacity: 1; }
+.searchInput:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.kbd { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: var(--tcw-font-mono); font-size: 12px; color: var(--ink-muted); pointer-events: none; }
+.profile { color: var(--ink); font-size: 14px; text-decoration: none; }
+.profile:hover { text-decoration: underline; text-underline-offset: 3px; }
+.strip {
+  position: sticky; top: 56px; z-index: 19; display: flex; gap: 22px; align-items: center; height: 32px; padding: 0 24px;
+  border-bottom: 1px solid var(--line); font-family: var(--tcw-font-mono); font-size: 11px; color: var(--ink-muted);
+  background: var(--bg); white-space: nowrap; overflow: hidden;
+}
+.dotOk { color: var(--data-both); }
+.dotWarn { color: var(--cat-gold); }
+.dotOff { color: var(--ink-muted); }
+.stripRight { color: var(--cat-gold); text-decoration: none; }
+.stripRight:hover { text-decoration: underline; text-underline-offset: 3px; }
+.body { display: flex; align-items: stretch; }
+.nav {
+  width: 208px; flex: none; border-right: 1px solid var(--line); padding: 20px 0; box-sizing: border-box;
+  min-height: calc(100vh - 88px);
+}
+.navInner { position: sticky; top: 108px; }
+.navLabel { display: block; font-family: var(--tcw-font-mono); font-size: 11px; color: var(--ink-muted); padding: 0 20px 10px; }
+.navLink {
+  display: block; text-decoration: none; padding: 9px 14px 9px 18px; font-size: 14px; line-height: 17px; border-left: 2px solid transparent;
+  color: var(--ink-muted);
+}
+.navLink:hover { color: var(--ink); }
+.navLink:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--violet); }
+.navActive { border-left-color: var(--violet); color: var(--ink); font-weight: 600; background: var(--surface); }
+.main { flex: 1; min-width: 0; }
+.content { max-width: 1136px; margin: 0 auto; padding: 26px 36px 36px; box-sizing: border-box; }
+.crumbs { font-family: var(--tcw-font-mono); font-size: 11px; color: var(--ink-muted); margin: 0 0 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+.crumbs a, .crumbs button { color: var(--ink-muted); text-decoration: none; background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+.crumbs a:hover, .crumbs button:hover { color: var(--ink); }
+.footer {
+  margin-top: 30px; padding-top: 16px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 8px;
+  color: var(--ink-muted); font-family: var(--tcw-font-mono); font-size: 11px;
+}
+.footer strong { color: var(--ink); font-weight: 400; }
+.footerMark { width: 14px; height: 14px; }
+.footerLink { color: var(--ink-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.footerBtn { background: none; border: 0; padding: 0; font: inherit; color: var(--ink); cursor: pointer; }
+.footerBtn:hover { text-decoration: underline; text-underline-offset: 3px; }

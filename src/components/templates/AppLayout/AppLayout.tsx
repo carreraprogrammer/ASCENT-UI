@@ -12,6 +12,8 @@ import { CompletenessIndicator } from '../../molecules/CompletenessIndicator';
 import { rememberAuthPath } from '../../../utils/navigation';
 import { useAuthStore } from '../../../store/authStore';
 import { AppLayoutContext, type AppToolbarConfig } from './AppLayoutContext';
+import { InstShell } from './InstShell';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import styles from './AppLayout.module.css';
 
 // "Planes" en el menú lateral (solo visible en escritorio web) abre el plan del mes en
@@ -38,7 +40,8 @@ const NAV_ITEMS = [
   { to: '/profile', label: 'Mi perfil' },
 ];
 
-export const AppLayout = ({ title, children }: { title: string; children: ReactNode }) => {
+export const AppLayout = ({ title, children, ownHeader }: { title: string; children: ReactNode; ownHeader?: boolean }) => {
+  const desktop = useDesktopLayout();
   const location = useLocation();
   const shellRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
@@ -74,7 +77,7 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
     observer.observe(header);
 
     return () => observer.disconnect();
-  }, []);
+  }, [desktop]);
 
   const renderNav = () => (
     <nav className={styles.nav}>
@@ -95,6 +98,28 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
       })}
     </nav>
   );
+
+  // TCW-5: en escritorio web, el armazón "Instrumento" (mismas rutas, mismo menú). Las páginas que ya dibujan su
+  // propio encabezado pasan ownHeader; las demás reciben uno con su título y las acciones de su toolbar.
+  if (desktop) {
+    return (
+      <AppLayoutContext.Provider value={layoutContext}>
+        <IonPage className={styles.page}>
+          <InstShell
+            title={title}
+            toolbar={toolbar}
+            breadcrumbs={breadcrumbs}
+            ownHeader={ownHeader}
+            nav={NAV_ITEMS.map((item) => item.label === 'Planes' && !isNativeApp()
+              ? { to: currentPlanesPath(), label: item.label, isActive: (p: string) => p.startsWith(PLANES_PREFIX) }
+              : item)}
+          >
+            {children}
+          </InstShell>
+        </IonPage>
+      </AppLayoutContext.Provider>
+    );
+  }
 
   return (
     <AppLayoutContext.Provider value={layoutContext}>
