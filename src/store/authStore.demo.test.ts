@@ -102,3 +102,45 @@ describe('"Ver demo" del login', () => {
     expect(state.demoStash).toBeNull();
   });
 });
+
+describe('vencimiento de la sesión demo (sin refresh token)', () => {
+  const assign = vi.fn();
+  beforeEach(() => {
+    localStorage.clear();
+    assign.mockReset();
+    Object.defineProperty(window, 'location', { configurable: true, value: { ...window.location, assign } });
+  });
+  afterEach(() => vi.restoreAllMocks());
+
+  const expire = async () => {
+    const { api } = await import('../services/api');
+    const { AxiosError } = await import('axios');
+    const refresh = vi.spyOn(useAuthStore.getState(), 'refreshToken');
+    await expect(api.get('/api/v1/summary', {
+      adapter: async (config) => { throw new AxiosError('401', 'ERR_BAD_REQUEST', config, null, { status: 401, statusText: '', headers: {}, config, data: {} }); },
+    })).rejects.toBeTruthy();
+    return refresh;
+  };
+
+  it('con el interruptor: restaura la sesión real y no intenta refrescar', async () => {
+    seedRealSession();
+    vi.spyOn(demoService, 'switchToDemo').mockResolvedValue(demoResponse);
+    await useAuthStore.getState().enterDemoMode();
+    const refresh = await expire();
+
+    expect(refresh).not.toHaveBeenCalled();
+    expect(useAuthStore.getState().user).toEqual(realUser);
+    expect(useAuthStore.getState().accessToken).toBe('real-access');
+    expect(assign).toHaveBeenCalledWith('/profile');
+  });
+
+  it('con "Ver demo": cierra la sesión (la ruta protegida lleva a /login)', async () => {
+    useAuthStore.setState({ user: null, accessToken: null, isAuthenticated: false, demoStash: null });
+    vi.spyOn(demoService, 'session').mockResolvedValue(demoResponse);
+    await useAuthStore.getState().startDemo();
+    await expire();
+
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    expect(localStorage.getItem('at')).toBeNull();
+  });
+});

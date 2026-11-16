@@ -28,9 +28,21 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const { accessToken, user, refreshToken, clearSession } = useAuthStore.getState();
+    const { accessToken, user, refreshToken, clearSession, demoStash, exitDemoMode } = useAuthStore.getState();
     if (!accessToken || !user) {
       clearSession();
+      return Promise.reject(error);
+    }
+
+    // ASC-4: la sesión demo no tiene refresh token. Al vencer, se vuelve a la sesión real guardada (si se entró
+    // con el interruptor) o se cierra y la ruta protegida lleva a /login.
+    if (user.demo) {
+      if (demoStash) {
+        exitDemoMode();
+        window.location.assign('/profile');
+      } else {
+        clearSession();
+      }
       return Promise.reject(error);
     }
 

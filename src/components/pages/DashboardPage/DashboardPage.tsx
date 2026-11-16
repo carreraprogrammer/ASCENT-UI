@@ -225,6 +225,8 @@ const AscentWidget = ({ goal, onOpen }: { goal: AscentGoal; onOpen: () => void }
   const known = stage.progressKnown !== false && stage.target != null && stage.current != null;
   const pct = known ? Math.round(stageProgress(stage) * 100) : null;
   const pos = avatarPos(goal);
+  // "Tú · N%" junto al escalador: solo en escritorio web (nunca en Capacitor).
+  const showClimberLabel = useDesktopLayout();
 
   return (
     <div className={styles.d2Ascent}>
@@ -252,7 +254,7 @@ const AscentWidget = ({ goal, onOpen }: { goal: AscentGoal; onOpen: () => void }
         <span className={`${styles.d2MtnTickLbl} ${styles.d2MtnTickLblTop}`}>{money(stage.target ?? 0)}</span>
         <span className={`${styles.d2MtnTickLbl} ${styles.d2MtnTickLblBottom}`}>{money(0)}</span>
         <span className={styles.d2MtnAvatar} style={{ left: `${pos.x}%`, top: `${pos.y}%` }}>
-          <Climber size={32} label={pct != null ? `Tú · ${pct}%` : undefined} />
+          <Climber size={32} label={showClimberLabel && pct != null ? `Tú · ${pct}%` : undefined} />
         </span>
         <span className={styles.d2MtnFoot}>
           <span>

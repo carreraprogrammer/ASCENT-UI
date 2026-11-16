@@ -9,7 +9,7 @@ import { useAuthStore } from '../../../store/authStore';
 import { useToast } from '../../../hooks/useToast';
 import { getLastAuthPath } from '../../../utils/navigation';
 import { localizeAuthSchema } from '../../../utils/authFormCopy';
-import { DESKTOP_QUERY, useMediaQuery } from '../../../hooks/useMediaQuery';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import styles from '../AuthPage.module.css';
 
 const schema = {
@@ -28,7 +28,7 @@ export const RegisterPage = () => {
   const hydrateAuth = useAuthStore((state) => state.hydrateAuth);
   const history = useHistory();
   const { showError, toast } = useToast();
-  const isDesktop = useMediaQuery(DESKTOP_QUERY);
+  const isDesktop = useDesktopLayout();
   const formSchema = useMemo(() => (isDesktop ? localizeAuthSchema(schema) : schema), [isDesktop]);
 
   return (

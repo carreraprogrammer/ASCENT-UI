@@ -15,7 +15,7 @@ import { useToast } from '../../../hooks/useToast';
 import { startGoogleOAuth, loginWithGoogleMobile, initGoogleAuth } from '../../../services/authService';
 import { getLastAuthPath } from '../../../utils/navigation';
 import { localizeAuthSchema } from '../../../utils/authFormCopy';
-import { DESKTOP_QUERY, useMediaQuery } from '../../../hooks/useMediaQuery';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import styles from '../AuthPage.module.css';
 import nativeStyles from './LoginPageNative.module.css';
 
@@ -37,7 +37,7 @@ export const LoginPage = () => {
   const fetchSchema = useFormStore((state) => state.fetchSchema);
   const hydrateAuth = useAuthStore((state) => state.hydrateAuth);
   const startDemo = useAuthStore((state) => state.startDemo);
-  const isDesktop = useMediaQuery(DESKTOP_QUERY);
+  const isDesktop = useDesktopLayout();
   const [demoLoading, setDemoLoading] = useState(false);
   const location = useLocation();
   const history = useHistory();
