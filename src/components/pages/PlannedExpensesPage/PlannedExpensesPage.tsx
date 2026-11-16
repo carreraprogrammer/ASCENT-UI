@@ -28,6 +28,11 @@ import type {
   SinkingFundPayload,
 } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
+import { BarPct, DateCell, InstButton, Num, StateTag, Sub, Two } from '../../atoms/Inst';
+import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
+import { fmtAmount, fmtDayYear } from '../../../utils/instrumento';
+import { CellWithActions, ChipSelect, instDeskStyles as desk } from '../TransactionsPage/instDesk';
 
 const planningTypeLabels: Record<string, string> = {
   mandatory_one_off: 'Obligatorio puntual',
@@ -294,6 +299,177 @@ export const PlannedExpensesContent = () => {
     setFilters((current) => ({ ...current, [key]: '' }));
   };
 
+  // ── TCW-5 "Instrumento": escritorio sin islas (hereda el armazón). Mismos datos, modales y acciones. ──
+  const isDesktop = useDesktopLayout();
+  const openNewExpense = () => { setEditingExpense(null); setComposerOpen(true); };
+  const openNewFund = () => { setEditingFund(null); setFundComposerOpen(true); };
+  const plannedState: Record<string, string> = { planned: 'planeado', executed: 'ejecutado', cancelled: 'cancelado' };
+  const peHeads = ['Gasto', 'Fecha objetivo', 'Gaveta · categoría', 'Estado', 'Monto (COP)'];
+  const peAligns: Align[] = ['left', 'left', 'left', 'left', 'right'];
+  const peRows = plannedExpenses.map((expense) => {
+    const attrs = expense.attributes;
+    return [
+      <Two a={attrs.name} b={planningTypeLabels[attrs.planning_type] ?? attrs.planning_type} />,
+      <DateCell>{fmtDayYear(attrs.target_date)}</DateCell>,
+      <Sub>{[attrs.category_name, attrs.subcategory_name].filter(Boolean).join(' · ') || '—'}</Sub>,
+      <StateTag state={plannedState[attrs.status] ?? attrs.status} />,
+      <CellWithActions actions={[
+        ...(attrs.status === 'planned' ? [
+          { label: 'Ejecutado', onClick: () => void handleChangeStatus(expense, 'executed') },
+          { label: 'Cancelar', onClick: () => void handleChangeStatus(expense, 'cancelled') },
+        ] : []),
+        { label: 'Borrar', danger: true, onClick: () => void handleDeleteExpense(expense) },
+      ]}>
+        <Num strong>{fmtAmount(attrs.amount_estimated)}</Num>
+      </CellWithActions>,
+    ];
+  });
+  const sfHeads = ['Bolsillo', 'Aporte mensual', 'Fecha objetivo', 'Avance', 'Guardado (COP)'];
+  const sfAligns: Align[] = ['left', 'right', 'left', 'left', 'right'];
+  const sfRows = sinkingFunds.map((fund) => {
+    const target = fund.target_amount ?? 0;
+    const linked = fund.planned_expense_id ? plannedById.get(fund.planned_expense_id) : null;
+    return [
+      <Two a={fund.name} b={linked ? linked.attributes.name : (fund.active ? 'activo' : 'inactivo')} />,
+      <Num>{fmtAmount(fund.monthly_contribution)}</Num>,
+      <DateCell>{fund.target_date ? fmtDayYear(fund.target_date) : '—'}</DateCell>,
+      target > 0 ? <BarPct pct={(fund.current_balance / target) * 100} label={`Avance de ${fund.name}`} /> : <Sub>sin meta</Sub>,
+      <CellWithActions actions={[
+        { label: 'Retirar', disabled: fund.current_balance <= 0, onClick: () => void handleWithdrawFund(fund) },
+        { label: 'Borrar', danger: true, onClick: () => void handleDeleteFund(fund) },
+      ]}>
+        <Num strong>{target > 0 ? `${fmtAmount(fund.current_balance)} / ${fmtAmount(target)}` : fmtAmount(fund.current_balance)}</Num>
+      </CellWithActions>,
+    ];
+  });
+  const peFiltered = Boolean(activeFilterCount || filters.q);
+
+  const overlays = (
+    <>
+        <SortSheet
+          isOpen={sortOpen}
+          title="Ordenar gastos planeados"
+          sortBy={String(filters.sort_by ?? 'target_date')}
+          sortDir={(filters.sort_dir as 'asc' | 'desc') ?? 'asc'}
+          options={[
+            { label: 'Fecha objetivo', value: 'target_date' },
+            { label: 'Monto estimado', value: 'amount_estimated' },
+            { label: 'Nombre', value: 'name' },
+            { label: 'Estado', value: 'status' },
+            { label: 'Tipo', value: 'planning_type' },
+          ]}
+          onClose={() => setSortOpen(false)}
+          onChangeSortBy={(sort_by) => setFilters((current) => ({ ...current, sort_by }))}
+          onChangeSortDir={(sort_dir) => setFilters((current) => ({ ...current, sort_dir }))}
+        />
+
+        <CrudModal
+          isOpen={composerOpen}
+          title={editingExpense ? 'Editar gasto planeado' : 'Nuevo gasto planeado'}
+          subtitle="Usa esta entidad para gastos futuros previsibles que todavía no deben vivir como transacción ni como recurrente mensual."
+          onClose={() => {
+            setComposerOpen(false);
+            setEditingExpense(null);
+          }}
+        >
+          <PlannedExpenseComposer
+            plannedExpense={editingExpense}
+            loading={submitting}
+            categories={categories}
+            onCreate={handleCreate}
+            onUpdate={handleUpdate}
+            onCancel={() => {
+              setComposerOpen(false);
+              setEditingExpense(null);
+            }}
+          />
+        </CrudModal>
+
+        <CrudModal
+          isOpen={fundComposerOpen}
+          title={editingFund ? 'Editar bolsillo' : 'Nuevo bolsillo'}
+          subtitle="Aparta dinero cada mes hacia un gasto futuro puntual. El bolsillo pertenece a una de tus categorías y acumula hasta que llega el gasto."
+          onClose={() => {
+            setFundComposerOpen(false);
+            setEditingFund(null);
+          }}
+        >
+          <SinkingFundComposer
+            fund={editingFund}
+            loading={submitting}
+            onCreate={handleCreateFund}
+            onUpdate={handleUpdateFund}
+            onCancel={() => {
+              setFundComposerOpen(false);
+              setEditingFund(null);
+            }}
+          />
+        </CrudModal>
+        {toast}
+    </>
+  );
+
+  if (isDesktop) {
+    return (
+      <>
+        <div className={desk.page} data-testid="planned-desktop">
+          <InstPageHeader title="Planeados" sub="Gastos futuros previsibles y los bolsillos que los financian"
+            actions={<>
+              <InstButton onClick={openNewFund}>+ Nuevo bolsillo</InstButton>
+              <InstButton primary onClick={openNewExpense}>+ Nuevo gasto planeado</InstButton>
+            </>} />
+          <InstStats items={[
+            { label: 'Monto estimado pendiente', value: fmtAmount(metrics.totalEstimated), sub: `${metrics.plannedCount} de ${metrics.totalCount} siguen abiertos` },
+            { label: 'Guardado en bolsillos', value: fmtAmount(metrics.fundBalance), sub: `${metrics.fundCount} ${metrics.fundCount === 1 ? 'bolsillo activo' : 'bolsillos activos'}` },
+            { label: 'Aporte mensual', value: fmtAmount(metrics.fundMonthly), sub: 'a los bolsillos activos' },
+          ]} />
+          {error ? <InstNote error onRetry={() => void load()}>{error}</InstNote> : null}
+          <InstSection title={`Gastos planeados · ${plannedExpenses.length}`} id="planned-gastos"
+            right={<>
+              <ChipSelect label="Estado" value={String(filters.status ?? '')}
+                options={[{ value: 'planned', label: 'Planeado' }, { value: 'executed', label: 'Ejecutado' }, { value: 'cancelled', label: 'Cancelado' }]}
+                onChange={(status) => setFilters((current) => ({ ...current, status }))} />
+              <ChipSelect label="Tipo" value={String(filters.planning_type ?? '')}
+                options={Object.entries(planningTypeLabels).map(([value, label]) => ({ value, label }))}
+                onChange={(planning_type) => setFilters((current) => ({ ...current, planning_type }))} />
+              <ChipSelect label="Gaveta" value={String(filters.category_id ?? '')} options={categoryOptions}
+                onChange={(category_id) => setFilters((current) => ({ ...current, category_id }))} />
+            </>}>
+            {loading ? (
+              <InstTableSkeleton heads={peHeads} aligns={peAligns} rows={3} />
+            ) : error ? null : !plannedExpenses.length ? (
+              <InstNote>
+                {peFiltered ? 'No hay gastos planeados con estos filtros.' : 'Todavía no hay gastos planeados.'}
+                <InstButton className={desk.noteBtn} onClick={peFiltered ? () => setFilters(initialFilters) : openNewExpense}>
+                  {peFiltered ? 'Limpiar filtros' : 'Nuevo gasto planeado'}
+                </InstButton>
+              </InstNote>
+            ) : (
+              <InstTable caption="Gastos planeados" heads={peHeads} aligns={peAligns} rows={peRows}
+                rowKeys={plannedExpenses.map((e) => e.id)}
+                onRowClick={(i) => { setEditingExpense(plannedExpenses[i]); setComposerOpen(true); }} />
+            )}
+          </InstSection>
+          <InstSection title={`Bolsillos · ${sinkingFunds.length}`} id="planned-bolsillos">
+            {loading ? (
+              <InstTableSkeleton heads={sfHeads} aligns={sfAligns} rows={2} />
+            ) : error ? null : !sinkingFunds.length ? (
+              <InstNote>
+                Todavía no hay bolsillos.
+                <InstButton className={desk.noteBtn} onClick={openNewFund}>Crear bolsillo</InstButton>
+              </InstNote>
+            ) : (
+              <InstTable caption="Bolsillos" heads={sfHeads} aligns={sfAligns} rows={sfRows}
+                rowKeys={sinkingFunds.map((f) => f.id)}
+                onRowClick={(i) => { setEditingFund(sinkingFunds[i]); setFundComposerOpen(true); }} />
+            )}
+          </InstSection>
+        </div>
+        {overlays}
+      </>
+    );
+  }
+
   return (
     <IonContent className={styles.pageContent}>
         <section className={`${styles.stack} ${!detailsOpen ? styles.stackFill : ''}`}>
@@ -559,72 +735,13 @@ export const PlannedExpensesContent = () => {
           ) : null}
         </section>
 
-        <SortSheet
-          isOpen={sortOpen}
-          title="Ordenar gastos planeados"
-          sortBy={String(filters.sort_by ?? 'target_date')}
-          sortDir={(filters.sort_dir as 'asc' | 'desc') ?? 'asc'}
-          options={[
-            { label: 'Fecha objetivo', value: 'target_date' },
-            { label: 'Monto estimado', value: 'amount_estimated' },
-            { label: 'Nombre', value: 'name' },
-            { label: 'Estado', value: 'status' },
-            { label: 'Tipo', value: 'planning_type' },
-          ]}
-          onClose={() => setSortOpen(false)}
-          onChangeSortBy={(sort_by) => setFilters((current) => ({ ...current, sort_by }))}
-          onChangeSortDir={(sort_dir) => setFilters((current) => ({ ...current, sort_dir }))}
-        />
-
-        <CrudModal
-          isOpen={composerOpen}
-          title={editingExpense ? 'Editar gasto planeado' : 'Nuevo gasto planeado'}
-          subtitle="Usa esta entidad para gastos futuros previsibles que todavía no deben vivir como transacción ni como recurrente mensual."
-          onClose={() => {
-            setComposerOpen(false);
-            setEditingExpense(null);
-          }}
-        >
-          <PlannedExpenseComposer
-            plannedExpense={editingExpense}
-            loading={submitting}
-            categories={categories}
-            onCreate={handleCreate}
-            onUpdate={handleUpdate}
-            onCancel={() => {
-              setComposerOpen(false);
-              setEditingExpense(null);
-            }}
-          />
-        </CrudModal>
-
-        <CrudModal
-          isOpen={fundComposerOpen}
-          title={editingFund ? 'Editar bolsillo' : 'Nuevo bolsillo'}
-          subtitle="Aparta dinero cada mes hacia un gasto futuro puntual. El bolsillo pertenece a una de tus categorías y acumula hasta que llega el gasto."
-          onClose={() => {
-            setFundComposerOpen(false);
-            setEditingFund(null);
-          }}
-        >
-          <SinkingFundComposer
-            fund={editingFund}
-            loading={submitting}
-            onCreate={handleCreateFund}
-            onUpdate={handleUpdateFund}
-            onCancel={() => {
-              setFundComposerOpen(false);
-              setEditingFund(null);
-            }}
-          />
-        </CrudModal>
-        {toast}
+        {overlays}
     </IonContent>
   );
 };
 
 export const PlannedExpensesPage = () => (
-  <AppLayout title="Planeados">
+  <AppLayout title="Planeados" ownHeader>
     <PlannedExpensesContent />
   </AppLayout>
 );

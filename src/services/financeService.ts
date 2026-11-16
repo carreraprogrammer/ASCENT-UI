@@ -117,6 +117,13 @@ export const financeService = {
     return (data as { data: NightAnalysis | null }).data ?? null;
   },
 
+  /** TCW-5: la última revisión nocturna (GET /night_analyses?limit=1, endpoint existente) para la franja de estado. */
+  async fetchLatestNightAnalysis(): Promise<{ analysis_date: string; health_status: string; created_at: string } | null> {
+    const { data } = await api.get('/api/v1/night_analyses', { params: { limit: 1 } });
+    const rows = (data as { data?: Array<{ analysis_date: string; health_status: string; created_at: string }> }).data ?? [];
+    return rows[0] ?? null;
+  },
+
   async fetchNeedsReview(): Promise<NonNullable<NightAnalysisTransactionContext['needs_review']>> {
     const { data } = await api.get('/api/v1/transactions/needs_review');
     return (data as { data: NightAnalysisTransactionContext['needs_review'] }).data ?? [];

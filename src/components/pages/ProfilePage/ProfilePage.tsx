@@ -15,6 +15,10 @@ import { DataState } from '../../molecules/DataState/DataState';
 import { DynamicForm } from '../../organisms/DynamicForm';
 import { AppLayout } from '../../templates/AppLayout';
 import styles from './ProfilePage.module.css';
+import desk from './ProfileDesktop.module.css';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
+import { InstButton } from '../../atoms/Inst';
+import { InstKeyValue, InstNote, InstPageHeader, InstSection } from '../../molecules/Inst';
 
 interface FinancialCtx {
   phase?: string | null;
@@ -37,6 +41,10 @@ const STRATEGY_LABEL: Record<string, string> = {
 const PERSONA_ORDER: Persona[] = ['nilo', 'pip', 'teo'];
 
 export const ProfileContent = () => {
+  const isDesktop = useDesktopLayout();
+  // TCW-5: en escritorio, "Editar" abre el mismo formulario de perfil en línea, y "Agregar" el de remitentes.
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editingSenders, setEditingSenders] = useState(false);
   const user    = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
   const logout  = useAuthStore((state) => state.logout);
@@ -151,6 +159,195 @@ export const ProfileContent = () => {
     [user?.name, user?.city],
   );
 
+
+  const addSender = () => {
+    const trimmed = senderInput.trim().toLowerCase();
+    if (trimmed && !bankSenders.includes(trimmed)) {
+      void updateSenders([...bankSenders, trimmed]);
+      setSenderInput('');
+      senderInputRef.current?.focus();
+    }
+  };
+
+  // ── Escritorio (TCW-5 "Instrumento", mockup U_AscentPerfil) ─────────────────────
+  // Mismas acciones que el árbol móvil: formulario de perfil, apariencia, coach, Gmail y remitentes,
+  // impersonar (superadministrador), modo demo y cerrar sesión. Cambia la presentación.
+  if (isDesktop) {
+    const quiet = (label: string, onClick: () => void, extra?: { disabled?: boolean; pressed?: boolean; ariaLabel?: string }) => (
+      <button type="button" className={`${desk.quiet} ${extra?.pressed ? desk.on : ''}`} onClick={onClick}
+        disabled={extra?.disabled} aria-pressed={extra?.pressed} aria-label={extra?.ariaLabel}>{label}</button>
+    );
+    const dotted = (items: JSX.Element[]) => (
+      <span className={desk.inline}>
+        {items.map((it, i) => <span key={i}>{i > 0 ? <span aria-hidden="true" className={desk.sep}>·</span> : null}{it}</span>)}
+      </span>
+    );
+    const otherAccounts = user?.superAdmin ? accounts.filter((a) => a.user_id !== user.id) : [];
+
+    return (
+      <div className={desk.page} data-testid="profile-desktop">
+        <InstPageHeader title="Mi perfil" sub="Tu cuenta, tus integraciones y el modo demo" />
+
+        <InstSection title="Tu cuenta">
+          <InstKeyValue rows={[
+            { k: 'Nombre', v: user?.name ?? 'Sin nombre', action: quiet('Editar', () => setEditingProfile((v) => !v), { ariaLabel: 'Editar nombre' }) },
+            { k: 'Ciudad', v: user?.city || '—', action: quiet('Editar', () => setEditingProfile((v) => !v), { ariaLabel: 'Editar ciudad' }) },
+            { k: 'Correo', v: <>{user?.email ?? '—'} <span className={desk.muted}>· gestionado por tu proveedor de acceso</span></> },
+            { k: 'Rol', v: user?.superAdmin ? 'Superadministrador' : 'Usuario' },
+            { k: 'Apariencia', v: (
+              <span role="group" aria-label="Modo de color">
+                {dotted((['system', 'dark', 'light'] as ThemePreference[]).map((mode) => quiet(
+                  mode === 'system' ? 'Auto' : mode === 'dark' ? 'Oscuro' : 'Claro',
+                  () => setThemePreference(mode), { pressed: themePreference === mode },
+                )))}
+              </span>
+            ) },
+            { k: 'Tu coach', v: (
+              <span role="group" aria-label="Elige tu coach">
+                {dotted(PERSONA_ORDER.map((pp) => quiet(PERSONAS[pp].name, () => setPersona(pp), { pressed: persona === pp })))}
+                <span className={desk.muted}> — {PERSONAS[persona].name}, {PERSONAS[persona].trait}</span>
+              </span>
+            ) },
+          ]} />
+          {editingProfile ? (
+            <div className={desk.editor}>
+              <DynamicForm
+                schema={profileSchema}
+                initialValues={initialValues}
+                submitLabel="Guardar cambios"
+                onSuccess={(response) => {
+                  const attrs = (response as { data?: { attributes?: { name?: string; city?: string | null } } })
+                    ?.data?.attributes;
+                  if (user && attrs) {
+                    setUser({
+                      ...user,
+                      ...(attrs.name != null && { name: attrs.name }),
+                      ...(attrs.city !== undefined && { city: attrs.city }),
+                    });
+                  }
+                  showSuccess('Perfil actualizado.');
+                  setEditingProfile(false);
+                }}
+                onError={(error) => {
+                  console.error('[ProfilePage] submit:error', error);
+                  showError('No pude actualizar tu perfil.');
+                }}
+              />
+            </div>
+          ) : null}
+        </InstSection>
+
+        <InstSection title="Integraciones">
+          <InstKeyValue rows={[
+            gmailLoading
+              ? { k: 'Gmail', v: <span className={desk.muted}>Verificando…</span> }
+              : gmailConnected === true
+                ? { k: 'Gmail', v: <><span aria-hidden="true" className={desk.dotOk}>●</span> conectado · solo lectura</>,
+                    action: quiet(gmailActionLoading ? 'Desconectando…' : 'Desconectar', () => void disconnectGmail(), { disabled: gmailActionLoading, ariaLabel: 'Desconectar Gmail' }) }
+                : { k: 'Gmail', v: <><span aria-hidden="true" className={desk.dotOff}>●</span> sin conectar · el agente detecta tus movimientos bancarios cada noche</>,
+                    action: quiet(gmailActionLoading ? 'Abriendo…' : 'Conectar', () => void startOAuth(), { disabled: gmailActionLoading, ariaLabel: 'Conectar Gmail' }) },
+            ...(gmailConnected === true && !gmailLoading ? [{
+              k: 'Correos bancarios',
+              v: bankSenders.length === 0
+                ? 'detección automática por palabras clave'
+                : `${bankSenders.length} ${bankSenders.length === 1 ? 'remitente' : 'remitentes'} · ${bankSenders.slice(0, 2).join(', ')}${bankSenders.length > 2 ? ', …' : ''}`,
+              action: quiet(editingSenders ? 'Listo' : 'Agregar', () => setEditingSenders((v) => !v), { ariaLabel: 'Agregar remitentes bancarios' }),
+            }] : []),
+          ]} />
+          {gmailConnected === true && editingSenders ? (
+            <div className={desk.editor}>
+              <p className={desk.help}>
+                {bankSenders.length === 0
+                  ? 'El agente detecta correos bancarios automáticamente por keywords. Podés agregar remitentes específicos para mejorar la precisión.'
+                  : 'El agente busca correos solo de estos remitentes. Si no encontrás un banco, borralo para volver al modo automático.'}
+              </p>
+              {bankSenders.length > 0 ? (
+                <ul className={desk.senders}>
+                  {bankSenders.map((sd) => (
+                    <li key={sd}>
+                      <span className={desk.mono}>{sd}</span>
+                      {quiet('Quitar', () => void updateSenders(bankSenders.filter((x) => x !== sd)), { ariaLabel: `Quitar ${sd}` })}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <div className={desk.addRow}>
+                <input
+                  ref={senderInputRef}
+                  className={desk.input}
+                  type="email"
+                  aria-label="Remitente bancario"
+                  placeholder="alertas@mibanco.com"
+                  value={senderInput}
+                  onChange={(e) => setSenderInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ',') {
+                      e.preventDefault();
+                      const trimmed = senderInput.trim().toLowerCase();
+                      if (trimmed && !bankSenders.includes(trimmed)) {
+                        void updateSenders([...bankSenders, trimmed]);
+                        setSenderInput('');
+                      }
+                    }
+                  }}
+                  disabled={gmailActionLoading}
+                />
+                <InstButton disabled={!senderInput.trim() || gmailActionLoading} onClick={addSender}>Agregar</InstButton>
+              </div>
+            </div>
+          ) : null}
+          {gmailError != null ? <InstNote error>{gmailError}</InstNote> : null}
+        </InstSection>
+
+        {user?.superAdmin ? (
+          <InstSection title="Impersonar usuario">
+            {accountsLoading ? <InstNote>Cargando cuentas…</InstNote> : otherAccounts.length === 0 ? <InstNote>No hay otras cuentas.</InstNote> : (
+              <InstKeyValue rows={otherAccounts.map((account) => ({
+                k: account.name,
+                v: <span className={desk.muted}>{account.email}</span>,
+                action: quiet(impersonatingId === account.id ? 'Entrando…' : 'Ver como', () => void handleImpersonate(account),
+                  { disabled: impersonatingId === account.id, ariaLabel: `Ver como ${account.name}` }),
+              }))} />
+            )}
+          </InstSection>
+        ) : null}
+
+        {canSwitchDemo ? (
+          <InstSection title="Modo demo">
+            <InstKeyValue rows={[{
+              k: 'Mostrar con datos de ejemplo',
+              v: `${inDemo ? 'Encendido' : 'Apagado'} · tus datos reales no se consultan mientras esté encendido`,
+              action: (
+                <button type="button" role="switch" aria-checked={inDemo} aria-label="Modo demo" className={desk.quiet}
+                  disabled={demoSwitching} onClick={() => void handleDemoToggle()}>
+                  {inDemo ? 'Apagar' : 'Encender'}
+                </button>
+              ),
+            }]} />
+          </InstSection>
+        ) : null}
+
+        <InstSection title="Contexto financiero">
+          {contextLoading ? <InstNote>Cargando contexto financiero…</InstNote>
+            : contextError ? <InstNote error>{contextError}</InstNote>
+              : !financialContext ? <InstNote>Todavía no hay fase, estrategia o notas guardadas para esta cuenta.</InstNote>
+                : (
+                  <InstKeyValue rows={[
+                    { k: 'Fase actual', v: PHASE_LABEL[financialContext.phase ?? ''] ?? financialContext.phase ?? '—' },
+                    { k: 'Estrategia de deuda', v: STRATEGY_LABEL[financialContext.strategy ?? ''] ?? financialContext.strategy ?? '—' },
+                    ...(financialContext.notes ? [{ k: 'Notas / objetivo', v: financialContext.notes }] : []),
+                  ]} />
+                )}
+        </InstSection>
+
+        <InstSection title="Sesión">
+          <InstKeyValue rows={[{ k: 'Cerrar sesión', v: 'En este dispositivo', action: quiet('Cerrar sesión', () => void logout()) }]} />
+        </InstSection>
+
+        {toast}
+      </div>
+    );
+  }
 
   return (
     <IonContent className={styles.pageContent}>
@@ -479,7 +676,7 @@ export const ProfileContent = () => {
 };
 
 export const ProfilePage = () => (
-  <AppLayout title="Mi perfil">
+  <AppLayout title="Mi perfil" ownHeader>
     <ProfileContent />
   </AppLayout>
 );

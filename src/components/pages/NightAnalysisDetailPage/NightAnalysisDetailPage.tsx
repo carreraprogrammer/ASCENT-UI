@@ -26,6 +26,13 @@ import type { CategoryType } from '../../molecules/CategoryPressureCard/Category
 import { CrudModal } from '../../molecules/CrudModal';
 import { TransactionComposer } from '../../organisms/TransactionComposer/TransactionComposer';
 import styles from './NightAnalysisDetailPage.module.css';
+import { AppLayout } from '../../templates/AppLayout';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
+import { BarPct, InstButton, Num, StateTag } from '../../atoms/Inst';
+import { InstBand, InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton } from '../../molecules/Inst';
+import { fmtAmount } from '../../../utils/instrumento';
+import { CoachLine, InsightTabs, Reasoning } from '../MonthlyInsightDetailPage/InsightDesk';
+import desk from '../MonthlyInsightDetailPage/InsightDesk.module.css';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -145,12 +152,31 @@ const ReviewCard = ({ item, onPrimary, onSecondary }: ReviewCardProps) => {
   );
 };
 
+// ── Escritorio: acciones de una fila de revisión (las mismas de ReviewCard) ─────────
+const ReviewActions = ({ item, onPrimary, onSecondary }: ReviewCardProps) => {
+  const [loading, setLoading] = useState(false);
+  const primary = PRIMARY_LABEL[item.reason];
+  const handlePrimary = async () => {
+    setLoading(true);
+    try { await onPrimary(item); } finally { setLoading(false); }
+  };
+  return (
+    <span className={desk.actionsGap}>
+      <button type="button" className={desk.quiet} onClick={() => void onSecondary(item)}>{SECONDARY_LABEL[item.reason]}</button>
+      <InstButton primary={item.reason === 'unconfirmed'} disabled={loading} onClick={() => void handlePrimary()}>
+        {loading ? 'Un momento…' : primary.label}
+      </InstButton>
+    </span>
+  );
+};
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export const NightAnalysisDetailPage = () => {
   const { date } = useParams<{ date: string }>();
   const history = useHistory();
   const location = useLocation<{ insight?: AgentInsight }>();
+  const isDesktop = useDesktopLayout();
   const [analysis, setAnalysis] = useState<NightAnalysis | null>(null);
   const [allReviews, setAllReviews] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -251,6 +277,122 @@ export const NightAnalysisDetailPage = () => {
   })();
   const tabMonth = parsedDate.getMonth() + 1;
   const tabYear = parsedDate.getFullYear();
+
+  const editModal = (
+    <CrudModal
+      isOpen={Boolean(editingTransaction)}
+      title="Editar transacción"
+      subtitle="Ajusta contexto, clasificación y subcategoría."
+      onClose={() => setEditingTransaction(null)}
+    >
+      <TransactionComposer
+        transaction={editingTransaction}
+        categories={categories}
+        loading={submitting}
+        onCreate={async () => undefined}
+        onUpdate={handleUpdate}
+        onCancel={() => setEditingTransaction(null)}
+      />
+    </CrudModal>
+  );
+
+  // ── Escritorio (TCW-5 "Instrumento"): hereda el armazón, sin islas. Mismos datos y acciones. ──
+  if (isDesktop) {
+    const dateLabel = date ? formatDate(date) : '';
+    return (
+      <AppLayout title="Planes" ownHeader>
+        <div className={desk.page} data-testid="night-desktop">
+          <InstPageHeader title="Análisis nocturno" sub={dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)}
+            actions={<InstButton onClick={() => history.goBack()}>‹ Volver</InstButton>} />
+          <InstBand>
+            <span className={desk.month}>Revisión de la noche</span>
+            {health ? <StateTag state={health.label.toLowerCase()} tone={health.tone === 'bad' ? 'rose' : health.tone === 'warn' ? 'amber' : 'ok'} /> : null}
+            <span className={desk.flex} />
+            <InsightTabs active="nocturno" date={tabDate} month={tabMonth} year={tabYear} />
+          </InstBand>
+          {loading ? (
+            <InstSection title="Necesito tu ayuda"><InstTableSkeleton heads={['Movimiento', 'Fecha', 'Monto (COP)', '']} aligns={['left', 'left', 'right', 'right']} rows={3} /></InstSection>
+          ) : (
+            <>
+              {analysis ? (
+                <InstStats items={[
+                  { label: 'Estado', value: <span className={health?.tone === 'bad' ? desk.rose : undefined}>{health?.label ?? '—'}</span>, sub: 'salud del mes' },
+                  { label: 'Margen', value: fmtAmount(analysis.commitment_gap), sub: 'frente a lo comprometido' },
+                  { label: 'Ritmo', value: fmtAmount(analysis.daily_burn), sub: 'COP por día' },
+                ]} />
+              ) : null}
+              {insight ? (
+                <CoachLine body={insight.body} meta={[
+                  `Generado a las ${formatTime(insight.generated_at)}`,
+                  ...(reviews.length > 0 ? [`${reviews.length} movimiento${reviews.length > 1 ? 's' : ''} esperan tu ayuda`] : []),
+                ]} />
+              ) : null}
+              {!analysis ? (
+                <InstNote>Sin datos de contexto para esta fecha.</InstNote>
+              ) : (
+                <>
+                  {reviews.length > 0 ? (
+                    <InstSection title={`Necesito tu ayuda · ${reviews.length}`}>
+                      <InstTable caption="Movimientos que necesitan tu ayuda" heads={['Movimiento', 'Fecha', 'Monto (COP)', '']} aligns={['left', 'left', 'right', 'right']}
+                        rowKeys={reviews.map((r) => r.transaction_id)}
+                        rows={reviews.map((r) => [
+                          <><div className={desk.name}>{r.concept}</div><div style={{ fontSize: 12, color: 'var(--ink-muted)' }}>{r.notes ?? REVIEW_LABEL[r.reason]}</div></>,
+                          <span className={desk.right}>{r.date}</span>,
+                          <Num strong>{fmtAmount(r.amount)}</Num>,
+                          <ReviewActions item={r} onPrimary={handlePrimary} onSecondary={() => handleSecondary(r)} />,
+                        ])} />
+                    </InstSection>
+                  ) : null}
+                  {matched.length > 0 ? (
+                    <InstSection title={`Lo que esperaba ver · ${matched.length} cumplidos`}>
+                      <InstTable caption="Obligaciones cumplidas" heads={['Obligación', 'Diferencia', 'Monto (COP)']} aligns={['left', 'right', 'right']}
+                        rowKeys={matched.map((m) => m.transaction_id)}
+                        rows={matched.map((m) => [
+                          <span className={desk.name}>{m.obligation_name}</span>,
+                          Math.abs(m.delta) / m.expected_amount > 0.05
+                            ? <Num tone="muted">{fmtAmount(m.delta, { sign: 'always' })} vs esperado</Num> : <Num tone="muted">—</Num>,
+                          <Num strong>{fmtAmount(m.amount)}</Num>,
+                        ])} />
+                    </InstSection>
+                  ) : null}
+                  {unmatched.length > 0 ? (
+                    <InstSection title="Otros movimientos del día">
+                      <InstTable caption="Otros movimientos del día" heads={['Movimiento', 'Gaveta', 'Monto (COP)']} aligns={['left', 'left', 'right']}
+                        rowKeys={unmatched.map((u) => u.transaction_id)}
+                        rows={unmatched.map((u) => [
+                          <span className={desk.name}>{u.concept}</span>,
+                          <span style={{ fontSize: 13, color: 'var(--ink-muted)' }}>{CAT_NAMES[u.category_type] ?? u.category_type}</span>,
+                          <Num strong>{fmtAmount(u.amount)}</Num>,
+                        ])} />
+                    </InstSection>
+                  ) : null}
+                  {pressureAlerts.length > 0 ? (
+                    <InstSection title="Gavetas con presión">
+                      {/* TCW-5 comment-90: las barras reales de siempre (CategoryPressureCard), dentro del marco nuevo. */}
+                      <div className={desk.pressureGrid}>
+                        {pressureAlerts.map((a) => (
+                          <CategoryPressureCard
+                            key={a.category_type}
+                            name={CAT_NAMES[a.category_type] ?? a.category_type}
+                            pct={a.pct_used}
+                            spent={a.spent}
+                            limit={a.budget}
+                            category={a.category_type as CategoryType}
+                          />
+                        ))}
+                      </div>
+                    </InstSection>
+                  ) : null}
+                  {analysis.agent_reasoning ? <Reasoning text={analysis.agent_reasoning} /> : null}
+                </>
+              )}
+            </>
+          )}
+        </div>
+        {editModal}
+      </AppLayout>
+    );
+  }
 
   return (
     <IonPage className={styles.page}>

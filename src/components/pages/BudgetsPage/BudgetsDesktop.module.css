@@ -1,0 +1,18 @@
+/* TCW-5 "Instrumento": Presupuestos de escritorio (mockup U_AscentPresupuestos). */
+.page { color: var(--ink); }
+.flex { flex: 1; }
+.month { font-weight: 600; }
+.lineName { font-weight: 500; }
+.quiet {
+  font: inherit; font-size: 13px; color: var(--ink-muted); background: none; border: 0; padding: 0; cursor: pointer;
+}
+.quiet:hover { color: var(--ink); }
+.quiet:focus-visible, .warn:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 4px; }
+.warn {
+  display: block; margin: 14px 0 0; padding: 0; background: none; border: 0; cursor: pointer; text-align: left;
+  font-family: var(--tcw-font-mono); font-size: 12px; color: var(--cat-gold);
+}
+.warn + .warn { margin-top: 8px; }
+.warn:hover { text-decoration: underline; text-underline-offset: 3px; }
+.noteBtn.noteBtn { margin-left: 12px; font-family: var(--tcw-font-sans); }
+.hero { padding: 18px 0; border-bottom: 1px solid var(--line); }

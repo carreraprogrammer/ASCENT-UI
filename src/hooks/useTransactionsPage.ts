@@ -33,7 +33,15 @@ export const useTransactionsPage = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<TransactionQueryParams>(initialTransactionFilters);
+  // TCW-5: el buscador de la cabecera (⌘K) y "N movimientos por revisar" llegan con ?q= o ?status=.
+  const [filters, setFilters] = useState<TransactionQueryParams>(() => {
+    const params = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search);
+    return {
+      ...initialTransactionFilters,
+      ...(params?.get('q') ? { q: params.get('q') ?? '' } : {}),
+      ...(params?.get('status') ? { status: params.get('status') ?? '' } : {}),
+    };
+  });
   const [period, setPeriodState] = useState({ month: now.getMonth() + 1, year: now.getFullYear() });
   const periodRef = useRef(period);
   const [page, setPage] = useState(1);

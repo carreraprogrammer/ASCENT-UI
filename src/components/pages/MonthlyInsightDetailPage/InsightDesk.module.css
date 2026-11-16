@@ -1,0 +1,45 @@
+/* TCW-5 "Instrumento": Planes, análisis nocturno y anual en escritorio. Líneas de 1 px, nada de tarjetas. */
+.page { color: var(--ink); }
+.flex { flex: 1; }
+.month { font-weight: 600; }
+.nav {
+  font-family: var(--tcw-font-mono); font-size: 14px; color: var(--ink-muted); background: none; border: 0; padding: 0;
+  cursor: pointer; text-decoration: none;
+}
+.nav:hover { color: var(--ink); }
+.tabs { display: inline-flex; align-items: center; font-family: var(--tcw-font-mono); font-size: 12px; color: var(--ink-muted); margin-right: 14px; }
+.sep { margin: 0 6px; }
+.tab { font: inherit; color: var(--ink-muted); background: none; border: 0; padding: 0; cursor: pointer; }
+.tab:hover { color: var(--ink); }
+.tabOn { color: var(--ink); font-weight: 600; cursor: default; }
+.link { font-size: 13px; color: var(--ink); text-decoration: none; white-space: nowrap; }
+.link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.nav:focus-visible, .tab:focus-visible, .link:focus-visible, .quiet:focus-visible {
+  outline: none; box-shadow: var(--focus-ring); border-radius: 4px;
+}
+.quoteBox { padding-top: 12px; border-top: 1px solid var(--line); }
+.quote { margin: 0; font-size: 16px; line-height: 1.55; color: var(--ink); max-width: 760px; }
+.meta { margin: 8px 0 0; font-family: var(--tcw-font-mono); font-size: 11px; color: var(--ink-muted); }
+.next { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 14px 0 6px; border-top: 1px solid var(--line); }
+.nextTitle { margin: 0; font-size: 15px; font-weight: 600; }
+.nextBody { margin: 4px 0 0; font-size: 13px; color: var(--ink-muted); }
+.reason { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-muted); max-width: 760px; }
+.name { font-weight: 500; }
+.quiet { font: inherit; font-size: 13px; color: var(--ink-muted); background: none; border: 0; padding: 0; cursor: pointer; }
+.quiet:hover { color: var(--ink); }
+.quiet + .quiet::before { content: '· '; color: var(--ink-muted); }
+.chart { display: flex; align-items: flex-end; gap: 10px; height: 140px; padding: 12px 0 0; border-top: 1px solid var(--line); }
+.chartCol { flex: 1; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-end; height: 100%; gap: 6px; }
+.chartBar { background: var(--violet); border-radius: 3px 3px 0 0; min-height: 2px; }
+.chartBarPeak { background: var(--cat-rose); }
+.chartLbl { font-family: var(--tcw-font-mono); font-size: 11px; color: var(--ink-muted); text-align: center; }
+.caption { margin: 8px 0 0; font-family: var(--tcw-font-mono); font-size: 11px; color: var(--ink-muted); }
+.actions { display: inline-flex; gap: 8px; justify-content: flex-end; }
+.rose { color: var(--cat-rose); }
+.of { font-size: 14px; font-weight: 400; color: var(--ink-muted); }
+.right { font-family: var(--tcw-font-mono); font-size: 11px; color: var(--ink-muted); }
+.actionsGap { display: inline-flex; align-items: center; gap: 16px; }
+.headLink { display: inline-flex; align-items: center; height: 34px; margin-right: 8px; }
+.scoreFig { display: inline-flex; align-items: center; gap: 10px; }
+.pressureGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+.chartFrame { padding-top: 12px; border-top: 1px solid var(--line); }

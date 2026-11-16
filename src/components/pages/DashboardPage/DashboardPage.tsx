@@ -30,6 +30,7 @@ import { SheetModal } from '../../molecules/SheetModal';
 import { resolveNamedIcon } from '../../organisms/BudgetWizard/iconRegistry';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
+import { DashboardDesktop } from './DashboardDesktop';
 import { useAuthStore } from '../../../store/authStore';
 import { financeService } from '../../../services/financeService';
 import pageStyles from '../FinancePage.module.css';
@@ -716,7 +717,7 @@ const CustomizeSheet = ({ isOpen, widgets, onChange, onClose, onReset }: {
 // DASHBOARD CONTENT
 // ──────────────────────────────────────────────────────────────────────────
 export const DashboardContent = () => {
-  const { summary, completeness, loading, error, reload, monthTransactions } = useDashboardData();
+  const { summary, completeness, loading, error, reload, monthTransactions, pending, categoryLookup } = useDashboardData();
   const history = useHistory();
   const [modal, setModal] = useState<'flow' | 'obl' | 'burn' | 'ascent' | null>(null);
   const [customizeOpen, setCustomizeOpen] = useState(false);
@@ -801,6 +802,36 @@ export const DashboardContent = () => {
     }
   };
 
+  const modals = (
+    <>
+      {runway ? <FlowModal isOpen={modal === 'flow'} onClose={() => setModal(null)} runway={runway} nextCycleLabel={nextCycleLabel} /> : null}
+      <ObligationsModal isOpen={modal === 'obl'} onClose={() => setModal(null)} items={oblItems} today={todayNum} />
+      {runway ? <BurnModal isOpen={modal === 'burn'} onClose={() => setModal(null)} runway={runway} /> : null}
+      {ascent ? <AscentModal isOpen={modal === 'ascent'} goal={ascent} onClose={() => setModal(null)} /> : null}
+    </>
+  );
+
+  // TCW-5: escritorio web en el lenguaje "Instrumento". Mismos datos, cálculos, modales y acciones.
+  if (isDesktop) {
+    const health = runway?.health_status ?? null;
+    const statusLabel = health === 'comfortable' ? 'Vas bien' : health === 'warning' ? 'Vas justo' : health === 'critical' ? 'Estás en rojo' : 'Sin datos de flujo';
+    const tail = nextIncomeLabel === 'quincena' ? 'hasta la quincena' : 'hasta el próximo ingreso';
+    return (
+      <>
+        <DashboardDesktop
+          greeting={`${greeting}${firstName ? `, ${firstName}` : ''}`}
+          summary={summary} loading={loading} error={error} onRetry={() => void reload()} onReload={() => void reload()}
+          pending={pending} recent={monthTransactions} lookup={categoryLookup}
+          health={health} statusLabel={health ? `${statusLabel} — ${tail}` : statusLabel}
+          ascent={ascent ? <div className={styles.dkAscent}><AscentWidget goal={ascent} onOpen={() => setModal('ascent')} /></div> : null} oblItems={oblItems}
+          burn={runway ? { daily: runway.daily_necessary_burn ?? 0, sufficient: runway.has_sufficient_history !== false } : null}
+          onOpenFlow={() => setModal('flow')} onOpenObligations={() => setModal('obl')}
+        />
+        {modals}
+      </>
+    );
+  }
+
   return (
     <IonContent className={pageStyles.pageContent}>
       <section className={pageStyles.stack}>
@@ -879,9 +910,10 @@ export const DashboardPage = () => {
   const userName = useAuthStore((state) => state.user?.name);
   const greeting = getGreetingByHour(new Date().getHours());
   const firstName = getFirstName(userName);
+  const isDesktop = useDesktopLayout();
 
   return (
-    <AppLayout title={`${greeting}${firstName ? ` ${firstName}` : ''}`}>
+    <AppLayout title={`${greeting}${firstName ? ` ${firstName}` : ''}`} ownHeader={isDesktop}>
       <DashboardContent />
     </AppLayout>
   );

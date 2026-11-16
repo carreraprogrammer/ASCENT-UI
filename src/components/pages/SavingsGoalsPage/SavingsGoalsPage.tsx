@@ -14,6 +14,10 @@ import type { SavingsGoal, SavingsGoalPayload } from '../../../types/finance.typ
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import pageStyles from '../FinancePage.module.css';
 import styles from './SavingsGoalsPage.module.css';
+import desk from './SavingsGoalsDesktop.module.css';
+import { BarPct, DateCell, InstButton, Num, Sub, Two } from '../../atoms/Inst';
+import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
+import { fmtAmount, fmtDayYear } from '../../../utils/instrumento';
 
 type GoalForm = {
   name: string;
@@ -195,43 +199,8 @@ export const SavingsGoalsContent = () => {
     </DataState>
   );
 
-  return (
-    <IonContent className={pageStyles.pageContent}>
-        {isDesktop ? (
-          <section className={pageStyles.stack}>
-            <div className={pageStyles.splitLayout} data-testid="goals-desktop">
-              <aside className={pageStyles.splitAside}>
-                <div className={pageStyles.focusCard}>
-                  {summaryBody}
-                  <div className={pageStyles.focusActions}>
-                    <Button label="Nueva meta" onClick={openNew} />
-                  </div>
-                </div>
-              </aside>
-              <div className={pageStyles.splitMain}>
-                <div className={pageStyles.splitMainHeader}>
-                  <h3 className={pageStyles.splitMainTitle}>Detalle</h3>
-                  <span className={pageStyles.splitMainMeta}>{goals.length} registradas</span>
-                </div>
-                {goalsList}
-              </div>
-            </div>
-          </section>
-        ) : (
-        <section className={pageStyles.stack}>
-          <div className={pageStyles.focusStage}>
-            <div className={`${pageStyles.focusCard} ${pageStyles.focusCardFull}`}>
-              {summaryBody}
-              <div className={pageStyles.focusActions}>
-                <Button label="Nueva meta" onClick={openNew} />
-              </div>
-            </div>
-          </div>
-
-          {goalsList}
-        </section>
-        )}
-
+  const modals = (
+    <>
         <ConfirmModal
           isOpen={deleteConfirm !== null}
           title="Eliminar meta"
@@ -302,12 +271,103 @@ export const SavingsGoalsContent = () => {
             </div>
           </form>
         </CrudModal>
+    </>
+  );
+
+  // TCW-5 "Instrumento" (mockup U_AscentMetas): mismas metas, mismos modales y acciones; cambia la presentación.
+  if (isDesktop) {
+    return (
+      <div className={desk.page} data-testid="goals-desktop">
+        <SavingsGoalsDesktop goals={goals} loading={loading} error={error} totals={totals}
+          onRetry={() => void load()} onNew={openNew} onEdit={openEdit} onDelete={(goal) => setDeleteConfirm(goal)} />
+        {modals}
+      </div>
+    );
+  }
+
+  return (
+    <IonContent className={pageStyles.pageContent}>
+        <section className={pageStyles.stack}>
+          <div className={pageStyles.focusStage}>
+            <div className={`${pageStyles.focusCard} ${pageStyles.focusCardFull}`}>
+              {summaryBody}
+              <div className={pageStyles.focusActions}>
+                <Button label="Nueva meta" onClick={openNew} />
+              </div>
+            </div>
+          </div>
+
+          {goalsList}
+        </section>
+
+        {modals}
     </IonContent>
   );
 };
 
+const GOAL_HEADS = ['Meta', 'Fecha objetivo', 'Aporte necesario', 'Avance', 'Acumulado (COP)', ''];
+const GOAL_ALIGNS: Align[] = ['left', 'left', 'right', 'left', 'right', 'right'];
+
+const SavingsGoalsDesktop = ({ goals, loading, error, totals, onRetry, onNew, onEdit, onDelete }: {
+  goals: SavingsGoal[];
+  loading: boolean;
+  error: string | null;
+  totals: { current: number; target: number };
+  onRetry: () => void;
+  onNew: () => void;
+  onEdit: (goal: SavingsGoal) => void;
+  onDelete: (goal: SavingsGoal) => void;
+}) => {
+  const needed = goals.map((g) => g.monthly_contribution_needed).filter((v): v is number => v != null);
+  const header = (
+    <InstPageHeader title="Metas" sub="¿Qué meta concreta estás financiando mes a mes?"
+      actions={<InstButton primary onClick={onNew}>+ Nueva meta</InstButton>} />
+  );
+  if (loading) return <>{header}<InstSection title="Detalle"><InstTableSkeleton heads={GOAL_HEADS} aligns={GOAL_ALIGNS} rows={2} /></InstSection></>;
+  if (error) return <>{header}<InstNote error onRetry={onRetry}>{error}</InstNote></>;
+  if (!goals.length) {
+    return (
+      <>
+        {header}
+        <InstNote>No hay metas de ahorro. Crea tu primera meta para convertir el ahorro en una decisión mensual explícita.</InstNote>
+      </>
+    );
+  }
+  return (
+    <>
+      {header}
+      <InstStats items={[
+        { label: 'Metas activas', value: goals.length, sub: 'ahorro dirigido' },
+        { label: 'Acumulado', value: fmtAmount(totals.current), sub: `de ${fmtAmount(totals.target)} objetivo` },
+        { label: 'Aporte necesario', value: needed.length ? fmtAmount(needed.reduce((a, b) => a + b, 0)) : '—',
+          sub: needed.length ? 'al mes para llegar a tiempo' : 'sin fecha objetivo' },
+      ]} />
+      <InstSection title="Detalle">
+        <InstTable caption="Metas de ahorro" heads={GOAL_HEADS} aligns={GOAL_ALIGNS} rowKeys={goals.map((g) => g.id)}
+          rows={goals.map((goal) => {
+            const progress = goal.target_amount > 0
+              ? Math.min(Math.round((goal.current_amount / goal.target_amount) * 100), 100)
+              : 0;
+            return [
+              <Two a={goal.name} b={goal.status === 'paused' ? 'en pausa' : goal.status === 'completed' ? 'cumplida' : undefined} />,
+              goal.target_date ? <DateCell>{fmtDayYear(goal.target_date)}</DateCell> : <Sub>sin fecha objetivo</Sub>,
+              goal.monthly_contribution_needed === null ? <Sub>—</Sub> : <Num>{fmtAmount(goal.monthly_contribution_needed)}</Num>,
+              <BarPct pct={progress} label={`Avance de ${goal.name}`} />,
+              <Num strong>{fmtAmount(goal.current_amount)} / {fmtAmount(goal.target_amount)}</Num>,
+              <span className={desk.actions}>
+                <button type="button" className={desk.quiet} onClick={() => onEdit(goal)} aria-label={`Editar ${goal.name}`}>Editar</button>
+                <span aria-hidden="true" className={desk.dot}>·</span>
+                <button type="button" className={desk.quiet} onClick={() => onDelete(goal)} aria-label={`Eliminar ${goal.name}`}>Eliminar</button>
+              </span>,
+            ];
+          })} />
+      </InstSection>
+    </>
+  );
+};
+
 export const SavingsGoalsPage = () => (
-  <AppLayout title="Metas">
+  <AppLayout title="Metas" ownHeader>
     <SavingsGoalsContent />
   </AppLayout>
 );

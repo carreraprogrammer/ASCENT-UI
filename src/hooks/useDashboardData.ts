@@ -90,6 +90,7 @@ export const useDashboardData = () => {
     error,
     behaviorSummary,
     behaviorSignals,
+    categoryLookup,
     reload: () => void load(),
   };
 };

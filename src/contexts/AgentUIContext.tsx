@@ -231,6 +231,11 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
+/** TCW-5: la versión de los datos sin exigir el proveedor (el armazón de escritorio también se monta en pruebas). */
+export function useAgentDataVersion(): number {
+  return useContext(AgentUIContext)?.dataVersion ?? 0;
+}
+
 export function useAgentUI() {
   const ctx = useContext(AgentUIContext);
   if (!ctx) throw new Error('useAgentUI must be used within AgentUIProvider');

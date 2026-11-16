@@ -17,6 +17,20 @@ import { financeService } from '../../../services/financeService';
 import type { BurnRateCategory, Transaction } from '../../../types/finance.types';
 import { DrawerDetailContent, type DrawerDetailTransaction } from '../../organisms/DrawerDetail';
 import styles from './BudgetDetailPage.module.css';
+import { AppLayout } from '../../templates/AppLayout';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
+import { DateCell, InstButton, Num, OriginTag, StateTag } from '../../atoms/Inst';
+import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
+import { fmtAmount, fmtDay, fmtSigned, originOf } from '../../../utils/instrumento';
+
+// TCW-5: la fecha de un movimiento llega como "DD/MM/AAAA" (o ISO); en escritorio se escribe "15 nov".
+const txDay = (raw: string): string => {
+  const m = /^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?/u.exec(raw ?? '');
+  if (m) return fmtDay(new Date(m[3] ? Number(m[3]) : new Date().getFullYear(), Number(m[2]) - 1, Number(m[1])));
+  return fmtDay(raw);
+};
+const TX_HEADS = ['Fecha', 'Movimiento', 'Origen', 'Estado', 'Monto (COP)'];
+const TX_ALIGNS: Align[] = ['left', 'left', 'left', 'left', 'right'];
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -93,6 +107,7 @@ export const BudgetDetailPage = () => {
   const category = location.state?.category;
 
   const cfg = catConfig(categoryType);
+  const isDesktop = useDesktopLayout();
   const now = new Date();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,6 +153,59 @@ export const BudgetDetailPage = () => {
     () => filtered.map((tx) => buildTxn(tx, cfg.icon)),
     [filtered, cfg.icon],
   );
+
+  // ── Escritorio (TCW-5 "Instrumento"): hereda el armazón, sin islas. Mismos datos y cálculos. ──
+  if (isDesktop) {
+    const over = category ? category.spent > category.budget : false;
+    const insightTitle = primaryMetric?.title ?? (category && projection !== null ? 'Si seguís a este ritmo…' : undefined);
+    const insightText = primaryMetric?.body ?? (category && projection !== null
+      ? `Cerrás el mes en ${fmtAmount(projection)}. ${projection > category.budget
+        ? `Te vas a pasar por ${fmtAmount(projection - category.budget)}.`
+        : `Te queda margen de ${fmtAmount(category.budget - projection)}.`}`
+      : undefined);
+    return (
+      <AppLayout title={cfg.name} ownHeader>
+        <InstPageHeader title={cfg.name} sub={`Gaveta · ${MONTH_NAMES_ES[now.getMonth()]} ${now.getFullYear()}`}
+          actions={<InstButton onClick={() => history.goBack()}>‹ Volver</InstButton>} />
+        {category ? (
+          <InstStats items={[
+            { label: 'Gastado', value: <span style={over ? { color: 'var(--cat-rose)' } : undefined}>{fmtAmount(category.spent)}</span>,
+              sub: `${Math.round(pct)} % del presupuesto` },
+            { label: 'Presupuesto', value: fmtAmount(category.budget), sub: 'del plan del mes' },
+            primaryMetric?.kind === 'payment_status'
+              ? { label: 'Pendiente', value: fmtAmount(primaryMetric.value), sub: 'por cubrir' }
+              : { label: 'Disponible', value: fmtAmount(Math.abs(category.budget - category.spent)), sub: over ? 'de más' : 'restante' },
+          ]} />
+        ) : null}
+        {insightTitle && insightText ? (
+          <InstSection title={insightTitle}><p style={{ margin: 0, fontSize: 14, color: 'var(--ink)' }}>{insightText}</p></InstSection>
+        ) : null}
+        <InstSection title={loading ? 'Movimientos' : `Movimientos · ${filtered.length}`}>
+          {loading ? <InstTableSkeleton heads={TX_HEADS} aligns={TX_ALIGNS} rows={5} />
+            : filtered.length === 0 ? (
+              <InstNote>{hasCoversPeriod
+                ? 'Las obligaciones de este período fueron cubiertas el mes anterior.'
+                : 'Nada en esta gaveta este mes.'}</InstNote>
+            ) : (
+              <InstTable caption={`Movimientos de ${cfg.name}`} heads={TX_HEADS} aligns={TX_ALIGNS}
+                rowKeys={filtered.map((tx) => tx.id)}
+                rows={filtered.map((tx) => {
+                  const a = tx.attributes;
+                  const income = a.transaction_type === 'income';
+                  const cover = coversPeriodLabel(tx);
+                  return [
+                    <DateCell>{txDay(a.date)}</DateCell>,
+                    <span style={{ fontWeight: 500 }}>{a.concept || a.product || 'Movimiento sin nombre'}{cover ? <span style={{ fontWeight: 400, fontSize: 12, color: 'var(--ink-muted)' }}> · {cover}</span> : null}</span>,
+                    <OriginTag origin={originOf(a)} />,
+                    <StateTag state={a.status === 'pending' ? 'pendiente' : 'confirmado'} />,
+                    <Num strong tone={income ? 'ok' : undefined}>{fmtSigned(a.amount ?? 0, income)}</Num>,
+                  ];
+                })} />
+            )}
+        </InstSection>
+      </AppLayout>
+    );
+  }
 
   return (
     <IonPage>

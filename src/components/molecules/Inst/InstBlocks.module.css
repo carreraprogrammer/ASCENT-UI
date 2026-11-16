@@ -1,0 +1,35 @@
+/* TCW-5 "Instrumento": moléculas de escritorio. Las secciones se separan con líneas de 1 px, no con tarjetas. */
+.table { width: 100%; border-collapse: collapse; line-height: normal; }
+.th { font-family: var(--tcw-font-mono); font-size: 11px; font-weight: 400; color: var(--ink-muted); padding: 0 12px 10px 0; white-space: nowrap; }
+.td { padding: 11px 12px 11px 0; font-size: 14px; vertical-align: middle; color: var(--ink); }
+.tr { border-top: 1px solid var(--line); }
+.trClick { cursor: pointer; }
+.trClick:hover { background: color-mix(in srgb, var(--ink) 3%, transparent); }
+.trClick:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--violet); }
+.left { text-align: left; }
+.right { text-align: right; }
+.stats { display: flex; border-bottom: 1px solid var(--line); }
+.stat { flex: 1; padding: 20px 24px 20px 24px; border-left: 1px solid var(--line); min-width: 0; }
+.stat:first-child { padding-left: 0; border-left: 0; }
+.statVal { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; font-size: 26px; font-weight: 600; margin-top: 6px; white-space: nowrap; }
+.statSub { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+.section { padding: 22px 0 6px; }
+.secHead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px; }
+.secHeadActions { min-height: 34px; }
+.secRight { display: flex; gap: 8px; align-items: center; }
+.kv { display: grid; grid-template-columns: 200px 1fr auto; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 14px; align-items: center; }
+.kvKey { color: var(--ink-muted); }
+.kvAct { font-size: 13px; color: var(--ink-muted); }
+.pageHead { display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid var(--line); gap: 16px; }
+.h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -.03em; color: var(--ink); }
+.pageSub { margin: 4px 0 0; color: var(--ink-muted); font-size: 14px; }
+.pageActions { display: flex; gap: 8px; }
+.bandLine { display: flex; align-items: center; gap: 10px; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.skel { display: block; height: 12px; border-radius: 4px; background: var(--line); }
+.note { font-family: var(--tcw-font-mono); font-size: 12px; color: var(--ink-muted); padding: 22px 0; margin: 0; }
+.noteBad { color: var(--danger); }
+.retry { margin-left: 12px; }
+@media (prefers-reduced-motion: no-preference) {
+  .skel { animation: pulse 1.4s ease-in-out infinite; }
+}
+@keyframes pulse { 50% { opacity: .45; } }

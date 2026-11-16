@@ -9,6 +9,7 @@ import {
   trophyOutline,
   alertCircleOutline,
 } from 'ionicons/icons';
+import { createPortal } from 'react-dom';
 import { useHistory, useParams } from 'react-router-dom';
 import { AppLayout } from '../../templates/AppLayout';
 import { useAppToolbar } from '../../templates/AppLayout/AppLayoutContext';
@@ -34,7 +35,12 @@ import type {
   MonthlyPlanHistory,
   Transaction,
 } from '../../../types/finance.types';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
+import { BarPct, InstButton, Num, StateTag, Sub } from '../../atoms/Inst';
+import { InstBand, InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
+import { fmtAmount } from '../../../utils/instrumento';
 import './BudgetsPage.redesign.css';
+import desk from './BudgetsDesktop.module.css';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────────
 
@@ -502,6 +508,7 @@ const NoPlanState = ({ onStart, onLegacy }: { onStart: () => void; onLegacy: () 
 
 export const BudgetsContent = () => {
   const history = useHistory();
+  const desktop = useDesktopLayout();
   const routeParams = useParams<{ year?: string; month?: string }>();
 
   const [currentPlan, setCurrentPlan] = useState<CurrentPlan | null>(null);
@@ -652,6 +659,95 @@ export const BudgetsContent = () => {
     return Date.now() - new Date(currentPlan.confirmed_at).getTime() < 48 * 60 * 60 * 1000;
   }, [currentPlan?.confirmed_at]);
 
+  // ── Overlays (los mismos en escritorio y en móvil) ──────────────────────────────
+  const overlays = (
+    <>
+      {/* ── Wizard (sin cambios) ── */}
+      <AscentBudgetWizard
+        isOpen={wizardOpen}
+        onClose={handleCloseWizard}
+        onComplete={(draft: BudgetPlanDraft) => void handleWizardComplete(draft)}
+        wizardData={wizardData ?? undefined}
+        month={month}
+        hasPlanHistory={planHistory.length > 0}
+        isEditMode={wizardIsEditMode}
+        adjustCategoryCode={wizardAdjustCategory}
+        existingMode={currentPlan?.mode}
+        planConfirmedAt={wizardIsEditMode ? (currentPlan?.confirmed_at ?? undefined) : undefined}
+      />
+
+      <LoadingOverlay isOpen={wizardOpen && wizardDataLoading && !wizardData} message="Cargando datos del asistente..." />
+
+      {wizardOpen && wizardDataError && !wizardData ? (
+        <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', padding: 'var(--space-6)', background: 'color-mix(in srgb, var(--bg) 72%, transparent)', zIndex: 'calc(var(--z-modal) + 1)' }}>
+          <ErrorNotice
+            title="No pudimos abrir el asistente"
+            message={wizardDataError}
+            onRetry={reloadWizardData}
+            secondaryAction={<Button label="Cerrar" variant="ghost" onClick={handleCloseWizard} />}
+          />
+        </div>
+      ) : null}
+
+      {wizardOpen && wizardError ? (
+        <div role="alert" style={{ position: 'fixed', bottom: 'calc(var(--space-8) + env(safe-area-inset-bottom))', left: '50%', transform: 'translateX(-50%)', padding: 'var(--space-3) var(--space-5)', borderRadius: 'var(--radius-lg)', background: 'var(--color-error-subtle)', border: '1px solid var(--color-error)', color: 'var(--color-error)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-sm)', zIndex: 'calc(var(--z-modal) + 2)', maxWidth: 'min(480px, 90vw)', textAlign: 'center' }}>
+          {wizardError}
+        </div>
+      ) : null}
+
+      <LoadingOverlay isOpen={wizardSaving} message="Guardando plan..." zIndex="calc(var(--z-modal) + 3)" />
+
+      {wizardSuccess ? (
+        <div role="status" style={{ position: 'fixed', bottom: 'calc(var(--space-8) + env(safe-area-inset-bottom))', left: '50%', transform: 'translateX(-50%)', padding: 'var(--space-3) var(--space-5)', borderRadius: 'var(--radius-lg)', background: 'var(--surface-control)', border: '1px solid var(--surface-border)', color: 'var(--color-text-primary)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-sm)', zIndex: 'calc(var(--z-modal) + 2)' }}>
+          Plan guardado correctamente para {month}.
+        </div>
+      ) : null}
+
+      <BudgetPlanModal isOpen={planModalOpen} onClose={() => setPlanModalOpen(false)} onSaved={() => void load()} />
+    </>
+  );
+
+  // ── Escritorio (TCW-5 "Instrumento", mockup U_AscentPresupuestos) ──────────────
+  if (desktop) {
+    return (
+      <div className={desk.page} data-testid="budgets-desktop">
+        <BudgetsDesktop
+          periodLabel={selectedPeriodLabel}
+          period={selectedPeriod}
+          loading={loading}
+          error={error}
+          onRetry={() => void load()}
+          plan={currentPlan}
+          regularCats={regularCats}
+          goal={goalCat}
+          historyPlan={planHistory.find((p) => p.year === selectedPeriod.year && p.month === selectedPeriod.month) ?? null}
+          closing={closingPlanId != null}
+          planEditable={planEditable}
+          transactions={periodTransactions}
+          categoryLookup={categoryLookup}
+          onEdit={() => handleOpenWizardForEdit()}
+          onStart={handleOpenWizard}
+          onLegacy={() => setPlanModalOpen(true)}
+          onCloseMonth={(id) => void handleCloseMonth(id)}
+          onPrevious={() => {
+            const pm = selectedPeriod.month === 1 ? 12 : selectedPeriod.month - 1;
+            const py = selectedPeriod.month === 1 ? selectedPeriod.year - 1 : selectedPeriod.year;
+            history.push(`/budgets/${py}/${padMonth(pm)}`);
+          }}
+          onOpenSub={(c, s) => setDrawer({ mode: 'sub', cat: c, sub: s })}
+          onOpenPlanless={(c, amount, txns) => setDrawer({ mode: 'planless', cat: c, amount, txns })}
+        />
+        {/* El body de Ionic tiene transform: un position:fixed dentro de él se mide contra el body y no contra la
+            ventana. En escritorio el cajón se monta fuera del body para quedar pegado al borde de la ventana. */}
+        {drawer ? createPortal(
+          <div className="bp-root"><SubDrawer data={drawer} txns={drawerTxns} onClose={() => setDrawer(null)} /></div>,
+          document.documentElement,
+        ) : null}
+        {overlays}
+      </div>
+    );
+  }
+
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <IonContent className="bp-content">
@@ -738,54 +834,166 @@ export const BudgetsContent = () => {
         {drawer ? <SubDrawer data={drawer} txns={drawerTxns} onClose={() => setDrawer(null)} /> : null}
       </div>
 
-      {/* ── Wizard (sin cambios) ── */}
-      <AscentBudgetWizard
-        isOpen={wizardOpen}
-        onClose={handleCloseWizard}
-        onComplete={(draft: BudgetPlanDraft) => void handleWizardComplete(draft)}
-        wizardData={wizardData ?? undefined}
-        month={month}
-        hasPlanHistory={planHistory.length > 0}
-        isEditMode={wizardIsEditMode}
-        adjustCategoryCode={wizardAdjustCategory}
-        existingMode={currentPlan?.mode}
-        planConfirmedAt={wizardIsEditMode ? (currentPlan?.confirmed_at ?? undefined) : undefined}
-      />
-
-      <LoadingOverlay isOpen={wizardOpen && wizardDataLoading && !wizardData} message="Cargando datos del asistente..." />
-
-      {wizardOpen && wizardDataError && !wizardData ? (
-        <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', padding: 'var(--space-6)', background: 'color-mix(in srgb, var(--bg) 72%, transparent)', zIndex: 'calc(var(--z-modal) + 1)' }}>
-          <ErrorNotice
-            title="No pudimos abrir el asistente"
-            message={wizardDataError}
-            onRetry={reloadWizardData}
-            secondaryAction={<Button label="Cerrar" variant="ghost" onClick={handleCloseWizard} />}
-          />
-        </div>
-      ) : null}
-
-      {wizardOpen && wizardError ? (
-        <div role="alert" style={{ position: 'fixed', bottom: 'calc(var(--space-8) + env(safe-area-inset-bottom))', left: '50%', transform: 'translateX(-50%)', padding: 'var(--space-3) var(--space-5)', borderRadius: 'var(--radius-lg)', background: 'var(--color-error-subtle)', border: '1px solid var(--color-error)', color: 'var(--color-error)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-sm)', zIndex: 'calc(var(--z-modal) + 2)', maxWidth: 'min(480px, 90vw)', textAlign: 'center' }}>
-          {wizardError}
-        </div>
-      ) : null}
-
-      <LoadingOverlay isOpen={wizardSaving} message="Guardando plan..." zIndex="calc(var(--z-modal) + 3)" />
-
-      {wizardSuccess ? (
-        <div role="status" style={{ position: 'fixed', bottom: 'calc(var(--space-8) + env(safe-area-inset-bottom))', left: '50%', transform: 'translateX(-50%)', padding: 'var(--space-3) var(--space-5)', borderRadius: 'var(--radius-lg)', background: 'var(--surface-control)', border: '1px solid var(--surface-border)', color: 'var(--color-text-primary)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-sm)', zIndex: 'calc(var(--z-modal) + 2)' }}>
-          Plan guardado correctamente para {month}.
-        </div>
-      ) : null}
-
-      <BudgetPlanModal isOpen={planModalOpen} onClose={() => setPlanModalOpen(false)} onSaved={() => void load()} />
+      {overlays}
     </IonContent>
   );
 };
 
+// ── Escritorio (TCW-5 "Instrumento") ────────────────────────────────────────────
+// Mockup U_AscentPresupuestos. Mismos datos, cálculos y acciones que el árbol móvil; cambia la presentación.
+
+const LINE_HEADS = ['Gaveta', 'Línea', 'Presupuesto', 'Gastado', 'Avance'];
+const LINE_ALIGNS: Align[] = ['left', 'left', 'right', 'right', 'left'];
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+interface BudgetsDesktopProps {
+  periodLabel: string;
+  period: { year: number; month: number };
+  loading: boolean;
+  error: string | null;
+  onRetry: () => void;
+  plan: CurrentPlan | null;
+  regularCats: CurrentPlanCategory[];
+  goal: CurrentPlanCategory | null;
+  historyPlan: MonthlyPlanHistory | null;
+  closing: boolean;
+  planEditable: boolean;
+  transactions: Transaction[];
+  categoryLookup: Record<string, CategoryLookupItem>;
+  onEdit: () => void;
+  onStart: () => void;
+  onLegacy: () => void;
+  onCloseMonth: (planId: number) => void;
+  onPrevious: () => void;
+  onOpenSub: (cat: CurrentPlanCategory, sub: CurrentPlanSubcategory) => void;
+  onOpenPlanless: (cat: CurrentPlanCategory, amount: number, txns: Transaction[]) => void;
+}
+
+const BudgetsDesktop = (p: BudgetsDesktopProps) => {
+  const status: HistoryStatus | null = p.historyPlan
+    ? historyStatus(p.historyPlan)
+    : p.plan ? (p.plan.status === 'confirmed' ? 'confirmado' : 'borrador') : null;
+  const closable = p.historyPlan != null && status === 'confirmado' ? p.historyPlan : null;
+
+  const header = (
+    <InstPageHeader
+      title="Presupuestos"
+      sub="El plan mensual, línea por línea"
+      actions={p.plan ? (
+        <>
+          {p.planEditable ? <InstButton onClick={p.onEdit}>Editar plan</InstButton> : null}
+          {closable ? (
+            <InstButton primary disabled={p.closing} onClick={() => p.onCloseMonth(closable.id)}>
+              {p.closing ? 'Cerrando…' : 'Cerrar mes'}
+            </InstButton>
+          ) : null}
+        </>
+      ) : !p.loading && !p.error ? <InstButton primary onClick={p.onStart}>Armar plan mensual</InstButton> : null}
+    />
+  );
+
+  const band = (
+    <InstBand>
+      <span className={desk.month}>{capitalize(p.periodLabel.replace(' de ', ' '))}</span>
+      {status && !p.loading ? <StateTag state={status} /> : null}
+      <span className={desk.flex} />
+      {p.plan || p.loading ? <button type="button" className={desk.quiet} onClick={p.onPrevious}>Ver plan anterior</button> : null}
+    </InstBand>
+  );
+
+  if (p.loading) {
+    return <>{header}{band}<InstSection title="Líneas del presupuesto"><InstTableSkeleton heads={LINE_HEADS} aligns={LINE_ALIGNS} rows={6} /></InstSection></>;
+  }
+  if (p.error) {
+    return <>{header}{band}<InstNote error onRetry={p.onRetry}>{p.error}</InstNote></>;
+  }
+  if (!p.plan) {
+    return (
+      <>
+        {header}{band}
+        <InstNote>
+          Todavía no armas el plan de este mes. Reparte tu ingreso por categoría para saber, de un vistazo, si vas dentro de rango.
+          <InstButton className={desk.noteBtn} onClick={p.onLegacy}>Ver plan anterior</InstButton>
+        </InstNote>
+      </>
+    );
+  }
+
+  const totalBudget = p.regularCats.reduce((a, c) => a + (c.budgeted ?? 0), 0);
+  const totalSpent = p.regularCats.reduce((a, c) => a + (c.spent ?? 0), 0);
+  const lines = p.regularCats.flatMap((cat) => (cat.subcategories ?? []).map((sub) => ({ cat, sub })));
+  const now = new Date();
+  const isCurrent = p.period.year === now.getFullYear() && p.period.month === now.getMonth() + 1;
+  const daysInMonth = new Date(p.period.year, p.period.month, 0).getDate();
+
+  // Gasto sin línea de presupuesto, por gaveta: el mismo cálculo que el acordeón móvil (CategoryGroup).
+  const planless = p.regularCats.map((cat) => {
+    const code = cat.code ?? 'unknown';
+    const subs = cat.subcategories ?? [];
+    const budgetedSubIds = new Set(subs.map((s) => s.id).filter((id): id is number => typeof id === 'number').map(String));
+    const txns = p.transactions.filter((tx) => {
+      if (tx.attributes.transaction_type === 'income') return false;
+      if (transactionCategoryType(tx, p.categoryLookup) !== code) return false;
+      const subId = transactionSubcategoryId(tx);
+      return !(subId && budgetedSubIds.has(subId));
+    });
+    const accounted = subs.reduce((sum, s) => sum + (s.spent ?? 0), 0);
+    const amount = Math.max((cat.spent ?? 0) - accounted, txns.reduce((sum, tx) => sum + (tx.attributes.amount ?? 0), 0));
+    return { cat, amount, txns };
+  }).filter((x) => x.amount > 0);
+
+  return (
+    <>
+      {header}
+      {band}
+      {/* TCW-5 comment-90: el resumen visual real de siempre (BudgetHero, con su anillo), dentro del marco nuevo. */}
+      <div className={`bp-root ${desk.hero}`}>
+        <BudgetHero month={p.periodLabel} cats={p.regularCats} goal={p.goal} />
+      </div>
+      <InstStats items={[
+        { label: 'Ingreso', value: fmtAmount(p.plan.total_income),
+          sub: p.goal ? `objetivo financiero: ${p.goal.name ?? 'Objetivo financiero'} · ${fmtAmount(p.goal.budgeted ?? 0)} al mes` : 'ingreso del plan' },
+        { label: 'Presupuesto', value: fmtAmount(totalBudget), sub: `${lines.length} ${lines.length === 1 ? 'línea' : 'líneas'}` },
+        { label: 'Gastado', value: fmtAmount(totalSpent),
+          sub: `${pctOf(totalSpent, totalBudget)} %${isCurrent ? ` · día ${now.getDate()} de ${daysInMonth}` : ''}` },
+        { label: 'Disponible', value: fmtAmount(Math.max(0, totalBudget - totalSpent)), sub: 'presupuesto − gastado' },
+      ]} />
+      <InstSection title="Líneas del presupuesto">
+        {lines.length ? (
+          <InstTable
+            caption="Líneas del presupuesto"
+            heads={LINE_HEADS}
+            aligns={LINE_ALIGNS}
+            rowKeys={lines.map(({ cat, sub }, i) => `${cat.code}-${sub.id ?? sub.code ?? i}`)}
+            onRowClick={(i) => p.onOpenSub(lines[i].cat, lines[i].sub)}
+            rows={lines.map(({ cat, sub }) => {
+              const budget = sub.budgeted ?? 0;
+              const spent = sub.spent ?? 0;
+              const label = sub.name ?? sub.code;
+              return [
+                <Sub>{cat.name ?? 'Sin categoría'}</Sub>,
+                label ? <span className={desk.lineName}>{label}</span> : <Sub>toda la gaveta</Sub>,
+                <Num>{fmtAmount(budget)}</Num>,
+                <Num strong tone={spent > budget ? 'rose' : undefined}>{fmtAmount(spent)}</Num>,
+                <BarPct pct={pctOf(spent, budget)} width="180px" label={`Avance de ${label ?? cat.name ?? 'la línea'}`} />,
+              ];
+            })}
+          />
+        ) : <InstNote>Este plan todavía no tiene líneas por subcategoría.</InstNote>}
+      </InstSection>
+      {planless.map(({ cat, amount, txns }) => (
+        <button key={cat.code ?? cat.name} type="button" className={desk.warn} onClick={() => p.onOpenPlanless(cat, amount, txns)}>
+          ▲ {txns.length === 1 ? '1 gasto' : `${txns.length} gastos`} sin línea de presupuesto asignada
+          {planless.length > 1 ? ` en ${cat.name}` : ''} · {fmtAmount(amount)}
+        </button>
+      ))}
+    </>
+  );
+};
+
 export const BudgetsPage = () => (
-  <AppLayout title="Presupuestos">
+  <AppLayout title="Presupuestos" ownHeader>
     <BudgetsContent />
   </AppLayout>
 );

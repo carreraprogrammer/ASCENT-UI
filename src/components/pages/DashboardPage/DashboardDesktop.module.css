@@ -1,0 +1,23 @@
+/* TCW-5: Dashboard de escritorio, medidas del mockup U_AscentDashboard. */
+.page { color: var(--ink); }
+.flex { flex: 1; }
+.dot { width: 8px; height: 8px; border-radius: 999px; flex: none; }
+.dotOk { background: var(--data-both); }
+.dotWarn { background: var(--cat-gold); }
+.dotBad { background: var(--cat-rose); }
+.dotOff { background: var(--ink-muted); }
+.grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); border-bottom: 1px solid var(--line); }
+.left { padding: 22px 28px 22px 0; min-width: 0; }
+.right { padding: 22px 0 22px 28px; border-left: 1px solid var(--line); min-width: 0; }
+.rate { margin: 6px 0 10px; }
+.rateVal { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; font-size: 30px; font-weight: 600; }
+.rateUnit { color: var(--ink-muted); }
+.calc { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 13px; color: var(--ink-muted); }
+.calcV { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.calcTotal { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 10px; color: var(--ink); font-weight: 600; }
+.calcNote { margin: 8px 0 0; font-size: 12px; color: var(--cat-gold); }
+.oblHead { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; }
+.oblRow { display: flex; justify-content: space-between; margin: 8px 0 4px; font-size: 14px; }
+.oblPaid { font-weight: 600; }
+.oblLeft { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--ink-muted); }
+.mov { font-weight: 500; }

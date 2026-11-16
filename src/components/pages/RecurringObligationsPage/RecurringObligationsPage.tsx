@@ -19,7 +19,7 @@ import { IncomeSourceComposer } from '../../organisms/IncomeSourceComposer';
 import { IncomeSourceSlidingCard } from '../../organisms/IncomeSourceSlidingCard';
 import { useToast } from '../../../hooks/useToast';
 import { financeService } from '../../../services/financeService';
-import { getCategoryDisplayName } from '../../../utils/categoryLabels';
+import { getCategoryDisplayName, normalizeFlexibleLabel } from '../../../utils/categoryLabels';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type {
   CategoryResource,
@@ -33,6 +33,12 @@ import type {
   SummaryResponse,
 } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
+import { Bar, DateCell, InstButton, Num, StateTag, Sub, Two } from '../../atoms/Inst';
+import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
+import { fmtAmount } from '../../../utils/instrumento';
+import { CellWithActions, SortHead, instDeskStyles as desk } from '../TransactionsPage/instDesk';
+import { incomeDayLabel, nextSort, obligationState } from '../TransactionsPage/instDeskData';
 
 const initialObligationFilters: RecurringObligationQueryParams = {
   q: '',
@@ -372,6 +378,220 @@ export const RecurringObligationsContent = () => {
       setSubmitting(false);
     }
   };
+
+  // ── TCW-5 "Instrumento": vista de escritorio (mockup U_AscentRecurrentes). Mismos datos, modales y acciones. ──
+  const isDesktop = useDesktopLayout();
+  const openNewObligation = () => { setEditingObligation(null); setComposerOpen(true); };
+  const openNewIncome = () => { setEditingIncome(null); setIncomeComposerOpen(true); };
+  const executionById = useMemo(
+    () => new Map((recurringExecution?.items ?? []).map((item) => [String(item.id), item])),
+    [recurringExecution],
+  );
+  const obSortDefault = (obligationFilters.sort_by ?? 'due_day') === 'due_day' && (obligationFilters.sort_dir ?? 'asc') === 'asc';
+  const obSort = (column: string) => setObligationFilters((current) => ({
+    ...current, ...nextSort(current, column, column === 'amount' ? 'desc' : 'asc'),
+  }));
+  const obHead = (label: string, column: string) => (
+    <SortHead label={label} column={column} sortBy={obligationFilters.sort_by} sortDir={obligationFilters.sort_dir}
+      isDefault={obSortDefault} onSort={obSort} />
+  );
+  const inSortDefault = (incomeFilters.sort_by ?? 'expected_day_from') === 'expected_day_from' && (incomeFilters.sort_dir ?? 'asc') === 'asc';
+  const inSort = (column: string) => setIncomeFilters((current) => ({
+    ...current, ...nextSort(current, column, column === 'expected_amount' ? 'desc' : 'asc'),
+  }));
+  const inHead = (label: string, column: string) => (
+    <SortHead label={label} column={column} sortBy={incomeFilters.sort_by} sortDir={incomeFilters.sort_dir}
+      isDefault={inSortDefault} onSort={inSort} />
+  );
+  const obHeads = [obHead('Recurrente', 'name'), obHead('Día de vencimiento', 'due_day'), 'Deuda vinculada', 'Estado', obHead('Monto (COP)', 'amount')];
+  const obAligns: Align[] = ['left', 'right', 'left', 'left', 'right'];
+  const inHeads = [inHead('Ingreso', 'name'), inHead('Día esperado', 'expected_day_from'), inHead('Monto (COP)', 'expected_amount')];
+  const inAligns: Align[] = ['left', 'left', 'right'];
+  const obRows = obligations.map((obligation) => {
+    const attrs = obligation.attributes;
+    const linked = attrs.source_type === 'Debt' && attrs.source_id ? debtById.get(String(attrs.source_id)) : null;
+    const st = obligationState(attrs.active !== false, executionById.get(String(obligation.id))?.status);
+    const cat = [normalizeFlexibleLabel(attrs.category_name), attrs.subcategory_name].filter(Boolean).join(' · ');
+    return [
+      <Two a={attrs.name} b={cat || 'Sin categoría'} />,
+      <Num>{attrs.due_day ?? '—'}</Num>,
+      <Sub>{linked ? linked.attributes.name : attrs.source_type === 'Debt' && attrs.source_id ? `Deuda inexistente (#${attrs.source_id})` : '—'}</Sub>,
+      <StateTag state={st.label} tone={st.tone} />,
+      <CellWithActions actions={[
+        ...(attrs.source_type === 'Debt' && attrs.source_id ? [{ label: 'Quitar vínculo', onClick: () => setUnlinkingObligation(obligation) }] : []),
+        { label: 'Borrar', danger: true, onClick: () => setDeletingObligation(obligation) },
+      ]}>
+        <Num strong>{fmtAmount(attrs.amount)}</Num>
+      </CellWithActions>,
+    ];
+  });
+  const inRows = incomeSources.map((source) => [
+    <span style={{ fontWeight: 500 }}>{source.attributes.name}</span>,
+    <DateCell>{incomeDayLabel(source.attributes)}</DateCell>,
+    <CellWithActions actions={[{ label: 'Borrar', danger: true, onClick: () => setDeletingIncome(source) }]}>
+      <Num strong>{source.attributes.expected_amount > 0 ? fmtAmount(source.attributes.expected_amount) : '—'}</Num>
+    </CellWithActions>,
+  ]);
+
+  const desktopView = (
+    <div className={desk.page} data-testid="recurring-desktop">
+      <InstPageHeader title="Recurrentes" sub="Lo que vuelve cada mes, y con qué se paga" />
+      <InstStats items={[
+        {
+          label: 'Recurrentes cubiertos',
+          value: recurringExecution
+            ? <span className={desk.statBar}>{recurringExecution.pct} %<Bar pct={recurringExecution.pct} width="120px" label="Recurrentes cubiertos" /></span>
+            : '—',
+          sub: recurringExecution ? `${recurringExecution.covered_count} de ${recurringExecution.total_count} obligaciones completas` : 'sin datos del mes',
+        },
+        { label: 'Carga recurrente mensual', value: fmtAmount(metrics.obligationsTotal), sub: 'compromisos que vuelven cada mes' },
+        { label: 'Por cubrir', value: recurringExecution ? fmtAmount(recurringExecution.remaining_total) : '—', sub: 'antes de fin de mes' },
+      ]} />
+      {error ? <InstNote error onRetry={() => void load()}>{error}</InstNote> : null}
+      <InstSection title="Compromisos que vuelven cada mes" id="rec-obligaciones"
+        right={<InstButton primary onClick={openNewObligation}>+ Nuevo recurrente</InstButton>}>
+        {loading ? (
+          <InstTableSkeleton heads={obHeads} aligns={obAligns} rows={5} />
+        ) : error ? null : !obligations.length ? (
+          <InstNote>Todavía no hay obligaciones recurrentes.</InstNote>
+        ) : (
+          <InstTable caption="Obligaciones recurrentes" heads={obHeads} aligns={obAligns} rows={obRows}
+            rowKeys={obligations.map((o) => o.id)}
+            onRowClick={(i) => { setEditingObligation(obligations[i]); setComposerOpen(true); }} />
+        )}
+      </InstSection>
+      <InstSection title="Fuentes que sostienen el mes" id="rec-ingresos"
+        right={<InstButton onClick={openNewIncome}>Agregar ingreso</InstButton>}>
+        {loading ? (
+          <InstTableSkeleton heads={inHeads} aligns={inAligns} rows={2} />
+        ) : error ? null : !incomeSources.length ? (
+          <InstNote>Todavía no hay fuentes de ingreso.</InstNote>
+        ) : (
+          <InstTable caption="Fuentes de ingreso" heads={inHeads} aligns={inAligns} rows={inRows}
+            rowKeys={incomeSources.map((s) => s.id)}
+            onRowClick={(i) => { setEditingIncome(incomeSources[i]); setIncomeComposerOpen(true); }} />
+        )}
+      </InstSection>
+    </div>
+  );
+
+  const overlays = (
+    <>
+      <SortSheet
+        isOpen={sortOpen}
+        title="Ordenar recurrentes"
+        sortBy={String(obligationFilters.sort_by ?? 'due_day')}
+        sortDir={(obligationFilters.sort_dir as 'asc' | 'desc') ?? 'asc'}
+        options={[
+          { label: 'Día de vencimiento', value: 'due_day' },
+          { label: 'Monto', value: 'amount' },
+          { label: 'Nombre', value: 'name' },
+        ]}
+        onClose={() => setSortOpen(false)}
+        onChangeSortBy={(sort_by) => setObligationFilters((current) => ({ ...current, sort_by }))}
+        onChangeSortDir={(sort_dir) => setObligationFilters((current) => ({ ...current, sort_dir }))}
+      />
+
+      <SortSheet
+        isOpen={incomeSortOpen}
+        title="Ordenar ingresos"
+        sortBy={String(incomeFilters.sort_by ?? 'expected_day_from')}
+        sortDir={(incomeFilters.sort_dir as 'asc' | 'desc') ?? 'asc'}
+        options={[
+          { label: 'Día esperado', value: 'expected_day_from' },
+          { label: 'Monto', value: 'expected_amount' },
+          { label: 'Nombre', value: 'name' },
+        ]}
+        onClose={() => setIncomeSortOpen(false)}
+        onChangeSortBy={(sort_by) => setIncomeFilters((current) => ({ ...current, sort_by }))}
+        onChangeSortDir={(sort_dir) => setIncomeFilters((current) => ({ ...current, sort_dir }))}
+      />
+
+      <ConfirmModal
+        isOpen={Boolean(deletingObligation)}
+        title="Borrar recurrente"
+        message={
+          deletingObligation
+            ? `Vas a borrar "${deletingObligation.attributes.name}". Esta acción no se puede deshacer.`
+            : ''
+        }
+        confirmLabel="Borrar"
+        danger
+        onCancel={() => setDeletingObligation(null)}
+        onConfirm={() => void handleDelete()}
+      />
+
+      <ConfirmModal
+        isOpen={Boolean(unlinkingObligation)}
+        title="Quitar vínculo de deuda"
+        message={
+          unlinkingObligation
+            ? `Vas a quitar el vínculo de deuda de "${unlinkingObligation.attributes.name}". La obligación recurrente seguirá existiendo, solo se elimina la relación estructural.`
+            : ''
+        }
+        confirmLabel="Quitar vínculo"
+        onCancel={() => setUnlinkingObligation(null)}
+        onConfirm={() => void handleUnlinkDebt()}
+      />
+
+      <CrudModal
+        isOpen={composerOpen}
+        title={editingObligation ? 'Editar recurrente' : 'Nuevo recurrente'}
+        subtitle="Programa el cobro y clasifícalo con el mismo sistema visual de transacciones."
+        onClose={() => {
+          setComposerOpen(false);
+          setEditingObligation(null);
+        }}
+      >
+        <RecurringObligationComposer
+          obligation={editingObligation}
+          loading={submitting}
+          categories={categories}
+          onCreate={handleCreate}
+          onUpdate={handleUpdate}
+          onCancel={() => {
+            setComposerOpen(false);
+            setEditingObligation(null);
+          }}
+        />
+      </CrudModal>
+
+      <CrudModal
+        isOpen={incomeComposerOpen}
+        title={editingIncome ? 'Editar ingreso' : 'Nuevo ingreso'}
+        subtitle="Define cuánto entra, con qué frecuencia y qué tan confiable es para el plan."
+        onClose={() => { setIncomeComposerOpen(false); setEditingIncome(null); }}
+      >
+        <IncomeSourceComposer
+          source={editingIncome}
+          loading={submitting}
+          onCreate={handleCreateIncome}
+          onUpdate={handleUpdateIncome}
+          onCancel={() => { setIncomeComposerOpen(false); setEditingIncome(null); }}
+        />
+      </CrudModal>
+
+      <ConfirmModal
+        isOpen={Boolean(deletingIncome)}
+        title="Borrar ingreso"
+        message={deletingIncome ? `Vas a borrar "${deletingIncome.attributes.name}". Esta acción no se puede deshacer.` : ''}
+        confirmLabel="Borrar"
+        danger
+        onCancel={() => setDeletingIncome(null)}
+        onConfirm={() => void handleDeleteIncome()}
+      />
+      {toast}
+    </>
+  );
+
+  if (isDesktop) {
+    return (
+      <>
+        {desktopView}
+        {overlays}
+      </>
+    );
+  }
 
   return (
     <IonContent className={styles.pageContent}>
@@ -716,116 +936,13 @@ export const RecurringObligationsContent = () => {
         ) : null}
       </section>
 
-      <SortSheet
-        isOpen={sortOpen}
-        title="Ordenar recurrentes"
-        sortBy={String(obligationFilters.sort_by ?? 'due_day')}
-        sortDir={(obligationFilters.sort_dir as 'asc' | 'desc') ?? 'asc'}
-        options={[
-          { label: 'Día de vencimiento', value: 'due_day' },
-          { label: 'Monto', value: 'amount' },
-          { label: 'Nombre', value: 'name' },
-        ]}
-        onClose={() => setSortOpen(false)}
-        onChangeSortBy={(sort_by) => setObligationFilters((current) => ({ ...current, sort_by }))}
-        onChangeSortDir={(sort_dir) => setObligationFilters((current) => ({ ...current, sort_dir }))}
-      />
-
-      <SortSheet
-        isOpen={incomeSortOpen}
-        title="Ordenar ingresos"
-        sortBy={String(incomeFilters.sort_by ?? 'expected_day_from')}
-        sortDir={(incomeFilters.sort_dir as 'asc' | 'desc') ?? 'asc'}
-        options={[
-          { label: 'Día esperado', value: 'expected_day_from' },
-          { label: 'Monto', value: 'expected_amount' },
-          { label: 'Nombre', value: 'name' },
-        ]}
-        onClose={() => setIncomeSortOpen(false)}
-        onChangeSortBy={(sort_by) => setIncomeFilters((current) => ({ ...current, sort_by }))}
-        onChangeSortDir={(sort_dir) => setIncomeFilters((current) => ({ ...current, sort_dir }))}
-      />
-
-      <ConfirmModal
-        isOpen={Boolean(deletingObligation)}
-        title="Borrar recurrente"
-        message={
-          deletingObligation
-            ? `Vas a borrar "${deletingObligation.attributes.name}". Esta acción no se puede deshacer.`
-            : ''
-        }
-        confirmLabel="Borrar"
-        danger
-        onCancel={() => setDeletingObligation(null)}
-        onConfirm={() => void handleDelete()}
-      />
-
-      <ConfirmModal
-        isOpen={Boolean(unlinkingObligation)}
-        title="Quitar vínculo de deuda"
-        message={
-          unlinkingObligation
-            ? `Vas a quitar el vínculo de deuda de "${unlinkingObligation.attributes.name}". La obligación recurrente seguirá existiendo, solo se elimina la relación estructural.`
-            : ''
-        }
-        confirmLabel="Quitar vínculo"
-        onCancel={() => setUnlinkingObligation(null)}
-        onConfirm={() => void handleUnlinkDebt()}
-      />
-
-      <CrudModal
-        isOpen={composerOpen}
-        title={editingObligation ? 'Editar recurrente' : 'Nuevo recurrente'}
-        subtitle="Programa el cobro y clasifícalo con el mismo sistema visual de transacciones."
-        onClose={() => {
-          setComposerOpen(false);
-          setEditingObligation(null);
-        }}
-      >
-        <RecurringObligationComposer
-          obligation={editingObligation}
-          loading={submitting}
-          categories={categories}
-          onCreate={handleCreate}
-          onUpdate={handleUpdate}
-          onCancel={() => {
-            setComposerOpen(false);
-            setEditingObligation(null);
-          }}
-        />
-      </CrudModal>
-
-      <CrudModal
-        isOpen={incomeComposerOpen}
-        title={editingIncome ? 'Editar ingreso' : 'Nuevo ingreso'}
-        subtitle="Define cuánto entra, con qué frecuencia y qué tan confiable es para el plan."
-        onClose={() => { setIncomeComposerOpen(false); setEditingIncome(null); }}
-      >
-        <IncomeSourceComposer
-          source={editingIncome}
-          loading={submitting}
-          onCreate={handleCreateIncome}
-          onUpdate={handleUpdateIncome}
-          onCancel={() => { setIncomeComposerOpen(false); setEditingIncome(null); }}
-        />
-      </CrudModal>
-
-      <ConfirmModal
-        isOpen={Boolean(deletingIncome)}
-        title="Borrar ingreso"
-        message={deletingIncome ? `Vas a borrar "${deletingIncome.attributes.name}". Esta acción no se puede deshacer.` : ''}
-        confirmLabel="Borrar"
-        danger
-        onCancel={() => setDeletingIncome(null)}
-        onConfirm={() => void handleDeleteIncome()}
-      />
-      {toast}
+      {overlays}
     </IonContent>
   );
 };
 
 export const RecurringObligationsPage = () => (
-  <AppLayout title="Recurrentes">
+  <AppLayout title="Recurrentes" ownHeader>
     <RecurringObligationsContent />
   </AppLayout>
 );
