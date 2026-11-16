@@ -17,6 +17,9 @@ import { ReasoningAccordion } from '../../molecules/ReasoningAccordion/Reasoning
 import { InsightTabBar } from '../../molecules/InsightTabBar/InsightTabBar';
 import { Spinner } from '../../atoms/Spinner';
 import type { CategoryType } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
+import { AppLayout } from '../../templates/AppLayout';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
+import pageStyles from '../FinancePage.module.css';
 import styles from './MonthlyInsightDetailPage.module.css';
 
 const MONTH_NAMES = [
@@ -78,6 +81,9 @@ export const MonthlyInsightDetailPage = () => {
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [milestones, setMilestones] = useState<UserMilestone[]>([]);
   const [loading, setLoading] = useState(true);
+  // Escritorio (ASC-4, fase 5): la pestaña "Planes" del menú Finanzas abre esta vista
+  // dentro del layout de Ascent (cabecera + menú lateral). Móvil sigue a pantalla completa.
+  const isDesktop = useDesktopLayout();
 
   const m = Number(month);
   const y = Number(year);
@@ -120,189 +126,213 @@ export const MonthlyInsightDetailPage = () => {
     ? `Ajusta ${overCategories.map((c) => c.category).join(' y ')} para ${MONTH_NAMES[nextMonth]}`
     : `Sigue el plan de ${MONTH_NAMES[nextMonth]}`;
 
-  return (
-    <IonPage className={styles.page}>
-      <div className={styles.topbar}>
-        <button type="button" className={styles.iconBtn} onClick={() => history.goBack()}>
-          <IonIcon icon={chevronBackOutline} />
-        </button>
-        <div className={styles.crumb}>
-          <span className={styles.crumbKind}>{isCurrent ? 'Mes en curso' : 'Cierre de mes'}</span>
-          <span className={styles.crumbDate}>{MONTH_NAMES[m]} {y}</span>
-        </div>
-        <div className={styles.iconBtn} style={{ visibility: 'hidden' }} />
+  const topbar = (
+    <div className={styles.topbar}>
+      <button type="button" className={styles.iconBtn} onClick={() => history.goBack()}>
+        <IonIcon icon={chevronBackOutline} />
+      </button>
+      <div className={styles.crumb}>
+        <span className={styles.crumbKind}>{isCurrent ? 'Mes en curso' : 'Cierre de mes'}</span>
+        <span className={styles.crumbDate}>{MONTH_NAMES[m]} {y}</span>
       </div>
+      <div className={styles.iconBtn} style={{ visibility: 'hidden' }} />
+    </div>
+  );
 
-      <IonContent className={styles.content}>
-        <div className={styles.scroll}>
-          {loading ? (
-            <div className={styles.loader}><Spinner size="lg" /></div>
-          ) : !summary ? (
-            <div className={styles.empty}>Sin datos para {MONTH_NAMES[m]} {y}.</div>
-          ) : (
-            <>
-              <CoachNote
-                body={coachBody}
-                meta={[`Generado el 1 de ${MONTH_NAMES[nextMonth]}`]}
-              />
+  const body = (
+    <div className={styles.scroll}>
+      {loading ? (
+        <div className={styles.loader}><Spinner size="lg" /></div>
+      ) : !summary ? (
+        <div className={styles.empty}>Sin datos para {MONTH_NAMES[m]} {y}.</div>
+      ) : (
+        <>
+          <CoachNote
+            body={coachBody}
+            meta={[`Generado el 1 de ${MONTH_NAMES[nextMonth]}`]}
+          />
 
-              {/* Score card */}
-              {score != null && (
-                <div className={styles.scoreCard}>
-                  <ScoreRing value={score} />
-                  <div className={styles.scoreBody}>
-                    <div className={styles.scoreNum}>
-                      {score}<span className={styles.scoreMax}>/100</span>
-                    </div>
-                    <div className={styles.scoreDelta}>
-                      {underCategories.length} de {categories.length} gavetas en verde
-                    </div>
-                    <div className={styles.scoreFoot}>
-                      {isCurrent
-                        ? netBalance >= 0
-                          ? `Llevas ${formatCurrencyCompact(netBalance)} de margen acumulado.`
-                          : `Vas ${formatCurrencyCompact(Math.abs(netBalance))} en rojo por ahora.`
-                        : netBalance >= 0
-                          ? `Terminaste con ${formatCurrencyCompact(netBalance)} de margen.`
-                          : `Cerraste ${formatCurrencyCompact(Math.abs(netBalance))} en rojo.`}
-                    </div>
-                  </div>
+          {/* Score card */}
+          {score != null && (
+            <div className={styles.scoreCard}>
+              <ScoreRing value={score} />
+              <div className={styles.scoreBody}>
+                <div className={styles.scoreNum}>
+                  {score}<span className={styles.scoreMax}>/100</span>
                 </div>
-              )}
-
-              <StatusStrip cells={[
-                {
-                  label: 'Gavetas ok',
-                  value: `${underCategories.length}`,
-                  delta: categories.length > 0 ? `de ${categories.length}` : undefined,
-                },
-                {
-                  label: 'Se pasaron',
-                  value: `${overCategories.length}`,
-                  tone: overCategories.length > 0 ? 'bad' : undefined,
-                },
-                ...(debtPayments > 0 ? [{
-                  label: 'Abonos deuda',
-                  value: formatCurrencyCompact(debtPayments),
-                }] : []),
-                ...(sfContributions > 0 ? [{
-                  label: 'A bolsillos',
-                  value: formatCurrencyCompact(sfContributions),
-                }] : []),
-                {
-                  label: 'Balance',
-                  value: formatCurrencyCompact(netBalance),
-                  tone: netBalance < 0 ? 'bad' : undefined,
-                },
-              ]} />
-
-              {/* Category breakdown */}
-              {categories.length > 0 && (
-                <>
-                  <div className={styles.secHead}>
-                    <h3 className={styles.secTitle}>Tus gavetas</h3>
-                    {overCategories.length > 0 && (
-                      <span className={styles.secMeta}>{overCategories.length} se pasaron</span>
-                    )}
-                  </div>
-                  <div className={styles.pressureList}>
-                    {categories.map((cat) => (
-                      <CategoryPressureCard
-                        key={cat.category_type}
-                        name={cat.category}
-                        pct={cat.pct}
-                        spent={cat.spent}
-                        limit={cat.budget}
-                        category={cat.category_type as CategoryType}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {/* Milestones */}
-              {milestones.length > 0 && (
-                <>
-                  <div className={styles.secHead}>
-                    <h3 className={styles.secTitle}>Logros del mes</h3>
-                    <span className={styles.secMeta}>{milestones.length} desbloqueados</span>
-                  </div>
-                  <div className={styles.medalList}>
-                    {milestones.map((ms) => (
-                      <div key={ms.id} className={styles.medal}>
-                        <div className={styles.medalIcon}>
-                          <IonIcon icon={flameOutline} />
-                        </div>
-                        <div className={styles.medalBody}>
-                          <p className={styles.medalName}>
-                            {MILESTONE_LABELS[ms.code] ?? ms.code}
-                          </p>
-                          <p className={styles.medalWhen}>
-                            {new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'long' }).format(new Date(ms.achieved_at))}
-                          </p>
-                        </div>
-                        <IonIcon icon={chevronForwardOutline} className={styles.medalArrow} />
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {/* Savings goals */}
-              {savings.length > 0 && (
-                <>
-                  <div className={styles.secHead}>
-                    <h3 className={styles.secTitle}>Metas de ahorro</h3>
-                  </div>
-                  <div className={styles.list}>
-                    {savings.map((g, i) => {
-                      const pct = g.target_amount > 0
-                        ? Math.round((g.current_amount / g.target_amount) * 100) : 0;
-                      return (
-                        <div key={i} className={styles.row}>
-                          <div className={styles.rowBody}>
-                            <span className={styles.rowName}>{g.name}</span>
-                            <span className={styles.rowMeta}>{pct}% completado</span>
-                          </div>
-                          <span className={styles.rowAmt}>{formatCurrencyCompact(g.current_amount)}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-
-              {/* CTA next month */}
-              <div className={styles.cta}>
-                <div className={styles.ctaEyebrow}>
-                  <IonIcon icon={flagOutline} className={styles.ctaIcon} />
-                  <span>Propuesta para {MONTH_NAMES[nextMonth]}</span>
+                <div className={styles.scoreDelta}>
+                  {underCategories.length} de {categories.length} gavetas en verde
                 </div>
-                <p className={styles.ctaTitle}>{ctaTitle}</p>
-                <p className={styles.ctaBody}>
-                  {overCategories.length > 0
-                    ? isCurrent
-                      ? `Todavía puedes corregir el rumbo en lo que queda de ${MONTH_NAMES[m]}.`
-                      : `${MONTH_NAMES[m]} dejó patrones claros. Ajusta el plan para el próximo mes.`
-                    : `Llevas una racha sólida. Revisa si hay algo que optimizar.`}
-                </p>
-                <button
-                  type="button"
-                  className={styles.ctaBtn}
-                  onClick={() => history.push(`/budgets/${nextYear}/${nextMonth}`)}
-                >
-                  Revisar plan de {MONTH_NAMES[nextMonth]} <IonIcon icon={chevronForwardOutline} />
-                </button>
+                <div className={styles.scoreFoot}>
+                  {isCurrent
+                    ? netBalance >= 0
+                      ? `Llevas ${formatCurrencyCompact(netBalance)} de margen acumulado.`
+                      : `Vas ${formatCurrencyCompact(Math.abs(netBalance))} en rojo por ahora.`
+                    : netBalance >= 0
+                      ? `Terminaste con ${formatCurrencyCompact(netBalance)} de margen.`
+                      : `Cerraste ${formatCurrencyCompact(Math.abs(netBalance))} en rojo.`}
+                </div>
               </div>
+            </div>
+          )}
 
-              {/* Reasoning */}
-              {(summary as any)?.agent_reasoning ? (
-                <ReasoningAccordion text={(summary as any).agent_reasoning} />
-              ) : null}
+          <StatusStrip cells={[
+            {
+              label: 'Gavetas ok',
+              value: `${underCategories.length}`,
+              delta: categories.length > 0 ? `de ${categories.length}` : undefined,
+            },
+            {
+              label: 'Se pasaron',
+              value: `${overCategories.length}`,
+              tone: overCategories.length > 0 ? 'bad' : undefined,
+            },
+            ...(debtPayments > 0 ? [{
+              label: 'Abonos deuda',
+              value: formatCurrencyCompact(debtPayments),
+            }] : []),
+            ...(sfContributions > 0 ? [{
+              label: 'A bolsillos',
+              value: formatCurrencyCompact(sfContributions),
+            }] : []),
+            {
+              label: 'Balance',
+              value: formatCurrencyCompact(netBalance),
+              tone: netBalance < 0 ? 'bad' : undefined,
+            },
+          ]} />
+
+          {/* Category breakdown */}
+          {categories.length > 0 && (
+            <>
+              <div className={styles.secHead}>
+                <h3 className={styles.secTitle}>Tus gavetas</h3>
+                {overCategories.length > 0 && (
+                  <span className={styles.secMeta}>{overCategories.length} se pasaron</span>
+                )}
+              </div>
+              <div className={styles.pressureList}>
+                {categories.map((cat) => (
+                  <CategoryPressureCard
+                    key={cat.category_type}
+                    name={cat.category}
+                    pct={cat.pct}
+                    spent={cat.spent}
+                    limit={cat.budget}
+                    category={cat.category_type as CategoryType}
+                  />
+                ))}
+              </div>
             </>
           )}
 
-        </div>
+          {/* Milestones */}
+          {milestones.length > 0 && (
+            <>
+              <div className={styles.secHead}>
+                <h3 className={styles.secTitle}>Logros del mes</h3>
+                <span className={styles.secMeta}>{milestones.length} desbloqueados</span>
+              </div>
+              <div className={styles.medalList}>
+                {milestones.map((ms) => (
+                  <div key={ms.id} className={styles.medal}>
+                    <div className={styles.medalIcon}>
+                      <IonIcon icon={flameOutline} />
+                    </div>
+                    <div className={styles.medalBody}>
+                      <p className={styles.medalName}>
+                        {MILESTONE_LABELS[ms.code] ?? ms.code}
+                      </p>
+                      <p className={styles.medalWhen}>
+                        {new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'long' }).format(new Date(ms.achieved_at))}
+                      </p>
+                    </div>
+                    <IonIcon icon={chevronForwardOutline} className={styles.medalArrow} />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Savings goals */}
+          {savings.length > 0 && (
+            <>
+              <div className={styles.secHead}>
+                <h3 className={styles.secTitle}>Metas de ahorro</h3>
+              </div>
+              <div className={styles.list}>
+                {savings.map((g, i) => {
+                  const pct = g.target_amount > 0
+                    ? Math.round((g.current_amount / g.target_amount) * 100) : 0;
+                  return (
+                    <div key={i} className={styles.row}>
+                      <div className={styles.rowBody}>
+                        <span className={styles.rowName}>{g.name}</span>
+                        <span className={styles.rowMeta}>{pct}% completado</span>
+                      </div>
+                      <span className={styles.rowAmt}>{formatCurrencyCompact(g.current_amount)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* CTA next month */}
+          <div className={styles.cta}>
+            <div className={styles.ctaEyebrow}>
+              <IonIcon icon={flagOutline} className={styles.ctaIcon} />
+              <span>Propuesta para {MONTH_NAMES[nextMonth]}</span>
+            </div>
+            <p className={styles.ctaTitle}>{ctaTitle}</p>
+            <p className={styles.ctaBody}>
+              {overCategories.length > 0
+                ? isCurrent
+                  ? `Todavía puedes corregir el rumbo en lo que queda de ${MONTH_NAMES[m]}.`
+                  : `${MONTH_NAMES[m]} dejó patrones claros. Ajusta el plan para el próximo mes.`
+                : `Llevas una racha sólida. Revisa si hay algo que optimizar.`}
+            </p>
+            <button
+              type="button"
+              className={styles.ctaBtn}
+              onClick={() => history.push(`/budgets/${nextYear}/${nextMonth}`)}
+            >
+              Revisar plan de {MONTH_NAMES[nextMonth]} <IonIcon icon={chevronForwardOutline} />
+            </button>
+          </div>
+
+          {/* Reasoning */}
+          {(summary as any)?.agent_reasoning ? (
+            <ReasoningAccordion text={(summary as any).agent_reasoning} />
+          ) : null}
+        </>
+      )}
+
+    </div>
+  );
+
+  if (isDesktop) {
+    return (
+      <AppLayout title="Planes">
+        <IonContent className={pageStyles.pageContent}>
+          <div className={styles.desktopView} data-testid="planes-desktop">
+            {topbar}
+            <div className={styles.desktopTabs}>
+              <InsightTabBar active="mensual" month={m} year={y} />
+            </div>
+            {body}
+          </div>
+        </IonContent>
+      </AppLayout>
+    );
+  }
+
+  return (
+    <IonPage className={styles.page}>
+      {topbar}
+
+      <IonContent className={styles.content}>
+        {body}
       </IonContent>
       <InsightTabBar active="mensual" month={m} year={y} />
     </IonPage>

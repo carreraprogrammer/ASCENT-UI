@@ -21,6 +21,7 @@ import { useAgentUI } from '../../../contexts/AgentUIContext';
 import { initialTransactionFilters, useTransactionsPage } from '../../../hooks/useTransactionsPage';
 import { formatCurrencyCompact, formatCurrencyFull } from '../../../utils/formatCurrency';
 import { financeService } from '../../../services/financeService';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import formStyles from '../../organisms/ComposerForm.module.css';
 import styles from '../FinancePage.module.css';
 
@@ -164,6 +165,8 @@ export const TransactionsContent = () => {
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  // Escritorio (ASC-4, fase 5): resumen fijo a la izquierda y lista siempre visible.
+  const isDesktop = useDesktopLayout();
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [linkingTransaction, setLinkingTransaction] = useState<Transaction | null>(null);
   const [incomeSources, setIncomeSources] = useState<IncomeSource[]>([]);
@@ -588,158 +591,293 @@ export const TransactionsContent = () => {
     setFilters(next);
   };
 
+  const summaryBody = (
+    <>
+
+      {/* Header */}
+      <div className={styles.focusGrid}>
+        <div className={styles.focusCopy}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={() => setPeriod(shiftPeriod(period.year, period.month, -1))}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', color: 'inherit', fontSize: '1rem', opacity: 0.7 }}
+            >‹</button>
+            <span className={styles.eyebrow}>{monthName}</span>
+            <button
+              onClick={() => { if (!isCurrentPeriod) setPeriod(shiftPeriod(period.year, period.month, 1)); }}
+              style={{ background: 'none', border: 'none', cursor: isCurrentPeriod ? 'default' : 'pointer', padding: '0 4px', color: 'inherit', fontSize: '1rem', opacity: isCurrentPeriod ? 0.2 : 0.7 }}
+            >›</button>
+          </div>
+          <div className={styles.monthCompareGrid}>
+            <div className={styles.monthCompareItem}>
+              <span className={styles.monthCompareLabel}>Ingresos</span>
+              <strong className={`${styles.monthCompareValue} ${styles.monthCompareIncome}`}>
+                {formatCurrencyCompact(metrics.incomeTotal)}
+              </strong>
+            </div>
+            <div className={styles.monthCompareItem}>
+              <span className={styles.monthCompareLabel}>Gastos</span>
+              <strong className={styles.monthCompareValue}>
+                {formatCurrencyCompact(metrics.expenseTotal)}
+              </strong>
+            </div>
+          </div>
+          <div style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <p className={styles.focusCaption}>
+              Balance del mes:{' '}
+              <span className={monthBalance < 0 ? styles.statusWarn : styles.statusGood}>
+                {formatCurrencyCompact(monthBalance)}
+              </span>
+            </p>
+            {carryover !== 0 && (
+              <p className={styles.focusCaption}>
+                Saldo arrastrado:{' '}
+                <span className={carryover < 0 ? styles.statusWarn : styles.statusGood}>
+                  {carryover > 0 ? '+' : ''}{formatCurrencyCompact(carryover)}
+                </span>
+              </p>
+            )}
+            <p className={styles.focusCaption} style={{ fontWeight: 600 }}>
+              Disponible real:{' '}
+              <span className={realAvailable < 0 ? styles.statusWarn : styles.statusGood}>
+                {formatCurrencyCompact(realAvailable)}
+              </span>
+            </p>
+          </div>
+        </div>
+        <div className={styles.focusMeta} style={{ alignSelf: 'start', justifyContent: 'flex-end' }}>
+          {metrics.pendingCount > 0 ? (
+            <span className={styles.focusBadge}>{metrics.pendingCount} pendientes</span>
+          ) : null}
+          <span className={styles.focusBadge}>{metrics.count} movimientos</span>
+        </div>
+      </div>
+
+      {/* Stacked spend bar */}
+      {stackedSegments.length > 0 ? (
+        <div className={styles.spendWrap}>
+          <div className={styles.spendBar}>
+            {stackedSegments.map((seg) => (
+              <div
+                key={seg.type}
+                className={styles.spendSegment}
+                style={{ width: `${seg.pct}%`, background: seg.color }}
+                title={`${seg.label}: ${formatCurrencyCompact(seg.spent)}`}
+              />
+            ))}
+          </div>
+          <div className={styles.spendLegend}>
+            {stackedSegments.map((seg) => (
+              <div key={seg.type} className={styles.spendLegendItem}>
+                <span className={styles.spendLegendDot} style={{ background: seg.color }} />
+                <span className={styles.spendLegendLabel}>{seg.label}</span>
+                <span className={styles.spendLegendAmount}>{formatCurrencyCompact(seg.spent)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Spotlight */}
+      {spotlight ? (
+          <div
+            className={`${styles.focusSupport} ${!spotlight.on_track ? styles.focusSupportWarn : ''}`}
+            style={spotlight.color ? { '--category-accent': spotlight.color } as React.CSSProperties : undefined}
+          >
+          <div className={styles.focusSupportHeader}>
+            <h3 className={styles.focusSupportTitle}>
+              {!spotlight.on_track ? <IonIcon icon={warningOutline} aria-hidden="true" /> : null}
+              {spotlight.category}
+            </h3>
+            <span className={styles.focusSupportValue}>{formatCurrencyCompact(spotlight.spent)}</span>
+          </div>
+          {spotlight.budget > 0 ? (
+            <>
+              <div
+                className={styles.focusRail}
+                role="progressbar"
+                aria-valuenow={Math.min(spotlight.pct, 100)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`${spotlight.category}: ${spotlight.pct}% del presupuesto`}
+              >
+                <div
+                  className={`${styles.focusRailFill} ${!spotlight.on_track ? styles.focusRailFillWarn : ''}`}
+                  style={{ width: `${Math.min(spotlight.pct, 100)}%` }}
+                />
+              </div>
+              <p className={styles.focusSupportText}>
+                {spotlight.pct}% de {formatCurrencyCompact(spotlight.budget)} presupuestados
+                  {!spotlight.on_track ? (spotlight.pct >= 100 ? ' — ya se superó' : ' — va a superarse') : ''}
+              </p>
+            </>
+          ) : (
+            <p className={styles.focusSupportText}>mayor gasto del mes</p>
+          )}
+        </div>
+      ) : null}
+    </>
+  );
+
+  const newTransactionButton = (
+    <Button
+      label="Nueva transacción"
+      variant="primary"
+      iconLeft={<IonIcon icon={addOutline} />}
+      onClick={() => {
+        setEditingTransaction(null);
+        setComposerOpen(true);
+      }}
+    />
+  );
+
+  const subcategoriesButton = (
+    <Button
+      label="Subcategorías"
+      variant="ghost"
+      onClick={() => ionRouter.push('/subcategories', 'forward')}
+    />
+  );
+
+  const transactionDetail = (
+    <>
+        <section className={styles.inlineCategoryFilters}>
+          <div className={styles.categoryRailScroller}>
+            <div className={styles.categoryRail}>
+              <button
+                type="button"
+                className={[styles.categoryToken, !selectedCategoryId ? styles.categoryTokenActive : ''].filter(Boolean).join(' ')}
+                style={{ '--category-accent': 'var(--color-brand)' } as CSSProperties}
+                onClick={() => setFilters((current) => ({ ...current, category_id: '', subcategory_id: '' }))}
+              >
+                <span className={styles.categoryTokenText}>Todo</span>
+              </button>
+              {categoryFilters.map((category) => {
+                const active = category.id === selectedCategoryId;
+                return (
+                  <button
+                    key={category.id}
+                    type="button"
+                    className={[styles.categoryToken, active ? styles.categoryTokenActive : ''].filter(Boolean).join(' ')}
+                    style={{ '--category-accent': category.color } as CSSProperties}
+                    onClick={() => setFilters((current) => ({
+                      ...current,
+                      category_id: category.id,
+                      subcategory_id: '',
+                    }))}
+                  >
+                    <span className={styles.categorySwatch} />
+                    <span className={styles.categoryTokenText}>{category.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+      <AppliedFiltersBar
+        chips={visibleAppliedChips}
+        onRemove={removeChip}
+        onClearAll={() => {
+          setFilters(initialTransactionFilters);
+        }}
+      />
+      {!loading && !error && transactions.length ? (
+        <div className={styles.transactionDayGroups}>
+          {groupedTransactions.map((group) => (
+            <section key={group.key} className={styles.transactionDaySection}>
+              <h3 className={styles.transactionDayLabel}>{group.label}</h3>
+              <div className={styles.transactionGroupCard}>
+                {group.items.map((transaction) => (
+                  <TransactionSlidingCard
+                    key={transaction.id}
+                    variant="grouped"
+                    transaction={transaction}
+                    category={resolveTransactionCategory(transaction, categoryLookup)}
+                    linkedLabel={
+                      transaction.attributes.transaction_type === 'income'
+                        ? (incomeSources.find((s) => String(s.id) === String(transaction.attributes.income_source_id))?.attributes.name ?? null)
+                        : transaction.attributes.sinking_fund_id
+                          ? (sinkingFunds.find((f) => String(f.id) === String(transaction.attributes.sinking_fund_id))?.name ?? null)
+                          : (obligations.find((o) => String(o.id) === String(transaction.attributes.recurring_obligation_id))?.attributes.name ?? null)
+                    }
+                    onEdit={(nextTransaction) => {
+                      setEditingTransaction(nextTransaction);
+                      setComposerOpen(true);
+                    }}
+                    onDelete={(selectedTransaction) => {
+                      void requestDelete(selectedTransaction);
+                    }}
+                    onLink={(tx) => { handleOpenLink(tx); }}
+                    onQuickConfirm={(tx, code) => { void handleQuickConfirm(tx, code); }}
+                    suggestedSubcategories={suggestedFor(transaction)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      ) : null}
+    </>
+  );
+
   return (
     <>
       <IonContent className={styles.pageContent}>
-      <section className={`${styles.stack} ${!detailsOpen ? styles.stackFill : ''}`}>
-        {!detailsOpen ? (
-          <div className={styles.focusStage}>
-            <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
-
-              {/* Header */}
-              <div className={styles.focusGrid}>
-                <div className={styles.focusCopy}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <button
-                      onClick={() => setPeriod(shiftPeriod(period.year, period.month, -1))}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', color: 'inherit', fontSize: '1rem', opacity: 0.7 }}
-                    >‹</button>
-                    <span className={styles.eyebrow}>{monthName}</span>
-                    <button
-                      onClick={() => { if (!isCurrentPeriod) setPeriod(shiftPeriod(period.year, period.month, 1)); }}
-                      style={{ background: 'none', border: 'none', cursor: isCurrentPeriod ? 'default' : 'pointer', padding: '0 4px', color: 'inherit', fontSize: '1rem', opacity: isCurrentPeriod ? 0.2 : 0.7 }}
-                    >›</button>
-                  </div>
-                  <div className={styles.monthCompareGrid}>
-                    <div className={styles.monthCompareItem}>
-                      <span className={styles.monthCompareLabel}>Ingresos</span>
-                      <strong className={`${styles.monthCompareValue} ${styles.monthCompareIncome}`}>
-                        {formatCurrencyCompact(metrics.incomeTotal)}
-                      </strong>
-                    </div>
-                    <div className={styles.monthCompareItem}>
-                      <span className={styles.monthCompareLabel}>Gastos</span>
-                      <strong className={styles.monthCompareValue}>
-                        {formatCurrencyCompact(metrics.expenseTotal)}
-                      </strong>
-                    </div>
-                  </div>
-                  <div style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <p className={styles.focusCaption}>
-                      Balance del mes:{' '}
-                      <span className={monthBalance < 0 ? styles.statusWarn : styles.statusGood}>
-                        {formatCurrencyCompact(monthBalance)}
-                      </span>
-                    </p>
-                    {carryover !== 0 && (
-                      <p className={styles.focusCaption}>
-                        Saldo arrastrado:{' '}
-                        <span className={carryover < 0 ? styles.statusWarn : styles.statusGood}>
-                          {carryover > 0 ? '+' : ''}{formatCurrencyCompact(carryover)}
-                        </span>
-                      </p>
-                    )}
-                    <p className={styles.focusCaption} style={{ fontWeight: 600 }}>
-                      Disponible real:{' '}
-                      <span className={realAvailable < 0 ? styles.statusWarn : styles.statusGood}>
-                        {formatCurrencyCompact(realAvailable)}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-                <div className={styles.focusMeta} style={{ alignSelf: 'start', justifyContent: 'flex-end' }}>
-                  {metrics.pendingCount > 0 ? (
-                    <span className={styles.focusBadge}>{metrics.pendingCount} pendientes</span>
-                  ) : null}
-                  <span className={styles.focusBadge}>{metrics.count} movimientos</span>
+      {isDesktop ? (
+        <section className={styles.stack}>
+          <div className={styles.splitLayout} data-testid="transactions-desktop">
+            <aside className={styles.splitAside}>
+              <div className={styles.focusCard}>
+                {summaryBody}
+                <div className={styles.focusActions}>
+                  {newTransactionButton}
+                  {subcategoriesButton}
                 </div>
               </div>
-
-              {/* Stacked spend bar */}
-              {stackedSegments.length > 0 ? (
-                <div className={styles.spendWrap}>
-                  <div className={styles.spendBar}>
-                    {stackedSegments.map((seg) => (
-                      <div
-                        key={seg.type}
-                        className={styles.spendSegment}
-                        style={{ width: `${seg.pct}%`, background: seg.color }}
-                        title={`${seg.label}: ${formatCurrencyCompact(seg.spent)}`}
-                      />
-                    ))}
-                  </div>
-                  <div className={styles.spendLegend}>
-                    {stackedSegments.map((seg) => (
-                      <div key={seg.type} className={styles.spendLegendItem}>
-                        <span className={styles.spendLegendDot} style={{ background: seg.color }} />
-                        <span className={styles.spendLegendLabel}>{seg.label}</span>
-                        <span className={styles.spendLegendAmount}>{formatCurrencyCompact(seg.spent)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-
-              {/* Spotlight */}
-              {spotlight ? (
-                  <div
-                    className={`${styles.focusSupport} ${!spotlight.on_track ? styles.focusSupportWarn : ''}`}
-                    style={spotlight.color ? { '--category-accent': spotlight.color } as React.CSSProperties : undefined}
-                  >
-                  <div className={styles.focusSupportHeader}>
-                    <h3 className={styles.focusSupportTitle}>
-                      {!spotlight.on_track ? <IonIcon icon={warningOutline} aria-hidden="true" /> : null}
-                      {spotlight.category}
-                    </h3>
-                    <span className={styles.focusSupportValue}>{formatCurrencyCompact(spotlight.spent)}</span>
-                  </div>
-                  {spotlight.budget > 0 ? (
-                    <>
-                      <div
-                        className={styles.focusRail}
-                        role="progressbar"
-                        aria-valuenow={Math.min(spotlight.pct, 100)}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-label={`${spotlight.category}: ${spotlight.pct}% del presupuesto`}
-                      >
-                        <div
-                          className={`${styles.focusRailFill} ${!spotlight.on_track ? styles.focusRailFillWarn : ''}`}
-                          style={{ width: `${Math.min(spotlight.pct, 100)}%` }}
-                        />
-                      </div>
-                      <p className={styles.focusSupportText}>
-                        {spotlight.pct}% de {formatCurrencyCompact(spotlight.budget)} presupuestados
-                          {!spotlight.on_track ? (spotlight.pct >= 100 ? ' — ya se superó' : ' — va a superarse') : ''}
-                      </p>
-                    </>
-                  ) : (
-                    <p className={styles.focusSupportText}>mayor gasto del mes</p>
-                  )}
-                </div>
-              ) : null}
-
-              {/* Actions */}
-              <div className={styles.focusActions}>
-                <Button
-                  label="Nueva transacción"
-                  variant="primary"
-                  iconLeft={<IonIcon icon={addOutline} />}
-                  onClick={() => {
+            </aside>
+            <div className={styles.splitMain}>
+              <div className={styles.splitMainHeader}>
+                <h3 className={styles.splitMainTitle}>Detalle</h3>
+                <span className={styles.splitMainMeta}>{monthName}</span>
+              </div>
+              {transactionDetail}
+              {loading ? <div className={styles.centeredState}><Spinner size="lg" /></div> : null}
+              {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}
+              {!loading && !error && !transactions.length ? (
+                <EmptyState
+                  title="No hay transacciones en este período"
+                  description={activeFilterCount || filters.q ? 'No encontramos movimientos con esos filtros. Limpia criterios o registra una transacción nueva.' : 'Empieza registrando el primer movimiento del período para ver progreso y lectura conductual.'}
+                  actionLabel={activeFilterCount || filters.q ? 'Limpiar filtros' : 'Nueva transacción'}
+                  onAction={() => {
+                    if (activeFilterCount || filters.q) {
+                      setFilters(initialTransactionFilters);
+                      return;
+                    }
                     setEditingTransaction(null);
                     setComposerOpen(true);
                   }}
                 />
+              ) : null}
+            </div>
+          </div>
+        </section>
+      ) : (
+      <section className={`${styles.stack} ${!detailsOpen ? styles.stackFill : ''}`}>
+        {!detailsOpen ? (
+          <div className={styles.focusStage}>
+            <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
+              {summaryBody}
+
+              {/* Actions */}
+              <div className={styles.focusActions}>
+                  {newTransactionButton}
                 <Button
                   label="Explorar detalle"
                   variant="ghost"
                   onClick={() => setDetailsOpen(true)}
                 />
-                <Button
-                  label="Subcategorías"
-                  variant="ghost"
-                  onClick={() => ionRouter.push('/subcategories', 'forward')}
-                />
+                  {subcategoriesButton}
               </div>
 
             </div>
@@ -753,83 +891,7 @@ export const TransactionsContent = () => {
               { label: monthName },
             ]} />
             <div className={styles.detailPanel}>
-              <section className={styles.inlineCategoryFilters}>
-                <div className={styles.categoryRailScroller}>
-                  <div className={styles.categoryRail}>
-                    <button
-                      type="button"
-                      className={[styles.categoryToken, !selectedCategoryId ? styles.categoryTokenActive : ''].filter(Boolean).join(' ')}
-                      style={{ '--category-accent': 'var(--color-brand)' } as CSSProperties}
-                      onClick={() => setFilters((current) => ({ ...current, category_id: '', subcategory_id: '' }))}
-                    >
-                      <span className={styles.categoryTokenText}>Todo</span>
-                    </button>
-                    {categoryFilters.map((category) => {
-                      const active = category.id === selectedCategoryId;
-                      return (
-                        <button
-                          key={category.id}
-                          type="button"
-                          className={[styles.categoryToken, active ? styles.categoryTokenActive : ''].filter(Boolean).join(' ')}
-                          style={{ '--category-accent': category.color } as CSSProperties}
-                          onClick={() => setFilters((current) => ({
-                            ...current,
-                            category_id: category.id,
-                            subcategory_id: '',
-                          }))}
-                        >
-                          <span className={styles.categorySwatch} />
-                          <span className={styles.categoryTokenText}>{category.name}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </section>
-
-            <AppliedFiltersBar
-              chips={visibleAppliedChips}
-              onRemove={removeChip}
-              onClearAll={() => {
-                setFilters(initialTransactionFilters);
-              }}
-            />
-            {!loading && !error && transactions.length ? (
-              <div className={styles.transactionDayGroups}>
-                {groupedTransactions.map((group) => (
-                  <section key={group.key} className={styles.transactionDaySection}>
-                    <h3 className={styles.transactionDayLabel}>{group.label}</h3>
-                    <div className={styles.transactionGroupCard}>
-                      {group.items.map((transaction) => (
-                        <TransactionSlidingCard
-                          key={transaction.id}
-                          variant="grouped"
-                          transaction={transaction}
-                          category={resolveTransactionCategory(transaction, categoryLookup)}
-                          linkedLabel={
-                            transaction.attributes.transaction_type === 'income'
-                              ? (incomeSources.find((s) => String(s.id) === String(transaction.attributes.income_source_id))?.attributes.name ?? null)
-                              : transaction.attributes.sinking_fund_id
-                                ? (sinkingFunds.find((f) => String(f.id) === String(transaction.attributes.sinking_fund_id))?.name ?? null)
-                                : (obligations.find((o) => String(o.id) === String(transaction.attributes.recurring_obligation_id))?.attributes.name ?? null)
-                          }
-                          onEdit={(nextTransaction) => {
-                            setEditingTransaction(nextTransaction);
-                            setComposerOpen(true);
-                          }}
-                          onDelete={(selectedTransaction) => {
-                            void requestDelete(selectedTransaction);
-                          }}
-                          onLink={(tx) => { handleOpenLink(tx); }}
-                          onQuickConfirm={(tx, code) => { void handleQuickConfirm(tx, code); }}
-                          suggestedSubcategories={suggestedFor(transaction)}
-                        />
-                      ))}
-                    </div>
-                  </section>
-                ))}
-              </div>
-            ) : null}
+              {transactionDetail}
             </div>
           </div>
         ) : null}
@@ -853,8 +915,9 @@ export const TransactionsContent = () => {
         ) : null}
 
       </section>
+      )}
 
-      {detailsOpen ? (
+      {detailsOpen || isDesktop ? (
         <IonInfiniteScroll
           onIonInfinite={async (ev) => {
             await loadMore();
