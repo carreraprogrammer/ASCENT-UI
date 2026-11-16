@@ -29,6 +29,7 @@ import { ErrorState } from '../../molecules/ErrorState';
 import { SheetModal } from '../../molecules/SheetModal';
 import { resolveNamedIcon } from '../../organisms/BudgetWizard/iconRegistry';
 import { useDashboardData } from '../../../hooks/useDashboardData';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { useAuthStore } from '../../../store/authStore';
 import { financeService } from '../../../services/financeService';
 import pageStyles from '../FinancePage.module.css';
@@ -627,6 +628,12 @@ const DEFAULT_WIDGETS: WidgetPref[] = (['status', 'ascent', 'stats', 'obligation
   .map((id) => ({ id, visible: true }));
 const WIDGETS_KEY = 'ascent-dashboard-widgets-v2';
 
+// Escritorio (ASC-4, fase 4): dos columnas. Izquierda ≈1.7fr: estado + ascenso en una
+// tarjeta (y gavetas / lo último debajo). Derecha ≈1fr: ritmo + gastado y obligaciones.
+// Se respeta el orden y la visibilidad que el usuario eligió dentro de cada columna.
+const DESKTOP_HERO: WidgetId[] = ['status', 'ascent'];
+const DESKTOP_SIDE: WidgetId[] = ['stats', 'obligations'];
+
 const loadWidgets = (): WidgetPref[] => {
   try {
     const raw = localStorage.getItem(WIDGETS_KEY);
@@ -710,6 +717,7 @@ export const DashboardContent = () => {
   const [modal, setModal] = useState<'flow' | 'obl' | 'burn' | 'ascent' | null>(null);
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [widgets, setWidgets] = useState<WidgetPref[]>(loadWidgets);
+  const isDesktop = useDesktopLayout();
 
   // ── Botón "Personalizar" en el toolbar del header (solo en esta página) ──
   const userName = useAuthStore((state) => state.user?.name);
@@ -813,11 +821,33 @@ export const DashboardContent = () => {
               </div>
             ) : null}
 
-            <div className={styles.d2Scroll}>
-              {widgets.filter((w) => w.visible).map((w) => (
-                <div key={w.id}>{renderWidget(w.id)}</div>
-              ))}
-            </div>
+            {isDesktop ? (() => {
+              const visible = widgets.filter((w) => w.visible).map((w) => w.id);
+              const hero = visible.filter((id) => DESKTOP_HERO.includes(id));
+              const side = visible.filter((id) => DESKTOP_SIDE.includes(id));
+              const rest = visible.filter((id) => !DESKTOP_HERO.includes(id) && !DESKTOP_SIDE.includes(id));
+              return (
+                <div className={styles.dkGrid} data-testid="dashboard-desktop">
+                  <div className={styles.dkCol}>
+                    {hero.length ? (
+                      <div className={styles.dkCard}>
+                        {hero.map((id) => <div key={id}>{renderWidget(id)}</div>)}
+                      </div>
+                    ) : null}
+                    {rest.map((id) => <div key={id} className={styles.dkCard}>{renderWidget(id)}</div>)}
+                  </div>
+                  <div className={`${styles.dkCol} ${styles.dkSide}`}>
+                    {side.map((id) => <div key={id} className={styles.dkCard}>{renderWidget(id)}</div>)}
+                  </div>
+                </div>
+              );
+            })() : (
+              <div className={styles.d2Scroll}>
+                {widgets.filter((w) => w.visible).map((w) => (
+                  <div key={w.id}>{renderWidget(w.id)}</div>
+                ))}
+              </div>
+            )}
           </>
         ) : null}
       </section>

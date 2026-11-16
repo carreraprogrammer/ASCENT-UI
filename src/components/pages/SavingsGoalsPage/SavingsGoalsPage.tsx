@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { IonContent } from '@ionic/react';
 import { AppLayout } from '../../templates/AppLayout';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { Button } from '../../atoms/Button';
 import { DateInput } from '../../atoms/DateInput';
 import { NumberInput } from '../../atoms/NumberInput';
@@ -47,6 +48,8 @@ const formToPayload = (form: GoalForm): SavingsGoalPayload => ({
 });
 
 export const SavingsGoalsContent = () => {
+  // Escritorio (ASC-4, fase 5): resumen fijo a la izquierda y metas a la derecha.
+  const isDesktop = useDesktopLayout();
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -120,82 +123,114 @@ export const SavingsGoalsContent = () => {
     await load();
   };
 
+  const summaryBody = (
+    <>
+      <div className={pageStyles.focusGrid}>
+        <div className={pageStyles.focusCopy}>
+          <span className={pageStyles.eyebrow}>Ahorro dirigido</span>
+          <p className={pageStyles.focusQuestion}>¿Qué meta concreta estás financiando mes a mes?</p>
+          <h2 className={pageStyles.focusTitle}>
+            {goals.length ? `${goals.length} metas activas` : 'Crea tu primera meta'}
+          </h2>
+          <p className={pageStyles.focusText}>
+            Define montos objetivo y fechas para convertir el ahorro en una decisión mensual explícita.
+          </p>
+        </div>
+        <div>
+          <div className={pageStyles.focusValue}>{formatCurrencyCompact(totals.current)}</div>
+          <p className={pageStyles.focusCaption}>
+            acumulado de {formatCurrencyCompact(totals.target)} objetivo
+          </p>
+        </div>
+      </div>
+    </>
+  );
+
+  const goalsList = (
+    <DataState
+      loading={loading}
+      error={error}
+      data={goals}
+      emptyTitle="No hay metas de ahorro"
+      emptyDescription="Crea tu primera meta para convertir el ahorro en una decisión mensual explícita."
+      emptyActionLabel="Nueva meta"
+      onEmptyAction={openNew}
+      onRetry={() => void load()}
+    >
+      {(goalItems) => (
+        <div className={pageStyles.list}>
+          {goalItems.map((goal) => {
+            const progress = goal.target_amount > 0
+              ? Math.min(Math.round((goal.current_amount / goal.target_amount) * 100), 100)
+              : 0;
+            return (
+              <article key={goal.id} className={pageStyles.listItem}>
+                <div className={pageStyles.listPrimary}>
+                  <span className={pageStyles.listLabel}>{goal.name}</span>
+                  <span className={pageStyles.listMeta}>
+                    {formatCurrencyCompact(goal.current_amount)} de {formatCurrencyCompact(goal.target_amount)}
+                  </span>
+                  <div className={styles.progressTrack}>
+                    <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+                  </div>
+                  <span className={pageStyles.listMeta}>
+                    Aporte necesario: {goal.monthly_contribution_needed === null ? 'sin fecha objetivo' : formatCurrencyCompact(goal.monthly_contribution_needed)}
+                  </span>
+                </div>
+                <div className={pageStyles.listSecondary}>
+                  <span className={pageStyles.pill}>{progress}%</span>
+                  <span className={pageStyles.listMeta}>
+                    {goal.target_date ? `Fecha objetivo ${goal.target_date}` : 'Sin fecha objetivo'}
+                  </span>
+                  <div className={styles.actions}>
+                    <Button label="Editar" variant="ghost" size="sm" onClick={() => openEdit(goal)} />
+                    <Button label="Eliminar" variant="danger" size="sm" onClick={() => setDeleteConfirm(goal)} />
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </DataState>
+  );
+
   return (
     <IonContent className={pageStyles.pageContent}>
+        {isDesktop ? (
+          <section className={pageStyles.stack}>
+            <div className={pageStyles.splitLayout} data-testid="goals-desktop">
+              <aside className={pageStyles.splitAside}>
+                <div className={pageStyles.focusCard}>
+                  {summaryBody}
+                  <div className={pageStyles.focusActions}>
+                    <Button label="Nueva meta" onClick={openNew} />
+                  </div>
+                </div>
+              </aside>
+              <div className={pageStyles.splitMain}>
+                <div className={pageStyles.splitMainHeader}>
+                  <h3 className={pageStyles.splitMainTitle}>Detalle</h3>
+                  <span className={pageStyles.splitMainMeta}>{goals.length} registradas</span>
+                </div>
+                {goalsList}
+              </div>
+            </div>
+          </section>
+        ) : (
         <section className={pageStyles.stack}>
           <div className={pageStyles.focusStage}>
             <div className={`${pageStyles.focusCard} ${pageStyles.focusCardFull}`}>
-              <div className={pageStyles.focusGrid}>
-                <div className={pageStyles.focusCopy}>
-                  <span className={pageStyles.eyebrow}>Ahorro dirigido</span>
-                  <p className={pageStyles.focusQuestion}>¿Qué meta concreta estás financiando mes a mes?</p>
-                  <h2 className={pageStyles.focusTitle}>
-                    {goals.length ? `${goals.length} metas activas` : 'Crea tu primera meta'}
-                  </h2>
-                  <p className={pageStyles.focusText}>
-                    Define montos objetivo y fechas para convertir el ahorro en una decisión mensual explícita.
-                  </p>
-                </div>
-                <div>
-                  <div className={pageStyles.focusValue}>{formatCurrencyCompact(totals.current)}</div>
-                  <p className={pageStyles.focusCaption}>
-                    acumulado de {formatCurrencyCompact(totals.target)} objetivo
-                  </p>
-                </div>
-              </div>
+              {summaryBody}
               <div className={pageStyles.focusActions}>
                 <Button label="Nueva meta" onClick={openNew} />
               </div>
             </div>
           </div>
 
-          <DataState
-            loading={loading}
-            error={error}
-            data={goals}
-            emptyTitle="No hay metas de ahorro"
-            emptyDescription="Crea tu primera meta para convertir el ahorro en una decisión mensual explícita."
-            emptyActionLabel="Nueva meta"
-            onEmptyAction={openNew}
-            onRetry={() => void load()}
-          >
-            {(goalItems) => (
-              <div className={pageStyles.list}>
-                {goalItems.map((goal) => {
-                  const progress = goal.target_amount > 0
-                    ? Math.min(Math.round((goal.current_amount / goal.target_amount) * 100), 100)
-                    : 0;
-                  return (
-                    <article key={goal.id} className={pageStyles.listItem}>
-                      <div className={pageStyles.listPrimary}>
-                        <span className={pageStyles.listLabel}>{goal.name}</span>
-                        <span className={pageStyles.listMeta}>
-                          {formatCurrencyCompact(goal.current_amount)} de {formatCurrencyCompact(goal.target_amount)}
-                        </span>
-                        <div className={styles.progressTrack}>
-                          <div className={styles.progressFill} style={{ width: `${progress}%` }} />
-                        </div>
-                        <span className={pageStyles.listMeta}>
-                          Aporte necesario: {goal.monthly_contribution_needed === null ? 'sin fecha objetivo' : formatCurrencyCompact(goal.monthly_contribution_needed)}
-                        </span>
-                      </div>
-                      <div className={pageStyles.listSecondary}>
-                        <span className={pageStyles.pill}>{progress}%</span>
-                        <span className={pageStyles.listMeta}>
-                          {goal.target_date ? `Fecha objetivo ${goal.target_date}` : 'Sin fecha objetivo'}
-                        </span>
-                        <div className={styles.actions}>
-                          <Button label="Editar" variant="ghost" size="sm" onClick={() => openEdit(goal)} />
-                          <Button label="Eliminar" variant="danger" size="sm" onClick={() => setDeleteConfirm(goal)} />
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </DataState>
+          {goalsList}
         </section>
+        )}
 
         <ConfirmModal
           isOpen={deleteConfirm !== null}
