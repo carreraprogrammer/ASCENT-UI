@@ -935,6 +935,8 @@
     margin-bottom: 62px;
   }
   :is(.dkGrid, .dkAscent) .d2MtnTickLbl { font-size: 11px; right: 14px; }
+  /* TCW-5 auditoría, hallazgo 4: en escritorio las marcas de altura se leen con el gris de texto (≥ 4,5:1). */
+  .dkAscent .d2MtnTickLbl { color: var(--ink-muted); }
   :is(.dkGrid, .dkAscent) .d2MtnFoot { left: 4px; right: 4px; bottom: -58px; text-align: left; }
   :is(.dkGrid, .dkAscent) .d2MtnFootVal { font-size: 30px; }
   :is(.dkGrid, .dkAscent) .d2MtnFootValMuted { font-size: 15px; }

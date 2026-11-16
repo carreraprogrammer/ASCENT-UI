@@ -927,11 +927,12 @@ export const TransactionsContent = () => {
         sub="Flujo del mes: lo que entró, lo que salió y de dónde vino cada dato"
         actions={<InstButton primary onClick={openNew}>+ Nueva transacción</InstButton>}
       />
+      {/* Mientras carga, las cifras dicen "—": un cero parecería un dato (auditoría TCW-5, hallazgo 3). */}
       <InstStats items={[
-        { label: 'Ingresos', value: fmtAmount(metrics.incomeTotal), sub: monthLong(period) },
-        { label: 'Gastos', value: fmtAmount(metrics.expenseTotal), sub: `${metrics.count} ${metrics.count === 1 ? 'movimiento' : 'movimientos'}` },
-        { label: 'Balance del mes', value: fmtAmount(monthBalance, { sign: 'always' }), sub: 'ingresos − gastos' },
-        { label: 'Disponible real', value: fmtAmount(realAvailable), sub: `balance + saldo arrastrado (${fmtAmount(carryover, { sign: 'always' })})` },
+        { label: 'Ingresos', value: loading ? '—' : fmtAmount(metrics.incomeTotal), sub: monthLong(period) },
+        { label: 'Gastos', value: loading ? '—' : fmtAmount(metrics.expenseTotal), sub: loading ? 'cargando…' : `${metrics.count} ${metrics.count === 1 ? 'movimiento' : 'movimientos'}` },
+        { label: 'Balance del mes', value: loading ? '—' : fmtAmount(monthBalance, { sign: 'always' }), sub: 'ingresos − gastos' },
+        { label: 'Disponible real', value: loading ? '—' : fmtAmount(realAvailable), sub: loading ? 'balance + saldo arrastrado' : `balance + saldo arrastrado (${fmtAmount(carryover, { sign: 'always' })})` },
       ]} />
       {stackedSegments.length > 0 ? <div className={desk.spendSlot}>{spendBar}</div> : null}
       <InstSection title={`Movimientos · ${monthLong(period)}`} id="tx-movimientos">
