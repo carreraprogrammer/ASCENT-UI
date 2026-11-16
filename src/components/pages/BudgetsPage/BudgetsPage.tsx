@@ -947,6 +947,10 @@ const BudgetsDesktop = (p: BudgetsDesktopProps) => {
     <>
       {header}
       {band}
+      {/* TCW-5 comment-90: el resumen visual real de siempre (BudgetHero, con su anillo), dentro del marco nuevo. */}
+      <div className={`bp-root ${desk.hero}`}>
+        <BudgetHero month={p.periodLabel} cats={p.regularCats} goal={p.goal} />
+      </div>
       <InstStats items={[
         { label: 'Ingreso', value: fmtAmount(p.plan.total_income),
           sub: p.goal ? `objetivo financiero: ${p.goal.name ?? 'Objetivo financiero'} · ${fmtAmount(p.goal.budgeted ?? 0)} al mes` : 'ingreso del plan' },

@@ -368,14 +368,19 @@ export const NightAnalysisDetailPage = () => {
                   ) : null}
                   {pressureAlerts.length > 0 ? (
                     <InstSection title="Gavetas con presión">
-                      <InstTable caption="Gavetas con presión" heads={['Gaveta', 'Presupuesto', 'Gastado', 'Avance']} aligns={['left', 'right', 'right', 'left']}
-                        rowKeys={pressureAlerts.map((a) => a.category_type)}
-                        rows={pressureAlerts.map((a) => [
-                          <span className={desk.name}>{CAT_NAMES[a.category_type] ?? a.category_type}</span>,
-                          <Num>{fmtAmount(a.budget)}</Num>,
-                          <Num>{fmtAmount(a.spent)}</Num>,
-                          <BarPct pct={a.pct_used} label={`Avance de ${CAT_NAMES[a.category_type] ?? a.category_type}`} />,
-                        ])} />
+                      {/* TCW-5 comment-90: las barras reales de siempre (CategoryPressureCard), dentro del marco nuevo. */}
+                      <div className={desk.pressureGrid}>
+                        {pressureAlerts.map((a) => (
+                          <CategoryPressureCard
+                            key={a.category_type}
+                            name={CAT_NAMES[a.category_type] ?? a.category_type}
+                            pct={a.pct_used}
+                            spent={a.spent}
+                            limit={a.budget}
+                            category={a.category_type as CategoryType}
+                          />
+                        ))}
+                      </div>
                     </InstSection>
                   ) : null}
                   {analysis.agent_reasoning ? <Reasoning text={analysis.agent_reasoning} /> : null}

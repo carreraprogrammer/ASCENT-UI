@@ -333,8 +333,8 @@ export const MonthlyInsightDetailPage = () => {
     const prevMonth = m === 1 ? 12 : m - 1;
     const prevYear = m === 1 ? y - 1 : y;
     const planStatus = summary?.monthly_plan?.status;
-    const GAV_HEADS = ['Gaveta', 'Presupuesto', 'Gastado', 'Avance'];
-    const GAV_ALIGNS: Align[] = ['left', 'right', 'right', 'left'];
+    const GAV_HEADS = ['Gaveta', 'Presupuesto', 'Gastado'];
+    const GAV_ALIGNS: Align[] = ['left', 'right', 'right'];
     const days = summary?.burn_rate;
     return (
       <AppLayout title="Planes" ownHeader>
@@ -371,7 +371,13 @@ export const MonthlyInsightDetailPage = () => {
           ) : (
             <>
               <InstStats items={[
-                { label: 'Puntaje del mes', value: <>{score ?? 0}<span className={desk.of}> / 100</span></>,
+                { label: 'Puntaje del mes', value: (
+                    <span className={desk.scoreFig}>
+                      {/* TCW-5 comment-90: el anillo real de siempre (ScoreRing), dentro del marco nuevo. */}
+                      <ScoreRing value={score ?? 0} size={44} />
+                      <span>{score ?? 0}<span className={desk.of}> / 100</span></span>
+                    </span>
+                  ),
                   sub: `${underCategories.length} de ${categories.length} gavetas en verde` },
                 { label: 'Se pasaron', value: <span className={overCategories.length > 0 ? desk.rose : undefined}>{overCategories.length}</span>,
                   sub: overCategories.length === 1 ? 'gaveta sobre presupuesto' : 'gavetas sobre presupuesto' },
@@ -386,14 +392,19 @@ export const MonthlyInsightDetailPage = () => {
               {categories.length > 0 ? (
                 <InstSection title="Plan por gaveta"
                   right={days ? <span className={desk.right}>día {days.days_elapsed} de {days.days_in_month}{overCategories.length ? ` · ${overCategories.length} se pasaron` : ''}</span> : null}>
-                  <InstTable caption="Plan por gaveta" heads={GAV_HEADS} aligns={GAV_ALIGNS}
-                    rowKeys={categories.map((c) => c.category_type)}
-                    rows={categories.map((c) => [
-                      <span className={desk.name}>{c.category}</span>,
-                      <Num>{fmtAmount(c.budget)}</Num>,
-                      <Num>{fmtAmount(c.spent)}</Num>,
-                      <BarPct pct={c.pct} label={`Avance de ${c.category}`} />,
-                    ])} />
+                  {/* TCW-5 comment-90: las barras reales de siempre (CategoryPressureCard), dentro del marco nuevo. */}
+                  <div className={desk.pressureGrid}>
+                    {categories.map((cat) => (
+                      <CategoryPressureCard
+                        key={cat.category_type}
+                        name={cat.category}
+                        pct={cat.pct}
+                        spent={cat.spent}
+                        limit={cat.budget}
+                        category={cat.category_type as CategoryType}
+                      />
+                    ))}
+                  </div>
                 </InstSection>
               ) : null}
 

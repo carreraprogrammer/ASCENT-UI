@@ -40,3 +40,6 @@
 .right { font-family: var(--tcw-font-mono); font-size: 11px; color: var(--ink-muted); }
 .actionsGap { display: inline-flex; align-items: center; gap: 16px; }
 .headLink { display: inline-flex; align-items: center; height: 34px; margin-right: 8px; }
+.scoreFig { display: inline-flex; align-items: center; gap: 10px; }
+.pressureGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+.chartFrame { padding-top: 12px; border-top: 1px solid var(--line); }

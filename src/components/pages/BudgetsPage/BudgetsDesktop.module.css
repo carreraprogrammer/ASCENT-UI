@@ -15,3 +15,4 @@
 .warn + .warn { margin-top: 8px; }
 .warn:hover { text-decoration: underline; text-underline-offset: 3px; }
 .noteBtn.noteBtn { margin-left: 12px; font-family: var(--tcw-font-sans); }
+.hero { padding: 18px 0; border-bottom: 1px solid var(--line); }

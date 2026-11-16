@@ -156,7 +156,6 @@ export const YearlyInsightDetailPage = () => {
 
   // ── Escritorio (TCW-5 "Instrumento"): hereda el armazón, sin islas. Mismos datos y cálculos. ──
   if (isDesktop) {
-    const max = Math.max(...monthly, 1);
     return (
       <AppLayout title="Planes" ownHeader>
         <div className={desk.page} data-testid="year-desktop">
@@ -181,14 +180,8 @@ export const YearlyInsightDetailPage = () => {
               <CoachLine body={coachBody} meta={[isCurrent ? `Al día de hoy · ${y}` : `31 de diciembre · ${y}`, `${summaries.filter(Boolean).length} meses con datos`]} />
               {hasData ? (
                 <InstSection title="Tu año en cifras" right={peakMonthIdx >= 0 ? <span className={desk.right}>{MONTH_ABBR[peakMonthIdx].toLowerCase()} fue el pico</span> : null}>
-                  <div className={desk.chart} role="img" aria-label={`Gasto mensual confirmado de ${y}`}>
-                    {monthly.map((v, i) => (
-                      <div key={i} className={desk.chartCol} title={`${MONTH_ABBR[i]}: ${fmtAmount(v)}`}>
-                        <div className={`${desk.chartBar} ${i === peakMonthIdx ? desk.chartBarPeak : ''}`} style={{ height: `${Math.max((v / max) * 100, 2)}%` }} />
-                        <span className={desk.chartLbl}>{MONTH_ABBR[i].toLowerCase()}</span>
-                      </div>
-                    ))}
-                  </div>
+                  {/* TCW-5 comment-90: la gráfica real de siempre (YearChart), dentro del marco nuevo. */}
+                  <div className={desk.chartFrame}><YearChart monthly={monthly} /></div>
                   <p className={desk.caption}>Gasto mensual confirmado · {y}</p>
                 </InstSection>
               ) : <InstNote>Aún no hay suficientes datos para analizar {y}.</InstNote>}
