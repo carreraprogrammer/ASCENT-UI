@@ -937,6 +937,10 @@
   :is(.dkGrid, .dkAscent) .d2MtnTickLbl { font-size: 11px; right: 14px; }
   /* TCW-5 auditoría, hallazgo 4: en escritorio las marcas de altura se leen con el gris de texto (≥ 4,5:1). */
   .dkAscent .d2MtnTickLbl { color: var(--ink-muted); }
+  /* Re-auditoría TCW-5: en escritorio las etapas que faltan se leen con el gris de texto (≥ 4,5:1); la bloqueada
+     se distingue con un borde punteado en vez de bajar su opacidad. Móvil sin cambios. */
+  .dkAscent .d2AscentChip:not(.d2AscentChipDone):not(.d2AscentChipActive) { color: var(--ink-muted); }
+  .dkAscent .d2AscentChipLocked { opacity: 1; border: 1px dashed var(--line-strong); }
   :is(.dkGrid, .dkAscent) .d2MtnFoot { left: 4px; right: 4px; bottom: -58px; text-align: left; }
   :is(.dkGrid, .dkAscent) .d2MtnFootVal { font-size: 30px; }
   :is(.dkGrid, .dkAscent) .d2MtnFootValMuted { font-size: 15px; }
