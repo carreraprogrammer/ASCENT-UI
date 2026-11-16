@@ -1,0 +1,53 @@
+/* TCW-5: Dashboard de escritorio, medidas del mockup U_AscentDashboard. */
+.page { color: var(--ink); }
+.flex { flex: 1; }
+.dot { width: 8px; height: 8px; border-radius: 999px; flex: none; }
+.dotOk { background: var(--data-both); }
+.dotWarn { background: var(--cat-gold); }
+.dotBad { background: var(--cat-rose); }
+.dotOff { background: var(--ink-muted); }
+.grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); border-bottom: 1px solid var(--line); }
+.left { padding: 22px 28px 22px 0; min-width: 0; }
+.right { padding: 22px 0 22px 28px; border-left: 1px solid var(--line); min-width: 0; }
+.headRow { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.stageName { font-size: 14px; font-weight: 600; color: var(--violet); }
+.mtnBox {
+  display: block; width: 100%; border: 0; border-radius: 10px; background: var(--surface); padding: 8px 4px 0;
+  overflow: hidden; cursor: pointer; font: inherit; color: inherit; text-align: left;
+}
+.mtnBox:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.mtnStage { position: relative; display: block; max-width: 620px; }
+.mtnSvg { display: block; width: 100%; height: auto; overflow: hidden; }
+.peakTop { stop-color: color-mix(in srgb, var(--ink) 12%, var(--surface)); }
+.peakBottom { stop-color: var(--surface); stop-opacity: .2; }
+.tick { stroke: var(--line); stroke-dasharray: 3 5; }
+.slope { stroke: var(--line-strong); stroke-width: 1.5; }
+.slopeDone { stroke: var(--violet); stroke-width: 3; stroke-linecap: round; }
+.pole { stroke: var(--ink-muted); stroke-width: 1.6; }
+.flag { fill: var(--violet); }
+.lbl { fill: var(--ink-muted); font-size: 11px; font-family: var(--tcw-font-mono); }
+.climber { position: absolute; transform: translate(-50%, -50%); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.youPill {
+  position: absolute; height: 22px; padding: 0 9px; border-radius: 11px; background: var(--line); border: 1px solid var(--line-strong);
+  color: var(--ink); font-family: var(--tcw-font-mono); font-size: 11px; line-height: 20px; box-sizing: border-box; white-space: nowrap;
+}
+.figRow { display: flex; justify-content: space-between; align-items: flex-end; margin: 12px 0; }
+.fig { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; font-size: 26px; font-weight: 600; }
+.figOf { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; color: var(--ink-muted); }
+.hint { margin: 2px 0 0; font-size: 12px; color: var(--ink-muted); }
+.pct { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; color: var(--violet); font-weight: 600; }
+.pills { display: flex; gap: 6px; }
+.pill { flex: 1; text-align: center; padding: 8px 10px; border-radius: 999px; font-size: 12px; background: var(--surface-raised); color: var(--ink-muted); white-space: nowrap; }
+.pillOn { background: var(--violet); color: var(--on-violet); font-weight: 600; }
+.rate { margin: 6px 0 10px; }
+.rateVal { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; font-size: 30px; font-weight: 600; }
+.rateUnit { color: var(--ink-muted); }
+.calc { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 13px; color: var(--ink-muted); }
+.calcV { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.calcTotal { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 10px; color: var(--ink); font-weight: 600; }
+.calcNote { margin: 8px 0 0; font-size: 12px; color: var(--cat-gold); }
+.oblHead { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; }
+.oblRow { display: flex; justify-content: space-between; margin: 8px 0 4px; font-size: 14px; }
+.oblPaid { font-weight: 600; }
+.oblLeft { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--ink-muted); }
+.mov { font-weight: 500; }

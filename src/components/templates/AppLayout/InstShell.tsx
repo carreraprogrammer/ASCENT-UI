@@ -39,10 +39,23 @@ export const InstShell = ({ nav, title, toolbar, breadcrumbs, ownHeader, childre
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [query, setQuery] = useState('');
 
-  // El scroll es el del documento mientras el armazón de escritorio está montado.
+  // El scroll es el del documento mientras el armazón de escritorio está montado. ion-tabs envuelve las páginas
+  // en un contenedor con contain: size (shadow DOM), que no deja crecer el documento: se le da la altura del armazón.
+  const rootRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    document.documentElement.classList.add('inst-desktop');
-    return () => document.documentElement.classList.remove('inst-desktop');
+    const html = document.documentElement;
+    html.classList.add('inst-desktop');
+    const root = rootRef.current;
+    let observer: ResizeObserver | null = null;
+    if (root && typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(() => html.style.setProperty('--inst-doc-h', `${Math.ceil(root.getBoundingClientRect().height)}px`));
+      observer.observe(root);
+    }
+    return () => {
+      observer?.disconnect();
+      html.classList.remove('inst-desktop');
+      html.style.removeProperty('--inst-doc-h');
+    };
   }, []);
 
   // ⌘K / Ctrl+K lleva al buscador.
@@ -74,7 +87,7 @@ export const InstShell = ({ nav, title, toolbar, breadcrumbs, ownHeader, childre
   const nightAgo = night ? fmtAgo(night.created_at) : null;
 
   return (
-    <div className={styles.root}>
+    <div ref={rootRef} className={styles.root}>
       <ImpersonationBanner />
       <header className={styles.header}>
         <BrandMark size="sm" className={styles.mark} />

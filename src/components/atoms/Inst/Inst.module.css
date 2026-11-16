@@ -3,11 +3,6 @@
 .eyebrow { font-family: var(--tcw-font-mono); font-size: 11px; letter-spacing: .02em; color: var(--ink-muted); }
 .num { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; font-size: 14px; white-space: nowrap; }
 .strong { font-weight: 600; }
-.ok { color: var(--data-both); }
-.amber { color: var(--cat-gold); }
-.rose { color: var(--cat-rose); }
-.violet { color: var(--violet); }
-.muted { color: var(--ink-muted); }
 .tag { font-family: var(--tcw-font-mono); font-size: 11px; white-space: nowrap; color: var(--ink-muted); }
 .tagIcon { margin-right: 4px; }
 .tagIconAgent { color: var(--violet); }
@@ -34,3 +29,9 @@
 .two1 { font-weight: 500; }
 .two2 { font-size: 12px; color: var(--ink-muted); }
 .pct { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--ink-muted); margin-left: 8px; }
+/* Tonos al final: ganan sobre el color base de .tag y .num. */
+.ok { color: var(--data-both); }
+.amber { color: var(--cat-gold); }
+.rose { color: var(--cat-rose); }
+.violet { color: var(--violet); }
+.muted { color: var(--ink-muted); }

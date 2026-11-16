@@ -1,7 +1,7 @@
 /* TCW-5: en escritorio web el scroll es el del documento, no el de un contenedor. html.inst-desktop lo pone el
    armazón de escritorio (InstShell) solo mientras está montado; en móvil y en Capacitor nada de esto aplica. */
-html.inst-desktop, html.inst-desktop body { height: auto; overflow: visible; overflow-y: auto; }
-html.inst-desktop body { position: static; background: var(--bg); }
+html.inst-desktop { height: auto; overflow-y: auto; }
+html.inst-desktop body { position: static; height: auto; max-height: none; overflow: visible; background: var(--bg); }
 html.inst-desktop ion-app,
 html.inst-desktop ion-tabs,
 html.inst-desktop ion-router-outlet,
@@ -13,3 +13,5 @@ html.inst-desktop ion-content { display: block; height: auto; contain: none; --b
 html.inst-desktop ion-content::part(scroll) { position: relative; inset: auto; overflow: visible; height: auto; }
 html.inst-desktop ion-content::part(background) { background: transparent; }
 html.inst-desktop ion-tab-bar { display: none; }
+/* El alto real del armazón (InstShell lo mide): ion-tabs no crece solo con su contenido. */
+html.inst-desktop ion-app, html.inst-desktop ion-tabs, html.inst-desktop .ion-page:not(.ion-page-hidden) { min-height: max(100vh, var(--inst-doc-h, 100vh)); }
