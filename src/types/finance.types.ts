@@ -70,6 +70,7 @@ export interface SummaryBurnRate {
 
 export interface DebtSummary {
   total_balance: number;
+  original_total?: number | null;   // ASC-4: lo prestado de las deudas activas
   monthly_payments: number;
   recommended_payment: {
     id: number;

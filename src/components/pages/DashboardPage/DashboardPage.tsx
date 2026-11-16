@@ -133,6 +133,7 @@ const buildAscent = (summary: SummaryResponse): AscentGoal => {
   const efCurrent = efGoal?.current_amount ?? 0;
   const debtTotal = summary.debts?.total_balance ?? 0;
   const hasDebts = debtTotal > 0;
+  const debtOriginal = summary.debts?.original_total && summary.debts.original_total > 0 ? summary.debts.original_total : null;
 
   const sixMonth = committed * 6;
 
@@ -163,9 +164,10 @@ const buildAscent = (summary: SummaryResponse): AscentGoal => {
       id: 'debt_payoff',
       label: 'Pagar deudas',
       hint: hasDebts ? 'Deuda activa fuera, presupuesto estricto' : 'No tienes deuda activa',
-      target: hasDebts ? debtTotal : null,
-      current: null,
-      progressKnown: false,
+      // ASC-4: con lo prestado (debts.original_total) el avance es pagado ÷ prestado; sin él, como antes.
+      target: hasDebts ? (debtOriginal ?? debtTotal) : null,
+      current: hasDebts && debtOriginal ? Math.max(0, debtOriginal - debtTotal) : null,
+      progressKnown: hasDebts && debtOriginal != null,
       skipped: !hasDebts,
       unknownValue: hasDebts ? debtTotal : undefined,
       unknownLabel: hasDebts ? 'por liquidar' : undefined,
@@ -245,7 +247,8 @@ const AscentWidget = ({ goal, onOpen }: { goal: AscentGoal; onOpen: () => void }
           })}
           <line x1={D2_SLOPE_FROM.x} y1={D2_SLOPE_FROM.y} x2={pos.x} y2={pos.y} className={styles.d2MtnSlopeDone} />
         </svg>
-        <span className={styles.d2MtnFlag} style={{ left: '50%', top: '7%' }}>
+        <span className={styles.d2MtnFlag} style={showClimberLabel ? { left: '50%', top: `${(7 / 60) * 100}%` } : { left: '50%', top: '7%' }}
+          data-desktop={showClimberLabel || undefined}>
           <svg viewBox="0 0 20 22" width="15" height="16">
             <line x1="2" y1="1" x2="2" y2="21" stroke="var(--text-on-surface-muted)" strokeWidth="1.6" strokeLinecap="round" />
             <path d="M2,2 L17,6 L2,11 Z" fill="var(--color-brand)" />
@@ -253,7 +256,10 @@ const AscentWidget = ({ goal, onOpen }: { goal: AscentGoal; onOpen: () => void }
         </span>
         <span className={`${styles.d2MtnTickLbl} ${styles.d2MtnTickLblTop}`}>{money(stage.target ?? 0)}</span>
         <span className={`${styles.d2MtnTickLbl} ${styles.d2MtnTickLblBottom}`}>{money(0)}</span>
-        <span className={styles.d2MtnAvatar} style={{ left: `${pos.x}%`, top: `${pos.y}%` }}>
+        {/* La montaña es un SVG de 100×60 estirado: en escritorio la posición vertical va en y/60 para que el
+            escalador quede sobre la ladera. En móvil se conserva la posición de siempre (regla de móvil). */}
+        <span className={styles.d2MtnAvatar} data-desktop={showClimberLabel || undefined}
+          style={{ left: `${pos.x}%`, top: showClimberLabel ? `${(pos.y / 60) * 100}%` : `${pos.y}%` }}>
           <Climber size={32} label={showClimberLabel && pct != null ? `Tú · ${pct}%` : undefined} />
         </span>
         <span className={styles.d2MtnFoot}>
