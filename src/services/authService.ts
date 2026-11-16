@@ -28,7 +28,7 @@ const mapMeResponse = (data: { data?: { id?: number | string; attributes?: MeAtt
   permissions: data.data?.attributes?.permissions ?? [],
 });
 
-const mapAuthResponse = (data: { data?: { id?: number | string; attributes?: { name?: string; email?: string; avatar_url?: string | null; auth_provider?: string | null; permissions?: string[]; super_admin?: boolean } }; meta?: { access_token?: string; refresh_token?: string } }): AuthResponse => ({
+const mapAuthResponse = (data: { data?: { id?: number | string; attributes?: { name?: string; email?: string; avatar_url?: string | null; auth_provider?: string | null; permissions?: string[]; super_admin?: boolean; demo?: boolean } }; meta?: { access_token?: string; refresh_token?: string } }): AuthResponse => ({
   data: {
     id: data.data?.id,
     attributes: {
@@ -38,6 +38,7 @@ const mapAuthResponse = (data: { data?: { id?: number | string; attributes?: { n
       auth_provider: data.data?.attributes?.auth_provider ?? null,
       permissions: data.data?.attributes?.permissions ?? [],
       super_admin: data.data?.attributes?.super_admin ?? false,
+      demo: data.data?.attributes?.demo ?? false,
     },
   },
   meta: data.meta,
@@ -48,6 +49,20 @@ const mapAuthResponse = (data: { data?: { id?: number | string; attributes?: { n
 });
 
 export const authService={ async login(credentials:LoginCredentials):Promise<AuthResponse>{ const {data}=await api.post('/api/v1/auth/login',credentials); return mapAuthResponse(data as { data?: { id?: number | string; attributes?: { name?: string; email?: string; avatar_url?: string | null; auth_provider?: string | null; permissions?: string[]; super_admin?: boolean } }; meta?: { access_token?: string; refresh_token?: string } }); }, async register(payload:RegisterPayload):Promise<AuthResponse>{ const { passwordConfirmation, ...rest } = payload; const {data}=await api.post('/api/v1/auth/register',rest); return mapAuthResponse(data as { data?: { id?: number | string; attributes?: { name?: string; email?: string; avatar_url?: string | null; auth_provider?: string | null; permissions?: string[]; super_admin?: boolean } }; meta?: { access_token?: string; refresh_token?: string } }); }, async refresh(refreshToken:string,userId:number):Promise<AuthResponse>{ const {data}=await api.post('/api/v1/auth/refresh',{ user_id:userId, refresh_token:refreshToken }); return mapAuthResponse(data as { data?: { id?: number | string; attributes?: { name?: string; email?: string; avatar_url?: string | null; auth_provider?: string | null; permissions?: string[]; super_admin?: boolean } }; meta?: { access_token?: string; refresh_token?: string } }); }, async me():Promise<AuthUser>{ const {data}=await api.get('/api/v1/auth/me'); return mapMeResponse(data as { data?: { id?: number | string; attributes?: Partial<AuthUser> & { superAdmin?: boolean; super_admin?: boolean } } }); } };
+
+// ASC-4 fase 6: modo demo. Las dos rutas responden con la misma forma que el login, para la cuenta demo
+// (user.demo = true y el claim demo en el JWT). /demo/session es pública ("Ver demo" en el login); /demo/switch
+// solo para el superadministrador (interruptor de Mi perfil), con su token real.
+export const demoService = {
+  async session(): Promise<AuthResponse> {
+    const { data } = await api.post('/api/v1/demo/session');
+    return mapAuthResponse(data as Parameters<typeof mapAuthResponse>[0]);
+  },
+  async switchToDemo(): Promise<AuthResponse> {
+    const { data } = await api.post('/api/v1/demo/switch');
+    return mapAuthResponse(data as Parameters<typeof mapAuthResponse>[0]);
+  },
+};
 
 export const getGoogleAuthUrl = (): string => new URL('/api/v1/auth/google', apiBaseUrl).toString();
 

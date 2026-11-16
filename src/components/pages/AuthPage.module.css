@@ -100,3 +100,119 @@
   box-shadow: none;
 }
 .stack form button[type='submit']:hover { border-color: var(--ink-muted); background: var(--surface-raised); }
+
+/* ── ASC-4 fase 1: login y registro de escritorio (mockup AscentLogin). Por debajo de 1024 px nada cambia. ── */
+.desktopOnly {
+  display: none;
+}
+
+.demoLink {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .mobileOnly {
+    display: none;
+  }
+
+  .desktopOnly {
+    display: inline;
+  }
+
+  .stack {
+    gap: var(--tcw-space-4);
+  }
+
+  .divider {
+    gap: var(--tcw-space-3);
+    margin-top: 4px;
+    color: var(--ink-muted);
+  }
+
+  .line {
+    border-top-color: var(--line);
+  }
+
+  .dividerText {
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  /* El formulario dinámico sin su tarjeta ni su título: solo los campos y "Entrar". */
+  .emailSection {
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+  }
+
+  .emailSection > [data-form-section-head] {
+    display: none !important;
+  }
+
+  .emailSection form {
+    gap: 10px;
+  }
+
+  /* Los campos se nombran con su placeholder, como en el mockup; la etiqueta queda para los lectores de pantalla. */
+  .emailSection label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .link {
+    margin-top: 6px;
+    color: var(--ink-muted);
+    font-weight: 400;
+  }
+
+  .linkAccent {
+    color: var(--violet);
+  }
+
+  .demoLink {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: var(--tcw-space-2);
+    justify-self: center;
+    align-self: center;
+    padding: 4px 8px;
+    border: 0;
+    border-radius: var(--tcw-radius-sm);
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .demoText {
+    text-decoration: underline;
+    text-decoration-color: var(--line-strong);
+    text-underline-offset: 4px;
+  }
+
+  .demoLink:hover .demoText {
+    text-decoration-color: var(--ink-muted);
+  }
+
+  .demoLink:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .demoLink:disabled {
+    cursor: progress;
+    opacity: 0.7;
+  }
+
+  .demoHint {
+    color: var(--ink-muted);
+    font-size: 12px;
+  }
+}

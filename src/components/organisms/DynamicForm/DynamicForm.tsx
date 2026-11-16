@@ -13,9 +13,13 @@ const buildValues = (schema: FormSchema, initialValues: FormValues): FormValues 
     ]),
   );
 
+// A stable default: a fresh `{}` on every render re-ran the reset effect below on every render, so the form
+// wiped what the user typed (and looped forever). ASC-4.
+const EMPTY_VALUES: FormValues = {};
+
 export const DynamicForm = ({
   schema,
-  initialValues = {},
+  initialValues = EMPTY_VALUES,
   onSuccess,
   onError,
   readOnly = false,

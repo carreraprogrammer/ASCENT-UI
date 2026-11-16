@@ -1,0 +1,38 @@
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.label {
+  color: var(--ink-muted);
+  font-family: var(--tcw-font-mono);
+  font-size: 12px;
+}
+
+.returnBtn {
+  flex-shrink: 0;
+  padding: 3px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+}
+
+.returnBtn:hover {
+  border-color: var(--ink-muted);
+}
+
+.returnBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Capacitor } from '@capacitor/core';
 import { useAuthStore } from '../store/authStore';
+import { demoReadOnlyInterceptor } from './demoReadOnly';
 
 const fallbackApiBaseUrl = Capacitor.isNativePlatform()
   ? 'https://daniel15k-api-production.up.railway.app'
@@ -9,6 +10,9 @@ const fallbackApiBaseUrl = Capacitor.isNativePlatform()
 export const apiBaseUrl = import.meta.env.VITE_API_URL ?? fallbackApiBaseUrl;
 export const api=axios.create({ baseURL: apiBaseUrl });
 api.interceptors.request.use((config)=>{ const token=useAuthStore.getState().accessToken; if(token){ if(!config.headers) config.headers=new axios.AxiosHeaders(); config.headers.set('Authorization',`Bearer ${token}`); } return config; });
+
+// ASC-4 fase 6: aviso global de solo lectura en el modo demo (403 demo_read_only).
+api.interceptors.response.use((response) => response, demoReadOnlyInterceptor);
 
 let refreshPromise: Promise<void> | null = null;
 

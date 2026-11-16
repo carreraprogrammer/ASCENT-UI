@@ -32,6 +32,7 @@ import { useDashboardData } from '../../../hooks/useDashboardData';
 import { useAuthStore } from '../../../store/authStore';
 import { financeService } from '../../../services/financeService';
 import pageStyles from '../FinancePage.module.css';
+import { Climber } from '../../atoms/Climber';
 import styles from './DashboardPage.module.css';
 
 // ── Legible money formatter — clean amounts, no "mil" clutter ──────────────
@@ -249,13 +250,8 @@ const AscentWidget = ({ goal, onOpen }: { goal: AscentGoal; onOpen: () => void }
         </span>
         <span className={`${styles.d2MtnTickLbl} ${styles.d2MtnTickLblTop}`}>{money(stage.target ?? 0)}</span>
         <span className={`${styles.d2MtnTickLbl} ${styles.d2MtnTickLblBottom}`}>{money(0)}</span>
-        <span className={`${styles.d2MtnAvatar} ${styles.d2MtnAvatarSm}`} style={{ left: `${pos.x}%`, top: `${pos.y}%` }}>
-          <svg className={styles.d2MtnAvatarEyes} viewBox="0 0 40 24">
-            <circle className={styles.d2Pupil} cx="12" cy="12" r="6" />
-            <circle className={styles.d2Pupil} cx="28" cy="12" r="6" />
-            <circle className={styles.d2Catch} cx="9.8" cy="9.6" r="1.7" />
-            <circle className={styles.d2Catch} cx="25.8" cy="9.6" r="1.7" />
-          </svg>
+        <span className={styles.d2MtnAvatar} style={{ left: `${pos.x}%`, top: `${pos.y}%` }}>
+          <Climber size={32} label={pct != null ? `Tú · ${pct}%` : undefined} />
         </span>
         <span className={styles.d2MtnFoot}>
           <span>
