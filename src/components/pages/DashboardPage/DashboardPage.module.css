@@ -953,3 +953,9 @@
   .dkSide .d2StatUnit { font-size: 14px; }
   .dkSide .d2StatHint { font-size: 12px; margin-top: 6px; text-decoration: underline; text-underline-offset: 3px; }
 }
+
+/* ASC-4: en escritorio el escalador se apoya en la ladera (su base en el punto) y la bandera en la cima. */
+@media (min-width: 1024px) {
+  .dkGrid .d2MtnAvatar[data-desktop] { transform: translate(-50%, -88%); }
+  .dkGrid .d2MtnFlag[data-desktop] { transform: translate(-12%, -94%); }
+}
