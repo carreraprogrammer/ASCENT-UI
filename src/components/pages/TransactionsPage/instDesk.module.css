@@ -1,0 +1,51 @@
+/* TCW-5 "Instrumento" (escritorio): piezas de página compartidas por Transacciones, Deudas, Recurrentes,
+   Subcategorías y Planeados. Una sola superficie: nada de tarjetas; líneas de 1 px, radio 8 px en controles. */
+/* Mockup: line-height normal (el body de Ionic trae 1.5 y alarga cifras y encabezados). */
+.page { color: var(--ink); line-height: normal; }
+
+/* Fila de filtros (mockup: chips mono 12 px, radio 8, borde de 1 px; el activo con fondo de superficie). */
+.filters { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
+.chip {
+  font-family: var(--tcw-font-mono); font-size: 12px; line-height: 16px; padding: 6px 10px; border-radius: var(--tcw-radius-md);
+  border: 1px solid var(--line); color: var(--ink-muted); background: transparent; cursor: pointer; white-space: nowrap;
+}
+.chip:hover { color: var(--ink); }
+.chip:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.chipOn { color: var(--ink); background: var(--surface); }
+.plain:focus-visible, .sortBtn:focus-visible, .act:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--tcw-radius-md); }
+.selChip { position: relative; display: inline-block; }
+.selChip:focus-within { box-shadow: var(--focus-ring); }
+.selNative { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font: inherit; }
+.selNative option { background: var(--bg); color: var(--ink); }
+.plain {
+  font-family: var(--tcw-font-mono); font-size: 12px; color: var(--ink-muted); background: none; border: 0; padding: 6px 0;
+  cursor: pointer; white-space: nowrap;
+}
+.plain:hover { color: var(--ink); }
+.plain:disabled { cursor: default; opacity: .5; }
+.spacer { flex: 1; }
+
+/* Encabezado ordenable: se ve igual que un <th> normal; la flecha solo aparece si el orden no es el de siempre. */
+.sortBtn { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; white-space: nowrap; }
+.sortBtn:hover { color: var(--ink); }
+
+/* Acciones de fila: aparecen al pasar el puntero o al enfocar la fila; nunca tapan el monto. */
+.cellEnd { position: relative; display: inline-block; }
+.acts {
+  position: absolute; right: calc(100% + 12px); top: 50%; transform: translateY(-50%); display: flex; gap: 6px;
+  background: var(--bg); padding-left: 8px; opacity: 0; pointer-events: none;
+}
+:global(tr):hover .acts, :global(tr):focus-within .acts { opacity: 1; pointer-events: auto; }
+.act {
+  font-family: var(--tcw-font-mono); font-size: 11px; line-height: 14px; padding: 4px 8px; border-radius: var(--tcw-radius-md);
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink-muted); cursor: pointer; white-space: nowrap;
+}
+.act:hover { color: var(--ink); border-color: var(--line-strong); }
+.actDanger:hover { color: var(--cat-rose); }
+
+.more { display: flex; justify-content: center; padding: 14px 0 0; }
+.muted { color: var(--ink-muted); }
+.inline { display: inline-flex; align-items: center; gap: 10px; }
+.statBar { display: inline-flex; align-items: center; gap: 12px; }
+.statBar > span:last-child { margin-top: 2px; }
+.noteBtn { margin-left: 12px; font-family: var(--tcw-font-sans); }
