@@ -1,0 +1,7 @@
+/* TCW-5 "Instrumento": Metas de escritorio (mockup U_AscentMetas). */
+.page { color: var(--ink); }
+.actions { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.dot { font-size: 13px; color: var(--ink-muted); }
+.quiet { font: inherit; font-size: 13px; color: var(--ink-muted); background: none; border: 0; padding: 0; cursor: pointer; }
+.quiet:hover { color: var(--ink); }
+.quiet:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 4px; }

@@ -1,0 +1,24 @@
+/* TCW-5 "Instrumento": Mi perfil de escritorio (mockup U_AscentPerfil). Filas clave-valor, sin tarjetas. */
+.page { color: var(--ink); }
+.muted { color: var(--ink-muted); }
+.mono { font-family: var(--tcw-font-mono); font-size: 12px; }
+.inline { display: inline; }
+.sep { margin: 0 6px; color: var(--ink); }
+.quiet { font: inherit; font-size: 13px; color: var(--ink-muted); background: none; border: 0; padding: 0; cursor: pointer; }
+.inline .quiet { font-size: 14px; color: var(--ink-muted); }
+.inline .quiet.on { color: var(--ink); font-weight: 600; }
+.quiet:hover:not(:disabled) { color: var(--ink); }
+.quiet:disabled { opacity: .6; cursor: default; }
+.quiet:focus-visible, .input:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 4px; }
+.dotOk { color: var(--data-both); margin-right: 6px; }
+.dotOff { color: var(--ink-muted); margin-right: 6px; }
+.editor { border-top: 1px solid var(--line); padding: 14px 0 6px 212px; }
+.help { margin: 0 0 10px; font-size: 13px; color: var(--ink-muted); max-width: 640px; }
+.senders { list-style: none; margin: 0 0 12px; padding: 0; }
+.senders li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); max-width: 520px; }
+.addRow { display: flex; gap: 8px; align-items: center; max-width: 520px; }
+.input {
+  flex: 1; height: 34px; box-sizing: border-box; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--tcw-radius-md);
+  background: transparent; color: var(--ink); font-family: var(--tcw-font-mono); font-size: 12px;
+}
+.input::placeholder { color: var(--ink-muted); opacity: 1; }

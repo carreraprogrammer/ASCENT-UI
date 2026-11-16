@@ -19,7 +19,11 @@ import { Spinner } from '../../atoms/Spinner';
 import type { CategoryType } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
 import { AppLayout } from '../../templates/AppLayout';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
-import pageStyles from '../FinancePage.module.css';
+import { BarPct, DateCell, InstButton, Num, StateTag } from '../../atoms/Inst';
+import { InstBand, InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
+import { fmtAmount, fmtDay } from '../../../utils/instrumento';
+import { CoachLine, InsightTabs, NextStep, Reasoning, RouterLink } from './InsightDesk';
+import desk from './InsightDesk.module.css';
 import styles from './MonthlyInsightDetailPage.module.css';
 
 const MONTH_NAMES = [
@@ -81,6 +85,9 @@ export const MonthlyInsightDetailPage = () => {
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [milestones, setMilestones] = useState<UserMilestone[]>([]);
   const [loading, setLoading] = useState(true);
+  // TCW-5: en escritorio se distingue "falló la carga" (con Reintentar) de "sin datos". El móvil no cambia.
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   // Escritorio (ASC-4, fase 5): la pestaña "Planes" del menú Finanzas abre esta vista
   // dentro del layout de Ascent (cabecera + menú lateral). Móvil sigue a pantalla completa.
   const isDesktop = useDesktopLayout();
@@ -92,14 +99,15 @@ export const MonthlyInsightDetailPage = () => {
 
   useEffect(() => {
     setLoading(true);
+    setFailed(false);
     Promise.all([
       financeService.fetchSummary(m, y),
       financeService.fetchMilestones(),
     ])
       .then(([s, ms]) => { setSummary(s); setMilestones(ms); })
-      .catch(() => { setSummary(null); setMilestones([]); })
+      .catch(() => { setSummary(null); setMilestones([]); setFailed(true); })
       .finally(() => setLoading(false));
-  }, [m, y]);
+  }, [m, y, attempt]);
 
   const categories = summary?.burn_rate?.categories ?? [];
   const overCategories = categories.filter((c) => c.pct > 100);
@@ -319,17 +327,119 @@ export const MonthlyInsightDetailPage = () => {
   );
 
   if (isDesktop) {
+    // TCW-5 "Instrumento" (mockup U_AscentPlanes). El contenido real de /planes manda (plan TCW-5, "Datos por
+    // confirmar"): el resumen del mes, la nota del coach, las gavetas, logros, metas y la propuesta, con el
+    // lenguaje del mockup. Mismos datos y cálculos que el árbol móvil.
+    const prevMonth = m === 1 ? 12 : m - 1;
+    const prevYear = m === 1 ? y - 1 : y;
+    const planStatus = summary?.monthly_plan?.status;
+    const GAV_HEADS = ['Gaveta', 'Presupuesto', 'Gastado', 'Avance'];
+    const GAV_ALIGNS: Align[] = ['left', 'right', 'right', 'left'];
+    const days = summary?.burn_rate;
     return (
-      <AppLayout title="Planes">
-        <IonContent className={pageStyles.pageContent}>
-          <div className={styles.desktopView} data-testid="planes-desktop">
-            {topbar}
-            <div className={styles.desktopTabs}>
-              <InsightTabBar active="mensual" month={m} year={y} />
-            </div>
-            {body}
-          </div>
-        </IonContent>
+      <AppLayout title="Planes" ownHeader>
+        <div className={desk.page} data-testid="planes-desktop">
+          <InstPageHeader
+            title="Planes"
+            sub="El plan del mes y lo que ya tienes previsto gastar"
+            actions={(
+              <>
+                <span className={desk.headLink}><RouterLink to="/planned-expenses">Gastos planeados</RouterLink></span>
+                <InstButton onClick={() => history.push(`/budgets/${y}/${String(m).padStart(2, '0')}`)}>Editar plan</InstButton>
+              </>
+            )}
+          />
+          <InstBand>
+            <button type="button" className={desk.nav} onClick={() => history.push(`/planes/${prevYear}/${prevMonth}`)}>
+              ‹ {MONTH_NAMES[prevMonth].toLowerCase()}
+            </button>
+            <span className={desk.month}>{MONTH_NAMES[m]} {y}</span>
+            <button type="button" className={desk.nav} onClick={() => history.push(`/planes/${nextYear}/${nextMonth}`)}>
+              {MONTH_NAMES[nextMonth].toLowerCase()} ›
+            </button>
+            <span className={desk.flex} />
+            <InsightTabs active="mensual" month={m} year={y} />
+            {planStatus ? <StateTag state={planStatus === 'confirmed' ? 'confirmado' : 'borrador'} /> : null}
+          </InstBand>
+
+          {loading ? (
+            <InstSection title="Plan por gaveta"><InstTableSkeleton heads={GAV_HEADS} aligns={GAV_ALIGNS} rows={4} /></InstSection>
+          ) : failed ? (
+            <InstNote error onRetry={() => setAttempt((a) => a + 1)}>No pudimos cargar el resumen de {MONTH_NAMES[m]} {y}.</InstNote>
+          ) : !summary ? (
+            <InstNote>Sin datos para {MONTH_NAMES[m]} {y}.</InstNote>
+          ) : (
+            <>
+              <InstStats items={[
+                { label: 'Puntaje del mes', value: <>{score ?? 0}<span className={desk.of}> / 100</span></>,
+                  sub: `${underCategories.length} de ${categories.length} gavetas en verde` },
+                { label: 'Se pasaron', value: <span className={overCategories.length > 0 ? desk.rose : undefined}>{overCategories.length}</span>,
+                  sub: overCategories.length === 1 ? 'gaveta sobre presupuesto' : 'gavetas sobre presupuesto' },
+                ...(debtPayments > 0 ? [{ label: 'Abonos deuda', value: fmtAmount(debtPayments), sub: 'confirmados en el mes' }] : []),
+                ...(sfContributions > 0 ? [{ label: 'A bolsillos', value: fmtAmount(sfContributions), sub: 'aportes del mes' }] : []),
+                { label: 'Balance', value: <span className={netBalance < 0 ? desk.rose : undefined}>{fmtAmount(netBalance)}</span>,
+                  sub: isCurrent
+                    ? netBalance >= 0 ? 'margen acumulado' : 'en rojo por ahora'
+                    : netBalance >= 0 ? 'margen con el que cerraste' : 'cerraste en rojo' },
+              ]} />
+
+              {categories.length > 0 ? (
+                <InstSection title="Plan por gaveta"
+                  right={days ? <span className={desk.right}>día {days.days_elapsed} de {days.days_in_month}{overCategories.length ? ` · ${overCategories.length} se pasaron` : ''}</span> : null}>
+                  <InstTable caption="Plan por gaveta" heads={GAV_HEADS} aligns={GAV_ALIGNS}
+                    rowKeys={categories.map((c) => c.category_type)}
+                    rows={categories.map((c) => [
+                      <span className={desk.name}>{c.category}</span>,
+                      <Num>{fmtAmount(c.budget)}</Num>,
+                      <Num>{fmtAmount(c.spent)}</Num>,
+                      <BarPct pct={c.pct} label={`Avance de ${c.category}`} />,
+                    ])} />
+                </InstSection>
+              ) : null}
+
+              <CoachLine body={coachBody} meta={[`Generado el 1 de ${MONTH_NAMES[nextMonth].toLowerCase()}`]} />
+
+              {milestones.length > 0 ? (
+                <InstSection title={`Logros del mes · ${milestones.length}`}>
+                  <InstTable caption="Logros del mes" heads={['Logro', 'Fecha']} aligns={['left', 'right']}
+                    rowKeys={milestones.map((ms) => ms.id)}
+                    rows={milestones.map((ms) => [
+                      <span className={desk.name}>{MILESTONE_LABELS[ms.code] ?? ms.code}</span>,
+                      <DateCell>{fmtDay(ms.achieved_at)}</DateCell>,
+                    ])} />
+                </InstSection>
+              ) : null}
+
+              {savings.length > 0 ? (
+                <InstSection title="Metas de ahorro">
+                  <InstTable caption="Metas de ahorro" heads={['Meta', 'Avance', 'Acumulado (COP)']} aligns={['left', 'left', 'right']}
+                    rows={savings.map((g) => {
+                      const pct = g.target_amount > 0 ? Math.round((g.current_amount / g.target_amount) * 100) : 0;
+                      return [
+                        <span className={desk.name}>{g.name}</span>,
+                        <BarPct pct={pct} label={`Avance de ${g.name}`} />,
+                        <Num strong>{fmtAmount(g.current_amount)}</Num>,
+                      ];
+                    })} />
+                </InstSection>
+              ) : null}
+
+              <NextStep
+                title={`Propuesta para ${MONTH_NAMES[nextMonth].toLowerCase()}`}
+                heading={ctaTitle}
+                body={overCategories.length > 0
+                  ? isCurrent
+                    ? `Todavía puedes corregir el rumbo en lo que queda de ${MONTH_NAMES[m]}.`
+                    : `${MONTH_NAMES[m]} dejó patrones claros. Ajusta el plan para el próximo mes.`
+                  : 'Llevas una racha sólida. Revisa si hay algo que optimizar.'}
+                action={`Revisar plan de ${MONTH_NAMES[nextMonth]}`}
+                onAction={() => history.push(`/budgets/${nextYear}/${nextMonth}`)}
+              />
+
+              {(summary as any)?.agent_reasoning ? <Reasoning text={(summary as any).agent_reasoning} /> : null}
+            </>
+          )}
+        </div>
       </AppLayout>
     );
   }

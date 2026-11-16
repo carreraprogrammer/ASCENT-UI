@@ -16,6 +16,13 @@ import { ReasoningAccordion } from '../../molecules/ReasoningAccordion/Reasoning
 import { InsightTabBar } from '../../molecules/InsightTabBar/InsightTabBar';
 import { Spinner } from '../../atoms/Spinner';
 import styles from './YearlyInsightDetailPage.module.css';
+import { AppLayout } from '../../templates/AppLayout';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
+import { DateCell, InstButton } from '../../atoms/Inst';
+import { InstBand, InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton } from '../../molecules/Inst';
+import { fmtAmount, fmtDay } from '../../../utils/instrumento';
+import { CoachLine, InsightTabs, NextStep, Reasoning } from '../MonthlyInsightDetailPage/InsightDesk';
+import desk from '../MonthlyInsightDetailPage/InsightDesk.module.css';
 
 const MONTH_ABBR = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
 const MONTH_NAMES = [
@@ -106,6 +113,7 @@ export const YearlyInsightDetailPage = () => {
   const history = useHistory();
   const y = Number(year);
   const isCurrent = y === new Date().getFullYear();
+  const isDesktop = useDesktopLayout();
 
   const [summaries, setSummaries] = useState<(SummaryResponse | null)[]>([]);
   const [milestones, setMilestones] = useState<UserMilestone[]>([]);
@@ -145,6 +153,85 @@ export const YearlyInsightDetailPage = () => {
         ? `Fue un año con balance positivo. Guardaste ${formatCurrencyCompact(netYearly)} en el acumulado.`
         : `El año cerró en rojo por ${formatCurrencyCompact(Math.abs(netYearly))}. Los datos te muestran dónde ajustar.`
     : `Aún no hay suficientes datos para analizar ${y}.`;
+
+  // ── Escritorio (TCW-5 "Instrumento"): hereda el armazón, sin islas. Mismos datos y cálculos. ──
+  if (isDesktop) {
+    const max = Math.max(...monthly, 1);
+    return (
+      <AppLayout title="Planes" ownHeader>
+        <div className={desk.page} data-testid="year-desktop">
+          <InstPageHeader title={String(y)} sub={isCurrent ? 'Año en curso: lo que entró, lo que salió y lo que aprendimos' : 'Año cerrado: lo que entró, lo que salió y lo que aprendimos'}
+            actions={<InstButton onClick={() => history.goBack()}>‹ Volver</InstButton>} />
+          <InstBand>
+            <span className={desk.month}>{isCurrent ? 'Año en curso' : 'Año cerrado'} · {y}</span>
+            <span className={desk.flex} />
+            <InsightTabs active="anual" month={isCurrent ? new Date().getMonth() + 1 : 12} year={y} />
+          </InstBand>
+          {loading ? (
+            <InstSection title="Tu año en cifras"><InstTableSkeleton heads={['Mes', 'Gasto confirmado']} aligns={['left', 'right']} rows={4} /></InstSection>
+          ) : (
+            <>
+              <InstStats items={[
+                { label: 'Ingresado', value: fmtAmount(totalIncome), sub: 'ingresos confirmados' },
+                { label: 'Consumo', value: fmtAmount(totalConsumption), sub: 'gasto sin abonos ni bolsillos' },
+                ...(totalDebtPayments > 0 ? [{ label: 'Abonos deuda', value: fmtAmount(totalDebtPayments), sub: 'en el año' }] : []),
+                ...(totalSfContributions > 0 ? [{ label: 'A bolsillos', value: fmtAmount(totalSfContributions), sub: 'en el año' }] : []),
+                { label: 'Balance', value: <span className={netYearly < 0 ? desk.rose : undefined}>{fmtAmount(netYearly)}</span>, sub: 'ingresado − gastado' },
+              ]} />
+              <CoachLine body={coachBody} meta={[isCurrent ? `Al día de hoy · ${y}` : `31 de diciembre · ${y}`, `${summaries.filter(Boolean).length} meses con datos`]} />
+              {hasData ? (
+                <InstSection title="Tu año en cifras" right={peakMonthIdx >= 0 ? <span className={desk.right}>{MONTH_ABBR[peakMonthIdx].toLowerCase()} fue el pico</span> : null}>
+                  <div className={desk.chart} role="img" aria-label={`Gasto mensual confirmado de ${y}`}>
+                    {monthly.map((v, i) => (
+                      <div key={i} className={desk.chartCol} title={`${MONTH_ABBR[i]}: ${fmtAmount(v)}`}>
+                        <div className={`${desk.chartBar} ${i === peakMonthIdx ? desk.chartBarPeak : ''}`} style={{ height: `${Math.max((v / max) * 100, 2)}%` }} />
+                        <span className={desk.chartLbl}>{MONTH_ABBR[i].toLowerCase()}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className={desk.caption}>Gasto mensual confirmado · {y}</p>
+                </InstSection>
+              ) : <InstNote>Aún no hay suficientes datos para analizar {y}.</InstNote>}
+              {milestones.length > 0 ? (
+                <InstSection title={`Logros del año · ${milestones.length}`}>
+                  <InstTable caption="Logros del año" heads={['Logro', 'Fecha']} aligns={['left', 'right']}
+                    rowKeys={milestones.slice(0, 5).map((ms) => ms.id)}
+                    rows={milestones.slice(0, 5).map((ms) => [
+                      <span className={desk.name}>{ms.code.replace(/_/g, ' ')}</span>,
+                      <DateCell>{fmtDay(ms.achieved_at)}</DateCell>,
+                    ])} />
+                </InstSection>
+              ) : null}
+              {lessons.length > 0 ? (
+                <InstSection title={`${lessons.length} cosas que aprendimos`} right={<span className={desk.right}>tu coach</span>}>
+                  <InstTable caption="Lo que aprendimos" heads={['', 'Lección', 'Por qué']} aligns={['left', 'left', 'left']}
+                    rows={lessons.map((l, i) => [
+                      <span className={desk.right} style={{ color: 'var(--violet)' }}>0{i + 1}</span>,
+                      <span className={desk.name}>{l.title}</span>,
+                      <span style={{ fontSize: 13, color: 'var(--ink-muted)' }}>{l.text}</span>,
+                    ])} />
+                </InstSection>
+              ) : null}
+              <NextStep
+                title={isCurrent ? `Cierra bien ${y}` : `Tu plan para ${y + 1}`}
+                heading={isCurrent
+                  ? netYearly >= 0 ? 'Sigue construyendo sobre lo que funciona' : 'Todavía puedes ajustar el rumbo este año'
+                  : netYearly >= 0 ? 'Construye sobre lo que funcionó' : 'Ajusta lo que más pesó este año'}
+                body={peakMonthIdx >= 0
+                  ? isCurrent
+                    ? `${MONTH_NAMES[peakMonthIdx + 1]} es tu mes más caro hasta ahora. Planifica los meses que quedan con eso en mente.`
+                    : `${MONTH_NAMES[peakMonthIdx + 1]} fue tu mes más caro. Si lo planeas con antelación, llegas tranquilo.`
+                  : 'Empieza el año con un plan claro y un presupuesto ajustado a tu realidad.'}
+                action={isCurrent ? `Ver plan de ${y}` : `Diseñar plan ${y + 1}`}
+                onAction={() => history.push('/budgets')}
+              />
+              {(summaries[0] as any)?.agent_reasoning ? <Reasoning text={(summaries[0] as any).agent_reasoning} /> : null}
+            </>
+          )}
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <IonPage className={styles.page}>
