@@ -49,3 +49,6 @@
 .statBar { display: inline-flex; align-items: center; gap: 12px; }
 .statBar > span:last-child { margin-top: 2px; }
 .noteBtn { margin-left: 12px; font-family: var(--tcw-font-sans); }
+
+/* TCW-5 comment-90: la barra apilada real de gasto por gaveta, bajo las cifras, separada por un filete. */
+.spendSlot { padding: 18px 0; border-bottom: 1px solid var(--line); }

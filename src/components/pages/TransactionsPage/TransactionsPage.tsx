@@ -269,6 +269,36 @@ export const TransactionsContent = () => {
       .sort((a, b) => TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type));
   }, [transactions, categories]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // La barra apilada de gasto por gaveta: la misma en móvil y en escritorio (TCW-5 comment-90: las gráficas reales se
+  // conservan dentro del marco nuevo).
+  const spendBar = (
+    <>
+      {stackedSegments.length > 0 ? (
+        <div className={styles.spendWrap}>
+          <div className={styles.spendBar}>
+            {stackedSegments.map((seg) => (
+              <div
+                key={seg.type}
+                className={styles.spendSegment}
+                style={{ width: `${seg.pct}%`, background: seg.color }}
+                title={`${seg.label}: ${formatCurrencyCompact(seg.spent)}`}
+              />
+            ))}
+          </div>
+          <div className={styles.spendLegend}>
+            {stackedSegments.map((seg) => (
+              <div key={seg.type} className={styles.spendLegendItem}>
+                <span className={styles.spendLegendDot} style={{ background: seg.color }} />
+                <span className={styles.spendLegendLabel}>{seg.label}</span>
+                <span className={styles.spendLegendAmount}>{formatCurrencyCompact(seg.spent)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+
   const spotlight = useMemo(() => {
     const cats = summary?.burn_rate?.categories;
     if (!cats?.length) return null;
@@ -660,30 +690,7 @@ export const TransactionsContent = () => {
         </div>
       </div>
 
-      {/* Stacked spend bar */}
-      {stackedSegments.length > 0 ? (
-        <div className={styles.spendWrap}>
-          <div className={styles.spendBar}>
-            {stackedSegments.map((seg) => (
-              <div
-                key={seg.type}
-                className={styles.spendSegment}
-                style={{ width: `${seg.pct}%`, background: seg.color }}
-                title={`${seg.label}: ${formatCurrencyCompact(seg.spent)}`}
-              />
-            ))}
-          </div>
-          <div className={styles.spendLegend}>
-            {stackedSegments.map((seg) => (
-              <div key={seg.type} className={styles.spendLegendItem}>
-                <span className={styles.spendLegendDot} style={{ background: seg.color }} />
-                <span className={styles.spendLegendLabel}>{seg.label}</span>
-                <span className={styles.spendLegendAmount}>{formatCurrencyCompact(seg.spent)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      {spendBar}
 
       {/* Spotlight */}
       {spotlight ? (
@@ -926,6 +933,7 @@ export const TransactionsContent = () => {
         { label: 'Balance del mes', value: fmtAmount(monthBalance, { sign: 'always' }), sub: 'ingresos − gastos' },
         { label: 'Disponible real', value: fmtAmount(realAvailable), sub: `balance + saldo arrastrado (${fmtAmount(carryover, { sign: 'always' })})` },
       ]} />
+      {stackedSegments.length > 0 ? <div className={desk.spendSlot}>{spendBar}</div> : null}
       <InstSection title={`Movimientos · ${monthLong(period)}`} id="tx-movimientos">
         <div className={desk.filters}>
           <PlainButton onClick={() => setPeriod(prevPeriod)} label={`Ver ${monthLong(prevPeriod)}`}>‹ {monthShort(prevPeriod.month)}</PlainButton>
