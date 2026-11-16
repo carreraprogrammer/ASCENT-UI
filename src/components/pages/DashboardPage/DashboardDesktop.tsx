@@ -44,7 +44,7 @@ const movRow = (tx: Transaction, lookup: Record<string, CategoryLookupItem>): Re
 
 export const DashboardDesktop = ({
   greeting, summary, loading, error, onRetry, pending, recent, lookup, onReload,
-  health, statusLabel, ascent, oblItems, burn, onOpenFlow, onOpenObligations,
+  health, statusLabel, ascent, oblItems, burn, onOpenFlow, onOpenObligations, onCustomize, planNotice, show,
 }: {
   greeting: string;
   summary: SummaryResponse | null;
@@ -63,6 +63,11 @@ export const DashboardDesktop = ({
   burn: { daily: number; sufficient: boolean } | null;
   onOpenFlow: () => void;
   onOpenObligations: () => void;
+  /** "Personalizar dashboard": la misma hoja de siempre; sus interruptores muestran u ocultan estas secciones. */
+  onCustomize: () => void;
+  /** "Tu plan de {mes} está listo para revisar", cuando el plan espera confirmación. */
+  planNotice: { label: string; onReview: () => void } | null;
+  show: { status: boolean; ascent: boolean; stats: boolean; obligations: boolean; txns: boolean };
 }) => {
   const history = useHistory();
   const [confirming, setConfirming] = useState(false);
@@ -82,7 +87,7 @@ export const DashboardDesktop = ({
     }
   };
 
-  const header = <InstPageHeader title={greeting} sub={longToday()} />;
+  const header = <InstPageHeader title={greeting} sub={longToday()} actions={<InstButton onClick={onCustomize}>Personalizar</InstButton>} />;
   if (loading && !summary) {
     return (
       <div className={styles.page}>
@@ -109,17 +114,26 @@ export const DashboardDesktop = ({
     <div className={styles.page}>
       {header}
 
-      <InstBand>
+      {planNotice ? (
+        <InstBand>
+          <span>{planNotice.label}</span>
+          <span className={styles.flex} />
+          <InstLink onClick={planNotice.onReview}>Revisar</InstLink>
+        </InstBand>
+      ) : null}
+
+      {show.status ? <InstBand>
         <span className={`${styles.dot} ${dot}`} aria-hidden="true" />
         <span>{statusLabel}</span>
         <span className={styles.flex} />
         <InstLink onClick={onOpenFlow}>Ver análisis</InstLink>
-      </InstBand>
+      </InstBand> : null}
 
-      <div className={styles.grid}>
-        <div className={styles.left}>{ascent}</div>
+      {show.ascent || show.stats || show.obligations ? <div className={`${styles.grid} ${show.ascent ? '' : styles.gridSide}`}>
+        {show.ascent ? <div className={styles.left}>{ascent}</div> : null}
 
-        <div className={styles.right}>
+        <div className={show.ascent ? styles.right : styles.rightAlone}>
+          {show.stats ? <>
           <Eyebrow>Ritmo diario</Eyebrow>
           {burn ? (
             <>
@@ -132,8 +146,9 @@ export const DashboardDesktop = ({
               {!burn.sufficient ? <p className={styles.calcNote}>Menos de 14 días de historial: por ahora es un estimado de 30.000 / día.</p> : null}
             </>
           ) : <p className={styles.calcNote}>Sin datos de flujo todavía.</p>}
+          </> : null}
 
-          {oblItems.length ? (
+          {show.obligations && oblItems.length ? (
             <>
               <div className={styles.oblHead}><Eyebrow>Obligaciones</Eyebrow><InstLink onClick={onOpenObligations}>Ver todo</InstLink></div>
               <div className={styles.oblRow}>
@@ -144,7 +159,7 @@ export const DashboardDesktop = ({
             </>
           ) : null}
         </div>
-      </div>
+      </div> : null}
 
       {pending.length ? (
         <InstSection id="dash-pending" title={`Por revisar · ${pending.length}`}
@@ -155,11 +170,11 @@ export const DashboardDesktop = ({
         </InstSection>
       ) : null}
 
-      <InstSection id="dash-latest" title="Lo último" right={<InstLink onClick={() => history.push('/transactions')}>Ver todo</InstLink>}>
+      {show.txns ? <InstSection id="dash-latest" title="Lo último" right={<InstLink onClick={() => history.push('/transactions')}>Ver todo</InstLink>}>
         {latest.length
           ? <InstTable heads={MOV_HEADS} aligns={MOV_ALIGN} rows={latest.map((t) => movRow(t, lookup))} rowKeys={latest.map((t) => t.id)} />
           : <InstNote>Todavía no hay movimientos este mes.</InstNote>}
-      </InstSection>
+      </InstSection> : null}
     </div>
   );
 };

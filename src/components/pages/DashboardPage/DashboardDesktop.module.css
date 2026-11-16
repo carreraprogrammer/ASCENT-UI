@@ -21,3 +21,5 @@
 .oblPaid { font-weight: 600; }
 .oblLeft { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--ink-muted); }
 .mov { font-weight: 500; }
+.gridSide { grid-template-columns: minmax(0, 1fr); }
+.rightAlone { padding: 22px 0; min-width: 0; }

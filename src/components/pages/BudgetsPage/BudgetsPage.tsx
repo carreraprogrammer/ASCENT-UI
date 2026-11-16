@@ -969,8 +969,10 @@ const BudgetsDesktop = (p: BudgetsDesktopProps) => {
             onRowClick={(i) => p.onOpenSub(lines[i].cat, lines[i].sub)}
             rows={lines.map(({ cat, sub }) => {
               const budget = sub.budgeted ?? 0;
-              const spent = sub.spent ?? 0;
               const label = sub.name ?? sub.code;
+              // Una línea sin subcategoría es la gaveta entera: su gastado es el de la gaveta, como lo mostraba el
+              // encabezado del grupo (auditoría TCW-5, hallazgo 1).
+              const spent = label ? (sub.spent ?? 0) : (cat.spent ?? 0);
               return [
                 <Sub>{cat.name ?? 'Sin categoría'}</Sub>,
                 label ? <span className={desk.lineName}>{label}</span> : <Sub>toda la gaveta</Sub>,

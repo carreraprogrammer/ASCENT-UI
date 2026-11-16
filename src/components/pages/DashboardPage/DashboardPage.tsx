@@ -813,6 +813,7 @@ export const DashboardContent = () => {
 
   // TCW-5: escritorio web en el lenguaje "Instrumento". Mismos datos, cálculos, modales y acciones.
   if (isDesktop) {
+    const on = (id: WidgetId) => widgets.some((w) => w.id === id && w.visible);
     const health = runway?.health_status ?? null;
     const statusLabel = health === 'comfortable' ? 'Vas bien' : health === 'warning' ? 'Vas justo' : health === 'critical' ? 'Estás en rojo' : 'Sin datos de flujo';
     const tail = nextIncomeLabel === 'quincena' ? 'hasta la quincena' : 'hasta el próximo ingreso';
@@ -826,8 +827,18 @@ export const DashboardContent = () => {
           ascent={ascent ? <div className={styles.dkAscent}><AscentWidget goal={ascent} onOpen={() => setModal('ascent')} /></div> : null} oblItems={oblItems}
           burn={runway ? { daily: runway.daily_necessary_burn ?? 0, sufficient: runway.has_sufficient_history !== false } : null}
           onOpenFlow={() => setModal('flow')} onOpenObligations={() => setModal('obl')}
+          onCustomize={() => setCustomizeOpen(true)}
+          planNotice={hasPlanPendingConfirmation ? { label: `Tu plan de ${planMonthLabel} está listo para revisar.`, onReview: () => history.push('/budgets') } : null}
+          show={{ status: on('status'), ascent: on('ascent'), stats: on('stats'), obligations: on('obligations'), txns: on('txns') }}
         />
         {modals}
+        <CustomizeSheet
+          isOpen={customizeOpen}
+          widgets={widgets}
+          onChange={setWidgets}
+          onClose={() => setCustomizeOpen(false)}
+          onReset={() => setWidgets(DEFAULT_WIDGETS.map((w) => ({ ...w })))}
+        />
       </>
     );
   }
