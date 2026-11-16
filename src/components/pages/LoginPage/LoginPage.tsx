@@ -163,7 +163,7 @@ export const LoginPage = () => {
         </div>
 
         <FormSection
-          className={styles.emailSection}
+          className={`${styles.emailSection} ${styles.phoneHideSchemaText}`}
           title="Acceso con email"
           description="Usa tu correo para entrar. Si el esquema dinámico no carga, el formulario base sigue disponible."
         >

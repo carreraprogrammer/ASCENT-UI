@@ -348,3 +348,25 @@
   .desktopTabs { display: flex; margin: 0 0 var(--space-4); }
   .desktopTabs > * { position: static; transform: none; left: auto; bottom: auto; }
 }
+
+/* TCW-2: enlace a Gastos planeados en la cabecera de Planes (solo se renderiza en escritorio). */
+.plannedLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-panel-soft);
+  color: var(--text-on-surface);
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color var(--transition-base), color var(--transition-base);
+}
+.plannedLink:hover { border-color: var(--line-strong); color: var(--color-text-primary); }
+.plannedLink:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.plannedLink ion-icon { font-size: 15px; }

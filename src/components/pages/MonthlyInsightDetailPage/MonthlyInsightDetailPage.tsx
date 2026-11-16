@@ -1,6 +1,6 @@
 import { IonContent, IonIcon, IonPage } from '@ionic/react';
 import { useEffect, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import {
   chevronBackOutline,
   chevronForwardOutline,
@@ -135,7 +135,14 @@ export const MonthlyInsightDetailPage = () => {
         <span className={styles.crumbKind}>{isCurrent ? 'Mes en curso' : 'Cierre de mes'}</span>
         <span className={styles.crumbDate}>{MONTH_NAMES[m]} {y}</span>
       </div>
-      <div className={styles.iconBtn} style={{ visibility: 'hidden' }} />
+      {isDesktop ? (
+        // TCW-2: Planeados vive dentro de Planes (el menú lateral sigue con 8 pestañas). Solo escritorio.
+        <Link className={styles.plannedLink} to="/planned-expenses">
+          Gastos planeados <IonIcon icon={chevronForwardOutline} aria-hidden="true" />
+        </Link>
+      ) : (
+        <div className={styles.iconBtn} style={{ visibility: 'hidden' }} />
+      )}
     </div>
   );
 

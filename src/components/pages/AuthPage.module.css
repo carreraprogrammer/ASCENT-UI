@@ -89,6 +89,12 @@
     font-size: var(--type-caption-size);
     letter-spacing: 0.01em;
   }
+
+  /* TCW-2: en el login web de teléfono no se ve el texto técnico del esquema (título y descripción de la tarjeta
+     del formulario). La tarjeta y los campos quedan igual. */
+  .phoneHideSchemaText > [data-form-section-head] {
+    display: none !important;
+  }
 }
 
 /* TCW-1: one primary action per view. In the sign-in it is "Continuar con The Cyborg Way"; the email form's

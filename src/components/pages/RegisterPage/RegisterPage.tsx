@@ -4,6 +4,8 @@ import { AuthLayout } from '../../templates/AuthLayout';
 import { FormSection } from '../../molecules/FormSection/FormSection';
 import { DynamicForm } from '../../organisms/DynamicForm';
 import { GoogleButton } from '../../atoms/GoogleButton';
+import { CyborgWayButton } from '../../atoms/CyborgWayButton';
+import { startCyborgWayLogin } from '../../../services/cyborgWayAuth';
 import { startGoogleOAuth } from '../../../services/authService';
 import { useAuthStore } from '../../../store/authStore';
 import { useToast } from '../../../hooks/useToast';
@@ -36,9 +38,10 @@ export const RegisterPage = () => {
       <div className={styles.stack}>
         <div className={`${styles.contentHeader} ${styles.mobileOnly}`}>
           <span className={styles.contentEyebrow}>Crear acceso</span>
-          <p className={styles.contentText}>Empieza con Google o crea tu acceso con email.</p>
+          <p className={styles.contentText}>Empieza con The Cyborg Way, con Google o crea tu acceso con email.</p>
         </div>
 
+        <CyborgWayButton onClick={() => void startCyborgWayLogin()} />
         <GoogleButton onClick={startGoogleOAuth} />
 
         <div className={styles.divider} aria-hidden="true">
