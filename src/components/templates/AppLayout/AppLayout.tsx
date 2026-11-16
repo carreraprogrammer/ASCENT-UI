@@ -1,6 +1,6 @@
 import { CromoSeal } from '../../atoms/CromoSeal';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { IonIcon, IonPage } from '@ionic/react';
+import { IonIcon, IonPage, isPlatform } from '@ionic/react';
 import { closeOutline, logOutOutline, personCircleOutline } from 'ionicons/icons';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { Header } from '../../organisms/Header';
@@ -13,6 +13,19 @@ import { rememberAuthPath } from '../../../utils/navigation';
 import { useAuthStore } from '../../../store/authStore';
 import { AppLayoutContext, type AppToolbarConfig } from './AppLayoutContext';
 import styles from './AppLayout.module.css';
+
+// "Planes" en el menú lateral (solo visible en escritorio web) abre el plan del mes en
+// curso, /planes/:year/:month. Antes apuntaba a /planned-expenses ("Planeados"). En la app
+// nativa se conserva el destino de siempre. Ver ASC-4, fase 5.
+const PLANES_PREFIX = '/planes/';
+const currentPlanesPath = (now = new Date()) => `${PLANES_PREFIX}${now.getFullYear()}/${now.getMonth() + 1}`;
+const isNativeApp = () => {
+  try {
+    return isPlatform('capacitor');
+  } catch {
+    return false;
+  }
+};
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard' },
@@ -65,17 +78,21 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
 
   const renderNav = () => (
     <nav className={styles.nav}>
-      {NAV_ITEMS.map((item) => (
+      {NAV_ITEMS.map((item) => {
+        const isPlanes = item.label === 'Planes' && !isNativeApp();
+        return (
         <NavLink
           key={item.to}
-          to={item.to}
+          to={isPlanes ? currentPlanesPath() : item.to}
           className={styles.navLink}
           activeClassName={styles.navLinkActive}
           exact
+          isActive={isPlanes ? (_match, loc) => loc.pathname.startsWith(PLANES_PREFIX) : undefined}
         >
           {item.label}
         </NavLink>
-      ))}
+        );
+      })}
     </nav>
   );
 

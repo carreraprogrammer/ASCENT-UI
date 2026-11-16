@@ -901,3 +901,55 @@
 .d2CzToggleOn { background: var(--color-investment); }
 .d2CzKnob { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 999px; background: var(--ink); box-shadow: 0 1px 3px color-mix(in srgb, var(--bg) 30%, transparent); transition: transform 160ms ease; }
 .d2CzToggleOn .d2CzKnob { transform: translateX(16px); }
+
+/* ── Escritorio (ASC-4, fase 4) — solo existe en la rama web ≥ 1024 px ── */
+@media (min-width: 1024px) {
+  .dkGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+  .dkCol { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+  .dkCard {
+    min-width: 0;
+    padding: 20px 22px 22px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-panel);
+  }
+  .dkCard:empty { display: none; }
+  .dkCard .d2Status { margin-top: 0; padding-top: 0; }
+  .dkCard > .d2Widget > .d2Sec:first-child,
+  .dkCard > div > .d2Widget > .d2Sec:first-child { margin-top: 0; }
+
+  /* Montaña: escala con el ancho de la columna (proporción fija, tope de alto) y nunca
+     se desborda. El valor y el porcentaje quedan debajo del gráfico, como en el mockup. */
+  .dkGrid .d2MtnWrap {
+    height: auto;
+    aspect-ratio: 5 / 2;
+    max-height: 420px;
+    overflow: visible;
+    margin-bottom: 62px;
+  }
+  .dkGrid .d2MtnTickLbl { font-size: 11px; right: 14px; }
+  .dkGrid .d2MtnFoot { left: 4px; right: 4px; bottom: -58px; text-align: left; }
+  .dkGrid .d2MtnFootVal { font-size: 30px; }
+  .dkGrid .d2MtnFootValMuted { font-size: 15px; }
+  .dkGrid .d2MtnFootLbl { font-size: 12.5px; }
+  .dkGrid .d2MtnFootPct { font-size: 17px; }
+  .dkGrid .d2AscentHead { margin-bottom: 14px; }
+  .dkGrid .d2AscentEyebrow { font-size: 12px; }
+  .dkGrid .d2AscentStage { font-size: 17px; }
+  .dkGrid .d2AscentStages { gap: 8px; margin-top: 14px; padding: 0; }
+  .dkGrid .d2AscentChip { font-size: 12px; padding: 10px 6px; white-space: nowrap; min-width: 0; }
+
+  /* Ritmo diario y gastado: una sola tarjeta, apilados. */
+  .dkSide .d2Stats { flex-direction: column; margin-top: 0; gap: 18px; }
+  .dkSide .d2Stat { padding: 0; }
+  .dkSide .d2Stat + .d2Stat { border-left: 0; padding: 18px 0 0; border-top: 1px solid var(--surface-border); }
+  .dkSide .d2StatLbl { font-size: 12.5px; }
+  .dkSide .d2StatVal { font-size: 34px; margin-top: 8px; }
+  .dkSide .d2StatUnit { font-size: 14px; }
+  .dkSide .d2StatHint { font-size: 12px; margin-top: 6px; text-decoration: underline; text-underline-offset: 3px; }
+}
