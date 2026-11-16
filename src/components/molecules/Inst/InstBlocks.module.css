@@ -14,7 +14,8 @@
 .statVal { font-family: var(--tcw-font-mono); font-variant-numeric: tabular-nums; font-size: 26px; font-weight: 600; margin-top: 6px; white-space: nowrap; }
 .statSub { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
 .section { padding: 22px 0 6px; }
-.secHead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px; min-height: 34px; }
+.secHead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px; }
+.secHeadActions { min-height: 34px; }
 .secRight { display: flex; gap: 8px; align-items: center; }
 .kv { display: grid; grid-template-columns: 200px 1fr auto; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 14px; align-items: center; }
 .kvKey { color: var(--ink-muted); }

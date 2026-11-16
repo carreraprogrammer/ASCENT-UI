@@ -61,7 +61,7 @@ export const InstStats = ({ items }: { items: Array<{ label: ReactNode; value: R
 
 export const InstSection = ({ title, right, children, id }: { title: ReactNode; right?: ReactNode; children: ReactNode; id?: string }) => (
   <section className={styles.section} aria-labelledby={id}>
-    <div className={styles.secHead}>
+    <div className={`${styles.secHead} ${right ? styles.secHeadActions : ''}`}>
       <h2 id={id} style={{ margin: 0, fontWeight: 400, lineHeight: 1 }}><Eyebrow>{title}</Eyebrow></h2>
       {right ? <span className={styles.secRight}>{right}</span> : null}
     </div>
