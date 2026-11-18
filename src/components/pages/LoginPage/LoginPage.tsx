@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { IonContent, IonPage, isPlatform } from '@ionic/react';
 import { AuthLayout } from '../../templates/AuthLayout';
 import { FormSection } from '../../molecules/FormSection/FormSection';
@@ -16,6 +16,7 @@ import { startGoogleOAuth, loginWithGoogleMobile, initGoogleAuth } from '../../.
 import { getLastAuthPath } from '../../../utils/navigation';
 import { localizeAuthSchema } from '../../../utils/authFormCopy';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
+import { CONTACT_URL } from '../../../services/contact';
 import styles from '../AuthPage.module.css';
 import nativeStyles from './LoginPageNative.module.css';
 
@@ -128,9 +129,9 @@ export const LoginPage = () => {
               )}
             </div>
 
-            <Link className={nativeStyles.registerLink} to="/register">
-              ¿No tienes cuenta? <span>Regístrate</span>
-            </Link>
+            <a className={nativeStyles.registerLink} href={CONTACT_URL} target="_blank" rel="noopener noreferrer">
+              ¿Aún sin acceso? <span>Solicitar acceso</span>
+            </a>
           </div>
           {toast}
         </IonContent>
@@ -194,9 +195,9 @@ export const LoginPage = () => {
           />
         </FormSection>
 
-        <Link className={styles.link} to="/register">
-          ¿No tienes cuenta? <span className={styles.linkAccent}>Regístrate</span>
-        </Link>
+        <a className={styles.link} href={CONTACT_URL} target="_blank" rel="noopener noreferrer">
+          ¿Aún sin acceso? <span className={styles.linkAccent}>Solicitar acceso</span>
+        </a>
 
         <button
           type="button"

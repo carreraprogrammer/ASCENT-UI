@@ -22,6 +22,10 @@
 	@fresh path / /index.html /sw.js /manifest.webmanifest
 	header @fresh Cache-Control "no-cache"
 
+	# TCW-8: el registro está cerrado; sus rutas llevan al login antes de servir la app.
+	@signup path /register /register/ /signup /signup/
+	redir @signup /login 302
+
 	try_files {path} /index.html
 	file_server
 }
