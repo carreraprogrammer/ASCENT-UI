@@ -8,9 +8,11 @@ COPY . .
 ARG VITE_API_URL=https://api.ascent.thecyborgway.dev
 ARG VITE_TCW_ISSUER=https://thecyborgway.dev
 ARG VITE_TCW_CLIENT_ID=ascent-web
+# TCW-8: "Solicitar acceso" en el login (el registro está cerrado).
+ARG VITE_CONTACT_URL=https://calendly.com/carreraprogrammer
 ARG RAILWAY_GIT_COMMIT_SHA=
 # TCW-5: the footer shows the short commit of the build (Railway passes it); without it the footer omits it.
-ENV VITE_API_URL=$VITE_API_URL VITE_TCW_ISSUER=$VITE_TCW_ISSUER VITE_TCW_CLIENT_ID=$VITE_TCW_CLIENT_ID VITE_COMMIT=$RAILWAY_GIT_COMMIT_SHA
+ENV VITE_API_URL=$VITE_API_URL VITE_TCW_ISSUER=$VITE_TCW_ISSUER VITE_TCW_CLIENT_ID=$VITE_TCW_CLIENT_ID VITE_CONTACT_URL=$VITE_CONTACT_URL VITE_COMMIT=$RAILWAY_GIT_COMMIT_SHA
 RUN npm run build
 
 FROM caddy:2.8-alpine

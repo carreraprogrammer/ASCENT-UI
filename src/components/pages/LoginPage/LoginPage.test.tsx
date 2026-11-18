@@ -11,8 +11,16 @@ const renderLogin = () => {
   return render(<MemoryRouter><LoginPage /></MemoryRouter>);
 };
 
-test('renders register link', () => {
-  expect(renderLogin().getByRole('link', { name: '¿No tienes cuenta? Regístrate' })).toHaveAttribute('href', '/register');
+// TCW-8: el registro está cerrado. El login no invita a crear cuenta; ofrece pedir acceso (CONTACT_URL).
+test('offers to request access instead of signing up', () => {
+  const view = renderLogin();
+  expect(view.getByRole('link', { name: '¿Aún sin acceso? Solicitar acceso' })).toHaveAttribute('href', 'https://calendly.com/carreraprogrammer');
+  expect(view.container.textContent ?? '').not.toMatch(/regístrate|registrarse|crear cuenta|sign ?up|empezar gratis/i);
+  expect(view.container.querySelector('a[href="/register"], a[href="/signup"]')).toBeNull();
+});
+
+test('still offers the demo without an account', () => {
+  expect(renderLogin().getByText('Ver demo')).toBeInTheDocument();
 });
 
 // TCW-2 fase 3: la cabecera técnica de la tarjeta del correo lleva la clase que la oculta en el teléfono (≤ 640 px).

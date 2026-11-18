@@ -1,6 +1,7 @@
 import { IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
 import { useEffect, useState, type ComponentType } from 'react';
 import { Redirect, Route, useLocation } from 'react-router-dom';
+import { ClosedSignupRoute } from './closedSignup';
 import {
   calendarOutline,
   cardOutline,
@@ -15,7 +16,6 @@ import { useOnboardingStore } from '../store/onboardingStore';
 import { useOnboardingStatus } from '../hooks/useOnboardingStatus';
 import { OnboardingPage } from '../components/pages/OnboardingPage/OnboardingPage';
 import { LoginPage } from '../components/pages/LoginPage/LoginPage';
-import { RegisterPage } from '../components/pages/RegisterPage/RegisterPage';
 import { DashboardPage } from '../components/pages/DashboardPage';
 import { ProfilePage } from '../components/pages/ProfilePage';
 import { NotFoundPage } from '../components/pages/NotFoundPage/NotFoundPage';
@@ -227,7 +227,7 @@ export const AppRouter = () => {
       <IonRouterOutlet animated={false}>
         <Route exact path="/" component={RootRedirect} />
         <GuestRoute exact path="/login" component={LoginPage} />
-        <GuestRoute exact path="/register" component={RegisterPage} />
+        {ClosedSignupRoute()}
         <Route exact path="/auth/callback" component={OAuthCallbackPage} />
         <Route exact path="/auth/tcw/callback" component={CyborgWayCallbackPage} />
         <Route exact path="/auth/gmail/callback" component={GmailCallbackPage} />
