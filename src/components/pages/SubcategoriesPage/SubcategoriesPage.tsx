@@ -14,7 +14,7 @@ import styles from './SubcategoriesPage.module.css';
 import { CategoryCell, InstButton, Num, Sub, Two } from '../../atoms/Inst';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
-import { CellWithActions, instDeskStyles as desk } from '../TransactionsPage/instDesk';
+import { RowActions, instDeskStyles as desk } from '../TransactionsPage/instDesk';
 
 // Tiers de gasto a los que se puede vincular una función (no income/unknown).
 const TIER_TYPES = ['committed', 'necessary', 'discretionary'];
@@ -152,10 +152,12 @@ export const SubcategoriesContent = () => {
         </span>
       : <Sub>—</Sub>,
     <Sub>{sub.is_system ? 'del sistema' : 'propia'}</Sub>,
-    <CellWithActions actions={[{ label: 'Borrar', danger: true, onClick: () => { setDeleting(sub); setReassignTo(''); } }]}>
-      <Num strong>{sub.transaction_count}</Num>
-    </CellWithActions>,
+    <Num strong>{sub.transaction_count}</Num>,
   ]);
+  // TCW-27: acciones en la columna final propia de la tabla.
+  const rowActions = subs.map((sub) => (
+    <RowActions actions={[{ label: 'Borrar', danger: true, onClick: () => { setDeleting(sub); setReassignTo(''); } }]} />
+  ));
   const used = subs.filter((sub) => sub.transaction_count > 0).length;
 
   const overlays = (
@@ -262,7 +264,8 @@ export const SubcategoriesContent = () => {
                 <InstButton className={desk.noteBtn} onClick={openNew}>Nueva subcategoría</InstButton>
               </InstNote>
             ) : (
-              <InstTable caption="Subcategorías" heads={heads} aligns={aligns} rows={rows}
+              <InstTable caption="Subcategorías" heads={heads} aligns={aligns} rows={rows} rowActions={rowActions}
+                editingRow={formOpen && editing ? subs.findIndex((s) => s.id === editing.id) : undefined}
                 rowKeys={subs.map((sub) => sub.id)} onRowClick={(i) => openEdit(subs[i])} />
             )}
           </InstSection>

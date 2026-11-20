@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
+import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import { CategoryCell } from '../../atoms/Inst';
+import { Menu } from '../../organisms/Menu';
 import { resolveTransactionCategory, type CategoryLookupItem } from '../../../utils/financeBehavior';
 import { getCategoryDisplayName } from '../../../utils/categoryLabels';
 import type { Transaction } from '../../../types/finance.types';
@@ -20,14 +21,19 @@ export const Chip = ({ on, onClick, children }: { on?: boolean; onClick: () => v
 export interface ChipOption { value: string; label: string; color?: string }
 
 /** Selector con forma de chip ("Gaveta ▾"): la primera opción es el nombre del filtro y significa "todas".
- *  Un <select> nativo no admite puntos de color: si alguna opción trae `color` se usa un menú propio (TCW-5, escritorio). */
+ *  Un <select> nativo no admite puntos de color: si alguna opción trae `color` se usa el Menu compartido (TCW-27). */
 export const ChipSelect = ({ label, value, options, onChange }: {
   label: string;
   value: string;
   options: ChipOption[];
   onChange: (value: string) => void;
 }) => {
-  if (options.some((o) => o.color)) return <ColorChipMenu label={label} value={value} options={options} onChange={onChange} />;
+  if (options.some((o) => o.color)) {
+    return (
+      <Menu label={label} options={[{ value: '', label: `${label}: todas` }, ...options]} selected={[value]}
+        onChange={(next) => onChange(next[0] ?? '')} />
+    );
+  }
   const current = options.find((o) => o.value === value)?.label;
   // El chip muestra el texto; el <select> nativo, transparente, va encima (teclado y lectores de pantalla intactos).
   return (
@@ -37,56 +43,6 @@ export const ChipSelect = ({ label, value, options, onChange }: {
         <option value="">{label}: todas</option>
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
-    </span>
-  );
-};
-
-const Dot = ({ color }: { color: string }) => <span aria-hidden="true" className={styles.dot} style={{ '--dot': color } as CSSProperties} />;
-
-const ColorChipMenu = ({ label, value, options, onChange }: {
-  label: string; value: string; options: ChipOption[]; onChange: (value: string) => void;
-}) => {
-  const [open, setOpen] = useState(false);
-  const root = useRef<HTMLSpanElement>(null);
-  const current = options.find((o) => o.value === value);
-  useEffect(() => {
-    if (!open) return undefined;
-    const away = (e: Event) => { if (!root.current?.contains(e.target as Node)) setOpen(false); };
-    document.addEventListener('mousedown', away);
-    return () => document.removeEventListener('mousedown', away);
-  }, [open]);
-  useEffect(() => {
-    if (open) root.current?.querySelector<HTMLElement>('[role="menuitemradio"][aria-checked="true"]')?.focus();
-  }, [open]);
-  const items: ChipOption[] = [{ value: '', label: `${label}: todas` }, ...options];
-  const onKey = (e: KeyboardEvent<HTMLSpanElement>) => {
-    if (e.key === 'Escape') { setOpen(false); root.current?.querySelector('button')?.focus(); return; }
-    if (!open || (e.key !== 'ArrowDown' && e.key !== 'ArrowUp')) return;
-    e.preventDefault();
-    const btns = Array.from(root.current?.querySelectorAll<HTMLElement>('[role="menuitemradio"]') ?? []);
-    const i = btns.indexOf(document.activeElement as HTMLElement);
-    const down = e.key === 'ArrowDown';
-    const next = i < 0 ? (down ? 0 : btns.length - 1) : (i + (down ? 1 : -1) + btns.length) % btns.length;
-    btns[next]?.focus();
-  };
-  return (
-    <span ref={root} className={cx(styles.selChip, styles.menuRoot)} onKeyDown={onKey}
-      onBlur={(e) => { if (!root.current?.contains(e.relatedTarget as Node | null)) setOpen(false); }}>
-      <button type="button" className={cx(styles.chip, value && styles.chipOn)} aria-haspopup="menu" aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}>
-        {current?.color ? <Dot color={current.color} /> : null}{current?.label ?? label} ▾
-      </button>
-      {open ? (
-        <span role="menu" aria-label={label} className={styles.menu}>
-          {items.map((o) => (
-            <button key={o.value || 'all'} type="button" role="menuitemradio" aria-checked={o.value === value}
-              className={cx(styles.menuItem, o.value === value && styles.menuItemOn)}
-              onClick={() => { setOpen(false); onChange(o.value); }}>
-              {o.color ? <Dot color={o.color} /> : null}{o.label}
-            </button>
-          ))}
-        </span>
-      ) : null}
     </span>
   );
 };
@@ -134,17 +90,13 @@ export interface RowAction { label: string; onClick: () => void; danger?: boolea
 
 const stop = (e: MouseEvent | KeyboardEvent) => e.stopPropagation();
 
-/** Última celda de una fila: el valor y, al pasar el puntero o enfocar la fila, sus acciones (las mismas del deslizar en móvil). */
-export const CellWithActions = ({ children, actions }: { children: ReactNode; actions: RowAction[] }) => (
-  <span className={styles.cellEnd}>
-    {actions.length ? (
-      <span className={styles.acts} onClick={stop} onKeyDown={stop}>
-        {actions.map((a) => (
-          <button key={a.label} type="button" className={cx(styles.act, a.danger && styles.actDanger)}
-            disabled={a.disabled} onClick={a.onClick}>{a.label}</button>
-        ))}
-      </span>
-    ) : null}
-    {children}
+/** Acciones de una fila (las mismas del deslizar en móvil). Van en la columna final propia de InstTable (prop `rowActions`):
+ *  invisibles hasta pasar el puntero o enfocar la fila, pero siempre reservan su espacio. */
+export const RowActions = ({ actions }: { actions: RowAction[] }) => (
+  <span className={styles.acts} onClick={stop} onKeyDown={stop}>
+    {actions.map((a) => (
+      <button key={a.label} type="button" className={cx(styles.act, a.danger && styles.actDanger)}
+        disabled={a.disabled} onClick={a.onClick}>{a.label}</button>
+    ))}
   </span>
 );

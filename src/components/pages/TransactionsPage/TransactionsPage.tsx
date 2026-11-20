@@ -28,7 +28,7 @@ import styles from '../FinancePage.module.css';
 import { DateCell, InstButton, Num, OriginTag, StateTag, Sub } from '../../atoms/Inst';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { fmtAmount, fmtDay, fmtSigned, originOf } from '../../../utils/instrumento';
-import { CellWithActions, Chip, ChipSelect, PlainButton, SortHead, TxCategoryCell, instDeskStyles as desk, type RowAction } from './instDesk';
+import { RowActions, Chip, ChipSelect, PlainButton, SortHead, TxCategoryCell, instDeskStyles as desk, type RowAction } from './instDesk';
 import { SOURCE_OPTIONS, monthLong, monthShort, nextSort, txQuickFilters, txQuickOf, type TxQuick } from './instDeskData';
 
 const periodFormatter = new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' });
@@ -909,11 +909,14 @@ export const TransactionsContent = () => {
       <TxCategoryCell tx={transaction} lookup={categoryLookup} />,
       <OriginTag origin={originOf(transaction.attributes)} />,
       <StateTag state={pending ? 'pendiente' : 'confirmado'} />,
-      <CellWithActions actions={rowActions(transaction)}>
-        <Num strong tone={income ? 'ok' : undefined}>{fmtSigned(transaction.attributes.amount, income)}</Num>
-      </CellWithActions>,
+      <Num strong tone={income ? 'ok' : undefined}>{fmtSigned(transaction.attributes.amount, income)}</Num>,
     ];
   });
+  // TCW-27: acciones en la columna final propia de la tabla; ya no se montan sobre Estado ni Origen.
+  const txActions = orderedTransactions.map((transaction) => <RowActions actions={rowActions(transaction)} />);
+  const editingRow = composerOpen && editingTransaction
+    ? orderedTransactions.findIndex((t) => t.id === editingTransaction.id)
+    : undefined;
 
   const desktopView = (
     <div className={desk.page} data-testid="transactions-desktop">
@@ -968,7 +971,7 @@ export const TransactionsContent = () => {
           </InstNote>
         ) : (
           <>
-            <InstTable caption={`Movimientos de ${monthLong(period)}`} heads={txHeads} aligns={txAligns} rows={txRows}
+            <InstTable caption={`Movimientos de ${monthLong(period)}`} heads={txHeads} aligns={txAligns} rows={txRows} rowActions={txActions} editingRow={editingRow}
               rowKeys={orderedTransactions.map((t) => t.id)} onRowClick={(i) => openEdit(orderedTransactions[i])} />
             {hasNextPage ? (
               <div ref={moreRef} className={desk.more}>
