@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, NavLink, useHistory } from 'react-router-dom';
 import { BrandMark } from '../../atoms/BrandMark';
+import { TcwMark } from '../../atoms/TcwMark';
 import { InstButton } from '../../atoms/Inst';
 import { InstPageHeader } from '../../molecules/Inst';
 import { ImpersonationBanner } from '../../molecules/ImpersonationBanner/ImpersonationBanner';
@@ -152,7 +153,7 @@ export const InstShell = ({ nav, title, toolbar, breadcrumbs, ownHeader, childre
             {children}
             <footer className={styles.footer}>
               <a className={styles.footerLink} href="https://thecyborgway.dev" target="_blank" rel="noreferrer">
-                <BrandMark size="sm" className={styles.footerMark} />
+                <TcwMark size="sm" className={styles.footerMark} />
                 <span>a cromo by <strong>The Cyborg Way</strong></span>
               </a>
               <span className={styles.spacer} />

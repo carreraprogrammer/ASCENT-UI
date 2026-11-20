@@ -19,7 +19,7 @@ import { IncomeSourceComposer } from '../../organisms/IncomeSourceComposer';
 import { IncomeSourceSlidingCard } from '../../organisms/IncomeSourceSlidingCard';
 import { useToast } from '../../../hooks/useToast';
 import { financeService } from '../../../services/financeService';
-import { getCategoryDisplayName, normalizeFlexibleLabel } from '../../../utils/categoryLabels';
+import { getCategoryDisplayName } from '../../../utils/categoryLabels';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type {
   CategoryResource,
@@ -33,7 +33,7 @@ import type {
   SummaryResponse,
 } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
-import { Bar, DateCell, InstButton, Num, StateTag, Sub, Two } from '../../atoms/Inst';
+import { Bar, CategoryCell, DateCell, InstButton, Num, StateTag, Sub, Two } from '../../atoms/Inst';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { fmtAmount } from '../../../utils/instrumento';
@@ -411,9 +411,14 @@ export const RecurringObligationsContent = () => {
     const attrs = obligation.attributes;
     const linked = attrs.source_type === 'Debt' && attrs.source_id ? debtById.get(String(attrs.source_id)) : null;
     const st = obligationState(attrs.active !== false, executionById.get(String(obligation.id))?.status);
-    const cat = [normalizeFlexibleLabel(attrs.category_name), attrs.subcategory_name].filter(Boolean).join(' · ');
+    const catResource = categories.find((c) => Number(c.id) === attrs.category_id);
+    const catCode = attrs.category_code ?? catResource?.attributes.code ?? null;
     return [
-      <Two a={attrs.name} b={cat || 'Sin categoría'} />,
+      <Two a={attrs.name} b={
+        <CategoryCell code={catCode} subcategoryName={attrs.subcategory_name}
+          gavetaName={catCode || attrs.category_name ? getCategoryDisplayName({ name: attrs.category_name, code: catCode, type: catResource?.attributes.category_type }) : null}
+          icon={attrs.subcategory_icon ?? catResource?.attributes.icon} />
+      } />,
       <Num>{attrs.due_day ?? '—'}</Num>,
       <Sub>{linked ? linked.attributes.name : attrs.source_type === 'Debt' && attrs.source_id ? `Deuda inexistente (#${attrs.source_id})` : '—'}</Sub>,
       <StateTag state={st.label} tone={st.tone} />,

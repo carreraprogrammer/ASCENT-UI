@@ -36,7 +36,7 @@ import type {
   Transaction,
 } from '../../../types/finance.types';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
-import { BarPct, InstButton, Num, StateTag, Sub } from '../../atoms/Inst';
+import { BarPct, CategoryCell, InstButton, Num, StateTag, Sub } from '../../atoms/Inst';
 import { InstBand, InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { fmtAmount } from '../../../utils/instrumento';
 import './BudgetsPage.redesign.css';
@@ -974,7 +974,7 @@ const BudgetsDesktop = (p: BudgetsDesktopProps) => {
               // encabezado del grupo (auditoría TCW-5, hallazgo 1).
               const spent = label ? (sub.spent ?? 0) : (cat.spent ?? 0);
               return [
-                <Sub>{cat.name ?? 'Sin categoría'}</Sub>,
+                <CategoryCell code={cat.code} gavetaName={cat.name ?? 'Sin categoría'} icon={sub.icon ?? cat.icon} />,
                 label ? <span className={desk.lineName}>{label}</span> : <Sub>toda la gaveta</Sub>,
                 <Num>{fmtAmount(budget)}</Num>,
                 <Num strong tone={spent > budget ? 'rose' : undefined}>{fmtAmount(spent)}</Num>,

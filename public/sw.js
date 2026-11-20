@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daniel15k-web-v1';
+const CACHE_NAME = 'daniel15k-web-v2';
 const APP_SHELL = ['/', '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {

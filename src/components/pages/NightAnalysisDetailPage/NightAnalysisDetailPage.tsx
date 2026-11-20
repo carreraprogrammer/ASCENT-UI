@@ -28,7 +28,7 @@ import { TransactionComposer } from '../../organisms/TransactionComposer/Transac
 import styles from './NightAnalysisDetailPage.module.css';
 import { AppLayout } from '../../templates/AppLayout';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
-import { BarPct, InstButton, Num, StateTag } from '../../atoms/Inst';
+import { BarPct, CategoryCell, InstButton, Num, StateTag } from '../../atoms/Inst';
 import { InstBand, InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton } from '../../molecules/Inst';
 import { fmtAmount } from '../../../utils/instrumento';
 import { CoachLine, InsightTabs, Reasoning } from '../MonthlyInsightDetailPage/InsightDesk';
@@ -361,7 +361,8 @@ export const NightAnalysisDetailPage = () => {
                         rowKeys={unmatched.map((u) => u.transaction_id)}
                         rows={unmatched.map((u) => [
                           <span className={desk.name}>{u.concept}</span>,
-                          <span style={{ fontSize: 13, color: 'var(--ink-muted)' }}>{CAT_NAMES[u.category_type] ?? u.category_type}</span>,
+                          <CategoryCell income={u.category_type === 'income'} code={u.category_type} gavetaName={CAT_NAMES[u.category_type] ?? u.category_type}
+                            icon={categories.find((c) => c.attributes.code === u.category_type || c.attributes.category_type === u.category_type)?.attributes.icon} />,
                           <Num strong>{fmtAmount(u.amount)}</Num>,
                         ])} />
                     </InstSection>

@@ -18,10 +18,10 @@ import { Spinner } from '../../atoms/Spinner';
 import styles from './YearlyInsightDetailPage.module.css';
 import { AppLayout } from '../../templates/AppLayout';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
-import { DateCell, InstButton } from '../../atoms/Inst';
+import { CategoryCell, DateCell, InstButton } from '../../atoms/Inst';
 import { InstBand, InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton } from '../../molecules/Inst';
 import { fmtAmount, fmtDay } from '../../../utils/instrumento';
-import { CoachLine, InsightTabs, NextStep, Reasoning } from '../MonthlyInsightDetailPage/InsightDesk';
+import { CoachLine, GAVETA_ICON, InsightTabs, NextStep, Reasoning } from '../MonthlyInsightDetailPage/InsightDesk';
 import desk from '../MonthlyInsightDetailPage/InsightDesk.module.css';
 
 const MONTH_ABBR = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
@@ -55,8 +55,10 @@ const YearChart = ({ monthly }: { monthly: number[] }) => {
 
 // ── Derived lessons from yearly data ──────────────────────────────────────
 
-function deriveLessons(monthly: number[], summaries: (SummaryResponse | null)[], isCurrent: boolean): Array<{ title: string; text: string }> {
-  const lessons: Array<{ title: string; text: string }> = [];
+type Lesson = { title: string; text: string; gaveta?: { code: string; name: string } };
+
+function deriveLessons(monthly: number[], summaries: (SummaryResponse | null)[], isCurrent: boolean): Lesson[] {
+  const lessons: Lesson[] = [];
   const nonZero = monthly.map((v, i) => ({ v, i })).filter((x) => x.v > 0);
   if (nonZero.length === 0) return lessons;
 
@@ -69,9 +71,11 @@ function deriveLessons(monthly: number[], summaries: (SummaryResponse | null)[],
   });
 
   const allCategories: Record<string, number[]> = {};
+  const codeByName: Record<string, string> = {};
   summaries.forEach((s) => {
     if (!s) return;
     (s.burn_rate?.categories ?? []).forEach((c) => {
+      codeByName[c.category] = c.category_type;
       if (!allCategories[c.category]) allCategories[c.category] = [];
       allCategories[c.category].push(c.pct);
     });
@@ -88,6 +92,7 @@ function deriveLessons(monthly: number[], summaries: (SummaryResponse | null)[],
         ? `${mostVolatile.name} es tu categoría más difícil.`
         : `${mostVolatile.name} fue tu categoría más difícil.`,
       text: `Se pasó del presupuesto ${mostVolatile.over} ${mostVolatile.over === 1 ? 'mes' : 'meses'} del año. Es la zona donde más hay que defender.`,
+      gaveta: codeByName[mostVolatile.name] ? { code: codeByName[mostVolatile.name], name: mostVolatile.name } : undefined,
     });
   }
 
@@ -200,7 +205,14 @@ export const YearlyInsightDetailPage = () => {
                   <InstTable caption="Lo que aprendimos" heads={['', 'Lección', 'Por qué']} aligns={['left', 'left', 'left']}
                     rows={lessons.map((l, i) => [
                       <span className={desk.right} style={{ color: 'var(--violet)' }}>0{i + 1}</span>,
-                      <span className={desk.name}>{l.title}</span>,
+                      <>
+                        <span className={desk.name}>{l.title}</span>
+                        {l.gaveta ? (
+                          <div style={{ marginTop: 6 }}>
+                            <CategoryCell code={l.gaveta.code} gavetaName={l.gaveta.name} icon={GAVETA_ICON[l.gaveta.code]} />
+                          </div>
+                        ) : null}
+                      </>,
                       <span style={{ fontSize: 13, color: 'var(--ink-muted)' }}>{l.text}</span>,
                     ])} />
                 </InstSection>

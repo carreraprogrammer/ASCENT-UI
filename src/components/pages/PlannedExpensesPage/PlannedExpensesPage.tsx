@@ -28,11 +28,12 @@ import type {
   SinkingFundPayload,
 } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
-import { BarPct, DateCell, InstButton, Num, StateTag, Sub, Two } from '../../atoms/Inst';
+import { BarPct, CategoryCell, DateCell, InstButton, Num, StateTag, Sub, Two } from '../../atoms/Inst';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { fmtAmount, fmtDayYear } from '../../../utils/instrumento';
 import { CellWithActions, ChipSelect, instDeskStyles as desk } from '../TransactionsPage/instDesk';
+import { categoryIconOf } from '../TransactionsPage/instDeskData';
 
 const planningTypeLabels: Record<string, string> = {
   mandatory_one_off: 'Obligatorio puntual',
@@ -311,7 +312,9 @@ export const PlannedExpensesContent = () => {
     return [
       <Two a={attrs.name} b={planningTypeLabels[attrs.planning_type] ?? attrs.planning_type} />,
       <DateCell>{fmtDayYear(attrs.target_date)}</DateCell>,
-      <Sub>{[attrs.category_name, attrs.subcategory_name].filter(Boolean).join(' · ') || '—'}</Sub>,
+      <CategoryCell code={attrs.category_code} subcategoryName={attrs.subcategory_name}
+        gavetaName={attrs.category_code || attrs.category_name ? getCategoryDisplayName({ name: attrs.category_name, code: attrs.category_code }) : null}
+        icon={categoryIconOf(categories, attrs.category_id, attrs.subcategory_id)} />,
       <StateTag state={plannedState[attrs.status] ?? attrs.status} />,
       <CellWithActions actions={[
         ...(attrs.status === 'planned' ? [
@@ -432,7 +435,7 @@ export const PlannedExpensesContent = () => {
               <ChipSelect label="Tipo" value={String(filters.planning_type ?? '')}
                 options={Object.entries(planningTypeLabels).map(([value, label]) => ({ value, label }))}
                 onChange={(planning_type) => setFilters((current) => ({ ...current, planning_type }))} />
-              <ChipSelect label="Gaveta" value={String(filters.category_id ?? '')} options={categoryOptions}
+              <ChipSelect label="Gaveta" value={String(filters.category_id ?? '')} options={categoryOptions.map((o) => ({ ...o, color: `var(--color-${categories.find((c) => String(c.id) === o.value)?.attributes.code ?? 'unknown'})` }))}
                 onChange={(category_id) => setFilters((current) => ({ ...current, category_id }))} />
             </>}>
             {loading ? (

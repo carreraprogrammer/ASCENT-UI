@@ -19,7 +19,8 @@ import { DrawerDetailContent, type DrawerDetailTransaction } from '../../organis
 import styles from './BudgetDetailPage.module.css';
 import { AppLayout } from '../../templates/AppLayout';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
-import { DateCell, InstButton, Num, OriginTag, StateTag } from '../../atoms/Inst';
+import { CategoryCell, DateCell, InstButton, Num, OriginTag, StateTag } from '../../atoms/Inst';
+import { buildCategoryLookup, resolveTransactionCategory, type CategoryLookupItem } from '../../../utils/financeBehavior';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { fmtAmount, fmtDay, fmtSigned, originOf } from '../../../utils/instrumento';
 
@@ -29,8 +30,8 @@ const txDay = (raw: string): string => {
   if (m) return fmtDay(new Date(m[3] ? Number(m[3]) : new Date().getFullYear(), Number(m[2]) - 1, Number(m[1])));
   return fmtDay(raw);
 };
-const TX_HEADS = ['Fecha', 'Movimiento', 'Origen', 'Estado', 'Monto (COP)'];
-const TX_ALIGNS: Align[] = ['left', 'left', 'left', 'left', 'right'];
+const TX_HEADS = ['Fecha', 'Movimiento', 'Gaveta · categoría', 'Origen', 'Estado', 'Monto (COP)'];
+const TX_ALIGNS: Align[] = ['left', 'left', 'left', 'left', 'left', 'right'];
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -131,6 +132,13 @@ export const BudgetDetailPage = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryType]);
 
+  // TCW-5: solo en escritorio, las categorías (endpoint existente) dan el nombre y el icono de la subcategoría.
+  const [lookup, setLookup] = useState<Record<string, CategoryLookupItem>>({});
+  useEffect(() => {
+    if (!isDesktop) return;
+    financeService.fetchCategories().then((res) => setLookup(buildCategoryLookup(res.data))).catch(() => {});
+  }, [isDesktop]);
+
   // covers_period transactions may have category_type null if the serializer omits it;
   // include them anyway since they were explicitly fetched for this period.
   const filtered = useMemo(
@@ -193,9 +201,12 @@ export const BudgetDetailPage = () => {
                   const a = tx.attributes;
                   const income = a.transaction_type === 'income';
                   const cover = coversPeriodLabel(tx);
+                  const cat = resolveTransactionCategory(tx, lookup);
                   return [
                     <DateCell>{txDay(a.date)}</DateCell>,
                     <span style={{ fontWeight: 500 }}>{a.concept || a.product || 'Movimiento sin nombre'}{cover ? <span style={{ fontWeight: 400, fontSize: 12, color: 'var(--ink-muted)' }}> · {cover}</span> : null}</span>,
+                    <CategoryCell income={income} code={a.category_type ?? categoryType} gavetaName={income ? 'Ingreso' : cfg.name}
+                      subcategoryName={cat.subcategoryName} icon={cat.subcategoryIcon ?? cat.categoryIcon} />,
                     <OriginTag origin={originOf(a)} />,
                     <StateTag state={a.status === 'pending' ? 'pendiente' : 'confirmado'} />,
                     <Num strong tone={income ? 'ok' : undefined}>{fmtSigned(a.amount ?? 0, income)}</Num>,

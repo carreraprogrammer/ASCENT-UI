@@ -43,3 +43,4 @@
 .scoreFig { display: inline-flex; align-items: center; gap: 10px; }
 .pressureGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
 .chartFrame { padding-top: 12px; border-top: 1px solid var(--line); }
+.gavetas { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }

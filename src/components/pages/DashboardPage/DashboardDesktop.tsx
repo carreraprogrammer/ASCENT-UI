@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Bar, DateCell, Eyebrow, InstButton, InstLink, Num, OriginTag, StateTag, Sub } from '../../atoms/Inst';
+import { Bar, DateCell, Eyebrow, InstButton, InstLink, Num, OriginTag, StateTag, CategoryCell } from '../../atoms/Inst';
 import { InstBand, InstNote, InstPageHeader, InstSection, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { financeService } from '../../../services/financeService';
 import { resolveTransactionCategory, type CategoryLookupItem } from '../../../utils/financeBehavior';
@@ -31,11 +31,12 @@ const movRow = (tx: Transaction, lookup: Record<string, CategoryLookupItem>): Re
   const income = a.transaction_type === 'income';
   const cat = resolveTransactionCategory(tx, lookup);
   const gaveta = income ? 'Ingreso' : (GAVETA[a.category_type ?? ''] ?? (cat.categoryType !== 'unknown' ? cat.categoryName : null));
-  const where = gaveta ? [gaveta, cat.subcategoryName].filter(Boolean).join(' · ') : 'Sin clasificar';
+  const code = gaveta && !income ? (a.category_type || cat.categoryCode) : null;
   return [
     <DateCell>{fmtDay(a.date)}</DateCell>,
     <span className={styles.mov}>{a.concept || a.product || '—'}</span>,
-    <Sub>{where}</Sub>,
+    <CategoryCell income={income} code={code} gavetaName={gaveta} subcategoryName={cat.subcategoryName}
+      icon={cat.subcategoryIcon ?? cat.categoryIcon} />,
     <OriginTag origin={originOf(a)} />,
     <StateTag state={a.status === 'pending' ? 'pendiente' : 'confirmado'} />,
     <Num strong tone={income ? 'ok' : undefined}>{fmtSigned(a.amount, income)}</Num>,

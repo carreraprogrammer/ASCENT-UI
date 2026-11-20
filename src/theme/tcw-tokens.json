@@ -43,7 +43,7 @@
      "dark": "#F4F4F5",
      "light": "#111113"
     },
-    "usage": "Primary text and the logo strokes. 17.2:1 on bg dark, 18.1:1 on bg light."
+    "usage": "Primary text and the mark ink. 17.2:1 on bg dark, 18.1:1 on bg light."
    },
    {
     "name": "ink-muted",
@@ -75,7 +75,7 @@
      "dark": "#8B7BFF",
      "light": "#5B3DF5"
     },
-    "usage": "The cyborg colour: the lens of the logo, the one primary action, the one lit node or result. 5.7:1 dark, 5.9:1 light. Never large fills or body text."
+    "usage": "The cyborg colour: the violet square of the mark, the one primary action, the one lit node or result. 5.7:1 dark, 5.9:1 light. Never large fills or body text."
    },
    {
     "name": "violet-hover",
@@ -356,7 +356,7 @@
    {
     "name": "dur-blink",
     "value": "150ms",
-    "usage": "Each half of the logo blink."
+    "usage": "Reserved motion duration (the mark no longer blinks)."
    },
    {
     "name": "dur-reveal",

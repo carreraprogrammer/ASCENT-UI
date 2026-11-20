@@ -28,7 +28,7 @@ import styles from '../FinancePage.module.css';
 import { DateCell, InstButton, Num, OriginTag, StateTag, Sub } from '../../atoms/Inst';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { fmtAmount, fmtDay, fmtSigned, originOf } from '../../../utils/instrumento';
-import { CellWithActions, Chip, ChipSelect, PlainButton, SortHead, instDeskStyles as desk, type RowAction } from './instDesk';
+import { CellWithActions, Chip, ChipSelect, PlainButton, SortHead, TxCategoryCell, instDeskStyles as desk, type RowAction } from './instDesk';
 import { SOURCE_OPTIONS, monthLong, monthShort, nextSort, txQuickFilters, txQuickOf, type TxQuick } from './instDeskData';
 
 const periodFormatter = new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' });
@@ -359,6 +359,7 @@ export const TransactionsContent = () => {
         code: category.attributes.code,
         type: category.attributes.category_type,
       }),
+      code: category.attributes.code ?? 'unknown',
       color: category.attributes.color ?? 'var(--color-unknown)',
     })),
     [categories],
@@ -884,13 +885,6 @@ export const TransactionsContent = () => {
   const openEdit = (transaction: Transaction) => { setEditingTransaction(transaction); setComposerOpen(true); };
   const filtered = Boolean(activeFilterCount || filters.q || filters.status || filters.transaction_type || filters.source);
 
-  const gavetaLabel = (transaction: Transaction) => {
-    const cat = resolveTransactionCategory(transaction, categoryLookup);
-    if (!cat.categoryId && !cat.subcategoryName) return 'Sin clasificar';
-    const tier = getCategoryDisplayName({ name: cat.categoryName, code: cat.categoryCode, type: cat.categoryType });
-    return cat.subcategoryName ? `${tier} · ${cat.subcategoryName}` : tier;
-  };
-
   const rowActions = (transaction: Transaction): RowAction[] => {
     const acts: RowAction[] = [];
     if (transaction.attributes.status === 'pending') {
@@ -911,7 +905,8 @@ export const TransactionsContent = () => {
     return [
       <DateCell>{fmtDay(resolveTransactionDate(transaction))}</DateCell>,
       <span style={{ fontWeight: 500 }}>{transaction.attributes.concept}</span>,
-      <Sub>{gavetaLabel(transaction)}</Sub>,
+      // TCW-5: Gaveta · categoría con la pieza CategoryCell (atoms/Inst), vía TxCategoryCell.
+      <TxCategoryCell tx={transaction} lookup={categoryLookup} />,
       <OriginTag origin={originOf(transaction.attributes)} />,
       <StateTag state={pending ? 'pendiente' : 'confirmado'} />,
       <CellWithActions actions={rowActions(transaction)}>
@@ -946,7 +941,7 @@ export const TransactionsContent = () => {
           <Chip on={quick === 'expense'} onClick={() => setQuick('expense')}>Gastos</Chip>
           <Chip on={quick === 'pending'} onClick={() => setQuick('pending')}>Por revisar · {metrics.pendingCount}</Chip>
           <ChipSelect label="Gaveta" value={selectedCategoryId}
-            options={categoryFilters.map((c) => ({ value: c.id, label: c.name }))}
+            options={categoryFilters.map((c) => ({ value: c.id, label: c.name, color: `var(--color-${c.code})` }))}
             onChange={(id) => setFilters((current) => ({ ...current, category_id: id, subcategory_id: '' }))} />
           <ChipSelect label="Origen" value={String(filters.source ?? '')} options={SOURCE_OPTIONS}
             onChange={(source) => setFilters((current) => ({ ...current, source }))} />

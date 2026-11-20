@@ -17,7 +17,7 @@ Ascent wears the brand of **The Cyborg Way** (TCW-1). The design system is the s
   `--color-expense` (= `--data-lexical`). `--danger` only for errors.
 - **Categories**: the categorical palette of the brand (`--cat-*`): committed rose, necessary gold, flexible sky,
   investment lime, social coral, unknown slate. Charts use the same palette; never violet.
-- **Violet** only for the one primary action of a view and the lens of the mark. One primary per view.
+- **Violet** only for the one primary action of a view and the violet square of the mark. One primary per view.
 - **Seal**: "a cromo by The Cyborg Way" (`CromoSeal`) in the sign-in and at the foot of every page.
 - **Sign-in**: "Continuar con The Cyborg Way" (OIDC + PKCE against the brain) is the primary action; Google and
   email stay.
