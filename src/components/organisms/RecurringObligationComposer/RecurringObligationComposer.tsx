@@ -134,15 +134,6 @@ export const RecurringObligationComposer = ({
     <>
       <section className={styles.panel}>
         <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <div>
-              <p className={styles.sectionEyebrow}>Programación</p>
-              <h3 className={styles.sectionTitle}>Contexto del cobro</h3>
-            </div>
-            <p className={styles.sectionText}>
-              Define nombre, monto y calendario. La clasificación viene después para no mezclar estructura con detalle.
-            </p>
-          </div>
 
           <div className={styles.grid}>
             <div className={styles.spanTwo}>
@@ -210,15 +201,6 @@ export const RecurringObligationComposer = ({
         </div>
 
         <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <div>
-              <p className={styles.sectionEyebrow}>Clasificación</p>
-              <h3 className={styles.sectionTitle}>Categoría y subcategoría</h3>
-            </div>
-            <p className={styles.sectionText}>
-              Usa el mismo lenguaje visual de transacciones: categoría por color y subcategoría por icono.
-            </p>
-          </div>
 
           <div className={styles.categoryRail}>
             {localCategories.map((category) => {
@@ -290,7 +272,7 @@ export const RecurringObligationComposer = ({
 
         {error ? <p className={styles.error}>{error}</p> : null}
 
-        <div className={styles.actions}>
+        <div className={styles.actions} data-composer-actions>
           <Button label="Cancelar" variant="ghost" onClick={handleCancel} disabled={loading} />
           <Button label={submitLabel} onClick={() => void handleSubmit()} loading={loading} />
         </div>

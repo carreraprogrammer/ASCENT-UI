@@ -146,15 +146,6 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
   return (
     <section className={styles.panel}>
       <div className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div>
-            <p className={styles.sectionEyebrow}>Escenario</p>
-            <h3 className={styles.sectionTitle}>Perfil del ingreso</h3>
-          </div>
-          <p className={styles.sectionText}>
-            El editor prioriza nombre, cadencia y confiabilidad para proyectar el flujo mensual sin cargar la pantalla con ruido innecesario.
-          </p>
-        </div>
 
         <div className={styles.grid}>
           <div className={styles.spanTwo}>
@@ -263,7 +254,7 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
 
       {error ? <p className={styles.error}>{error}</p> : null}
 
-      <div className={styles.actions}>
+      <div className={styles.actions} data-composer-actions>
         <Button label="Cancelar" variant="ghost" onClick={onCancel ?? reset} disabled={loading} />
         <Button label={submitLabel} onClick={() => void handleSubmit()} loading={loading} />
       </div>

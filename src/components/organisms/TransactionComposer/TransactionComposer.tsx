@@ -1,10 +1,9 @@
 import { IonIcon } from '@ionic/react';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { cardOutline, cashOutline, walletOutline } from 'ionicons/icons';
 import { Button } from '../../atoms/Button';
 import { DateInput } from '../../atoms/DateInput';
 import { NumberInput } from '../../atoms/NumberInput';
-import { SelectInput } from '../../atoms/SelectInput';
+import { SegmentedControl } from '../../atoms/SegmentedControl';
 import { TextInput } from '../../atoms/TextInput';
 import { AddSubcategorySheet } from '../BudgetWizard/AddSubcategorySheet';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
@@ -30,10 +29,10 @@ const transactionStatusOptions = [
   { label: 'Pendiente', value: 'pending' },
 ];
 
-const PAYMENT_SOURCE_OPTIONS: { value: PaymentSource; label: string; icon: string }[] = [
-  { value: 'credit_card', label: 'Tarjeta de crédito', icon: cardOutline },
-  { value: 'debit', label: 'Débito / Nequi', icon: walletOutline },
-  { value: 'cash', label: 'Efectivo', icon: cashOutline },
+const PAYMENT_SOURCE_OPTIONS: { value: PaymentSource; label: string }[] = [
+  { value: 'credit_card', label: 'Tarjeta' },
+  { value: 'debit', label: 'Cuenta' },
+  { value: 'cash', label: 'Efectivo' },
 ];
 
 interface TransactionComposerValues {
@@ -194,16 +193,6 @@ export const TransactionComposer = ({
     <>
       <section className={styles.panel}>
         <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <div>
-              <p className={styles.sectionEyebrow}>Movimiento</p>
-              <h3 className={styles.sectionTitle}>Contexto base</h3>
-            </div>
-            <p className={styles.sectionText}>
-              Fecha, tipo y monto primero. Después clasifica el movimiento con el mismo sistema visual del resto de la app.
-            </p>
-          </div>
-
           <div className={styles.grid}>
             <DateInput
               name="transaction-date"
@@ -212,7 +201,7 @@ export const TransactionComposer = ({
               onChange={(date) => setValues((current) => ({ ...current, date }))}
               required
             />
-            <SelectInput
+            <SegmentedControl
               name="transaction-type"
               label="Tipo"
               value={values.transactionType}
@@ -223,7 +212,7 @@ export const TransactionComposer = ({
               disabled={isEditing}
               required
             />
-            <SelectInput
+            <SegmentedControl
               name="transaction-status"
               label="Estado"
               value={values.status}
@@ -251,30 +240,14 @@ export const TransactionComposer = ({
               />
             </div>
             <div className={styles.spanTwo}>
-              <p className={styles.fieldLabel}>Medio de pago *</p>
-              <div className={styles.paymentSourceRow}>
-                {PAYMENT_SOURCE_OPTIONS.map(({ value, label, icon }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.paymentSourceBtn,
-                      values.paymentSource === value ? styles.paymentSourceBtnActive : '',
-                    ].filter(Boolean).join(' ')}
-                    onClick={() =>
-                      setValues((current) => ({
-                        ...current,
-                        paymentSource: current.paymentSource === value ? null : value,
-                      }))
-                    }
-                    aria-label={label}
-                    title={label}
-                    aria-pressed={values.paymentSource === value}
-                  >
-                    <IonIcon icon={icon} className={styles.paymentSourceIcon} aria-hidden="true" />
-                  </button>
-                ))}
-              </div>
+              <SegmentedControl
+                name="transaction-payment-source"
+                label="Medio de pago"
+                value={values.paymentSource}
+                onChange={(paymentSource) => setValues((current) => ({ ...current, paymentSource: paymentSource as PaymentSource }))}
+                options={PAYMENT_SOURCE_OPTIONS}
+                required
+              />
             </div>
             {values.paymentSource === 'credit_card' ? (
               <div className={styles.spanTwo}>
@@ -291,16 +264,6 @@ export const TransactionComposer = ({
         </div>
 
         <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <div>
-              <p className={styles.sectionEyebrow}>Clasificación</p>
-              <h3 className={styles.sectionTitle}>Categoría y subcategoría</h3>
-            </div>
-            <p className={styles.sectionText}>
-              Las categorías son estáticas. Si falta una subcategoría, puedes crearla sin salir del editor.
-            </p>
-          </div>
-
           <div className={styles.categoryRail}>
             {localCategories.map((category) => {
               const active = String(category.id) === values.categoryId;
@@ -371,7 +334,7 @@ export const TransactionComposer = ({
 
         {error ? <p className={styles.error}>{error}</p> : null}
 
-        <div className={styles.actions}>
+        <div className={styles.actions} data-composer-actions>
           <Button label="Cancelar" variant="ghost" onClick={handleCancel} disabled={loading} />
           <Button label={submitLabel} onClick={() => void handleSubmit()} loading={loading} />
         </div>
