@@ -1,0 +1,51 @@
+/* TCW-27: modal centrado único de escritorio (asistentes 680 px, confirmación 420 px). Solo tokens. */
+.root { position: fixed; inset: 0; z-index: 1100; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) 60%, transparent); }
+.box {
+  position: relative; display: flex; flex-direction: column; max-width: 100%; max-height: calc(100vh - 48px);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px; color: var(--ink);
+  box-shadow: 0 24px 64px color-mix(in srgb, var(--bg) 70%, transparent);
+}
+.box:focus { outline: none; }
+.wizard { width: 680px; }
+.confirm { width: 420px; }
+
+.header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.headCopy { min-width: 0; }
+.title { margin: 0; font-size: 15px; font-weight: 600; line-height: 20px; }
+.origin { margin: 2px 0 0; font-family: var(--tcw-font-mono); font-size: 11px; line-height: 16px; color: var(--ink-muted); }
+.kbd { font-family: var(--tcw-font-mono); font-size: 11px; line-height: 14px; padding: 2px 6px; border: 1px solid var(--line); border-radius: 4px; color: var(--ink-muted); background: var(--bg); }
+
+.steps { display: flex; gap: 8px; margin: 0; padding: 14px 20px 0; list-style: none; }
+.step { flex: 1; display: grid; gap: 6px; min-width: 0; }
+.segment { display: block; height: 3px; border-radius: 2px; background: var(--line); }
+.stepName { font-family: var(--tcw-font-mono); font-size: 11px; line-height: 14px; color: var(--ink-muted); }
+.step[data-state="done"] .segment { background: var(--color-success); }
+.step[data-state="current"] .segment { background: var(--violet); }
+.step[data-state="current"] .stepName { color: var(--ink); }
+
+.body { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 20px 16px; }
+/* Filas simples separadas por filetes, para el contenido de los asistentes. */
+.body > * + * { border-top: 1px solid var(--line); }
+
+.target { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 16px 20px 0; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 14px; }
+.consequence { margin: 12px 20px 0; font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+
+.footer { display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--line); margin-top: 16px; }
+.spacer { flex: 1; }
+.back, .cancel, .danger, .primary { font: inherit; font-size: 13px; line-height: 16px; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+.back { border: 0; background: none; color: var(--ink-muted); padding-left: 0; }
+.back:hover { color: var(--ink); }
+.cancel { border: 1px solid var(--line); background: transparent; color: var(--ink); }
+.cancel:hover { border-color: var(--line-strong); }
+.primary { border: 1px solid var(--violet); background: var(--violet); color: var(--bg); font-weight: 600; }
+.primary:hover:not(:disabled) { background: var(--violet-hover); }
+.primary:disabled { opacity: .5; cursor: not-allowed; }
+.danger { border: 1px solid var(--danger); background: transparent; color: var(--danger); font-weight: 600; }
+.danger:hover { background: color-mix(in srgb, var(--danger) 14%, transparent); }
+.back:focus-visible, .cancel:focus-visible, .danger:focus-visible, .primary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .box { animation: pop 140ms ease-out; }
+}
+@keyframes pop { from { transform: scale(0.98); opacity: 0; } to { transform: none; opacity: 1; } }
