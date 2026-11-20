@@ -3,7 +3,10 @@ import { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { formatThousands } from '../../../utils/formatInput';
+import { mockMedia } from '../../../../tests/helpers/media';
 import { NumberInput } from './NumberInput';
+
+beforeEach(() => { mockMedia({ desktop: true }); });
 
 const Harness = ({ initial, onChange = () => {} }: { initial: number; onChange?: (v: number | '') => void }) => {
   const [v, setV] = useState<number | ''>(initial);
