@@ -1,30 +1,8 @@
-/* The Cyborg Way mark (design system: Mark). Colours from the tokens only. */
+/* Ascent mark (TCW-5, la esquina violeta). Colours from the tokens only. */
 .brandMark { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
 .brandMark svg { width: 100%; height: 100%; display: block; }
-.ring { fill: none; stroke: var(--ink); stroke-width: 4; }
-.machine { stroke-dasharray: 5 4; }
-.lens {
-  fill: var(--violet);
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: blink 30s linear infinite;
-  animation-delay: -26s; /* the first blink comes about 4 s after load, then every 30 s */
-}
-.pupil { fill: var(--bg); opacity: 0; animation: pupil 30s linear infinite; animation-delay: -26s; }
+.ink { fill: var(--ink); }
+.violet { fill: var(--violet); }
 .sm { width: 32px; height: 32px; }
 .md { width: 44px; height: 44px; }
 .lg { width: 72px; height: 72px; }
-
-@keyframes blink {
-  0%, 90% { transform: scaleY(1); } 90.5% { transform: scaleY(0.06); } 91% { transform: scaleY(1); }
-  97.3% { transform: scaleY(1); } 97.8% { transform: scaleY(0.06); } 98.3%, 100% { transform: scaleY(1); }
-}
-@keyframes pupil { 0%, 90.5% { opacity: 0; } 90.7% { opacity: 1; } 97.6% { opacity: 1; } 97.8%, 100% { opacity: 0; } }
-
-@media (prefers-reduced-motion: reduce) {
-  .lens, .pupil { animation: none; }
-  .pupil { opacity: 0; }
-}
-@media print {
-  .lens, .pupil { animation: none; }
-}

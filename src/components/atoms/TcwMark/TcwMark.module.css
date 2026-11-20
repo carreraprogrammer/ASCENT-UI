@@ -1,0 +1,8 @@
+/* The Cyborg Way mark (TCW-5). Colours from the tokens only. */
+.tcwMark { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.tcwMark svg { width: 100%; height: 100%; display: block; }
+.ink { fill: var(--ink); }
+.violet { fill: var(--violet); }
+.sm { width: 32px; height: 32px; }
+.md { width: 44px; height: 44px; }
+.lg { width: 72px; height: 72px; }

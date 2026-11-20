@@ -12,7 +12,7 @@
   overflow: hidden;
 }
 
-/* SVG background drawn from the logo */
+/* SVG background: chart line only (the old logo rings were removed, TCW-5) */
 .bg {
   position: absolute;
   inset: 0;
