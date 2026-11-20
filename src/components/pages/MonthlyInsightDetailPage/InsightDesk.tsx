@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { InstButton } from '../../atoms/Inst';
+import { CategoryCell, InstButton } from '../../atoms/Inst';
 import { InstSection } from '../../molecules/Inst';
 import styles from './InsightDesk.module.css';
 
@@ -37,6 +37,21 @@ export const InsightTabs = ({ active, date, month, year }: { active: InsightTab;
     </nav>
   );
 };
+
+// Icono por gaveta (los mismos de BudgetDetailPage) cuando el dato solo trae el código de la gaveta.
+export const GAVETA_ICON: Record<string, string> = {
+  committed: 'homeOutline', necessary: 'cartOutline', discretionary: 'heartOutline',
+  investment: 'bookOutline', social: 'giftOutline', income: 'flashOutline',
+};
+
+/** Una o varias gavetas con el icono y el color de siempre (pieza compartida CategoryCell). */
+export const GavetaCells = ({ items }: { items: Array<{ code: string; name: string }> }) => (
+  <span className={styles.gavetas}>
+    {items.map((g) => (
+      <CategoryCell key={g.code} code={g.code} income={g.code === 'income'} gavetaName={g.name} icon={GAVETA_ICON[g.code]} />
+    ))}
+  </span>
+);
 
 /** Enlace de texto con "›", con el router (sin recargar la página). */
 export const RouterLink = ({ to, children }: { to: string; children: ReactNode }) =>

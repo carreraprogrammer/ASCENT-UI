@@ -1,7 +1,17 @@
 // TCW-5 "Instrumento" (escritorio): cómo se leen en las tablas los datos que ya existen. Solo presentación: no
 // cambia ningún cálculo. Lo usan Transacciones, Deudas, Recurrentes, Subcategorías y Planeados en escritorio.
-import type { IncomeSource, MonthExecutionStatus } from '../../../types/finance.types';
+import type { CategoryResource, IncomeSource, MonthExecutionStatus } from '../../../types/finance.types';
 import { MINUS } from '../../../utils/instrumento';
+
+/** Icono para CategoryCell: el de la subcategoría y, si no trae, el de la categoría (mismo criterio que móvil). */
+export const categoryIconOf = (
+  categories: CategoryResource[], categoryId?: number | string | null, subcategoryId?: number | string | null,
+): string | undefined => {
+  const cat = categories.find((c) => String(c.id) === String(categoryId));
+  const sub = subcategoryId == null ? undefined
+    : (cat ? [cat] : categories).flatMap((c) => c.relationships?.subcategories?.data ?? []).find((s) => String(s.id) === String(subcategoryId));
+  return sub?.attributes?.icon ?? cat?.attributes.icon;
+};
 
 const MONTHS_SHORT = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 const MONTHS_LONG = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];

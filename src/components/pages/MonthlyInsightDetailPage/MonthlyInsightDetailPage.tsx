@@ -22,7 +22,7 @@ import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { BarPct, DateCell, InstButton, Num, StateTag } from '../../atoms/Inst';
 import { InstBand, InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { fmtAmount, fmtDay } from '../../../utils/instrumento';
-import { CoachLine, InsightTabs, NextStep, Reasoning, RouterLink } from './InsightDesk';
+import { CoachLine, GavetaCells, InsightTabs, NextStep, Reasoning, RouterLink } from './InsightDesk';
 import desk from './InsightDesk.module.css';
 import styles from './MonthlyInsightDetailPage.module.css';
 
@@ -409,6 +409,12 @@ export const MonthlyInsightDetailPage = () => {
               ) : null}
 
               <CoachLine body={coachBody} meta={[`Generado el 1 de ${MONTH_NAMES[nextMonth].toLowerCase()}`]} />
+
+              {overCategories.length > 0 ? (
+                <InstSection title="Gavetas sobre presupuesto">
+                  <GavetaCells items={overCategories.map((c) => ({ code: c.category_type, name: c.category }))} />
+                </InstSection>
+              ) : null}
 
               {milestones.length > 0 ? (
                 <InstSection title={`Logros del mes · ${milestones.length}`}>

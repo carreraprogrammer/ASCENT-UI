@@ -35,3 +35,13 @@
 .rose { color: var(--cat-rose); }
 .violet { color: var(--violet); }
 .muted { color: var(--ink-muted); }
+
+/* TCW-5 CategoryCell. El color viene de --cat-color (var(--color-<gaveta>)). Contraste medido del texto de gaveta
+   sobre --bg: claro 4.9 a 6.3:1, oscuro 6.8 a 10.9:1 con los tokens --cat-* actuales (ya oscurecidos en claro),
+   así que no hace falta variante de texto. Si un token bajara de 4.5:1, mezclarlo hacia --ink en .catGaveta. */
+.catCell { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+.catBox { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 28px; height: 28px; border-radius: 8px; background: color-mix(in srgb, var(--cat-color) 14%, transparent); color: var(--cat-color); }
+.catIcon { font-size: 15px; color: var(--cat-color); }
+.catText { display: inline-flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.catSub { font-size: 13px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.catGaveta { font-family: var(--tcw-font-mono); font-size: 11px; color: var(--cat-color); white-space: nowrap; }

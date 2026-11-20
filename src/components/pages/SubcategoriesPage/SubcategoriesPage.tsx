@@ -11,7 +11,7 @@ import { financeService } from '../../../services/financeService';
 import type { CategoryResource, ManageableSubcategory } from '../../../types/finance.types';
 import pageStyles from '../FinancePage.module.css';
 import styles from './SubcategoriesPage.module.css';
-import { InstButton, Num, Sub, Two } from '../../atoms/Inst';
+import { CategoryCell, InstButton, Num, Sub, Two } from '../../atoms/Inst';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { CellWithActions, instDeskStyles as desk } from '../TransactionsPage/instDesk';
@@ -144,7 +144,13 @@ export const SubcategoriesContent = () => {
   const tierName = (type: string) => TIER_LABEL[type] ?? (type === 'income' ? 'Ingreso' : type);
   const rows = subs.map((sub) => [
     <Two a={sub.name} b={sub.description || undefined} />,
-    <Sub>{sub.categories.map((c) => tierName(c.category_type)).join(' · ') || '—'}</Sub>,
+    sub.categories.length
+      ? <span style={{ display: 'inline-flex', flexDirection: 'column', gap: 6 }}>
+          {sub.categories.map((c) => (
+            <CategoryCell key={c.id} code={c.category_type} gavetaName={tierName(c.category_type)} icon={sub.icon} />
+          ))}
+        </span>
+      : <Sub>—</Sub>,
     <Sub>{sub.is_system ? 'del sistema' : 'propia'}</Sub>,
     <CellWithActions actions={[{ label: 'Borrar', danger: true, onClick: () => { setDeleting(sub); setReassignTo(''); } }]}>
       <Num strong>{sub.transaction_count}</Num>
