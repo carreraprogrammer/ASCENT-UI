@@ -9,5 +9,5 @@
 .button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .button:disabled { opacity: 0.45; cursor: not-allowed; }
 .mark { width: 22px; height: 22px; }
-.mark :global(path), .mark :global(circle) { stroke: var(--on-violet); }
 .mark :global(path) { fill: var(--on-violet); }
+.mark :global(rect) { fill: var(--on-violet); }

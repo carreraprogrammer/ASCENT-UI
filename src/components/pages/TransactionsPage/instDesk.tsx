@@ -55,6 +55,9 @@ const ColorChipMenu = ({ label, value, options, onChange }: {
     document.addEventListener('mousedown', away);
     return () => document.removeEventListener('mousedown', away);
   }, [open]);
+  useEffect(() => {
+    if (open) root.current?.querySelector<HTMLElement>('[role="menuitemradio"][aria-checked="true"]')?.focus();
+  }, [open]);
   const items: ChipOption[] = [{ value: '', label: `${label}: todas` }, ...options];
   const onKey = (e: KeyboardEvent<HTMLSpanElement>) => {
     if (e.key === 'Escape') { setOpen(false); root.current?.querySelector('button')?.focus(); return; }
@@ -62,12 +65,15 @@ const ColorChipMenu = ({ label, value, options, onChange }: {
     e.preventDefault();
     const btns = Array.from(root.current?.querySelectorAll<HTMLElement>('[role="menuitemradio"]') ?? []);
     const i = btns.indexOf(document.activeElement as HTMLElement);
-    btns[(i + (e.key === 'ArrowDown' ? 1 : -1) + btns.length) % btns.length]?.focus();
+    const down = e.key === 'ArrowDown';
+    const next = i < 0 ? (down ? 0 : btns.length - 1) : (i + (down ? 1 : -1) + btns.length) % btns.length;
+    btns[next]?.focus();
   };
   return (
-    <span ref={root} className={cx(styles.selChip, styles.menuRoot)} onKeyDown={onKey}>
+    <span ref={root} className={cx(styles.selChip, styles.menuRoot)} onKeyDown={onKey}
+      onBlur={(e) => { if (!root.current?.contains(e.relatedTarget as Node | null)) setOpen(false); }}>
       <button type="button" className={cx(styles.chip, value && styles.chipOn)} aria-haspopup="menu" aria-expanded={open}
-        aria-label={label} onClick={() => setOpen((o) => !o)}>
+        onClick={() => setOpen((o) => !o)}>
         {current?.color ? <Dot color={current.color} /> : null}{current?.label ?? label} ▾
       </button>
       {open ? (
