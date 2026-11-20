@@ -12,6 +12,8 @@ interface Options {
   initialFocus?: string;
 }
 
+const stack: object[] = [];
+
 const focusables = (root: HTMLElement): HTMLElement[] => Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE));
 
 /** Comportamiento común de los diálogos de escritorio (TCW-27): foco atrapado y devuelto, Esc, Cmd/Ctrl+Enter y fondo sin scroll. */
@@ -33,9 +35,13 @@ export const useDialogBehavior = ({ isOpen, containerRef, onClose, onSubmit, ini
       target.focus();
     }
 
+    // Con diálogos apilados (p. ej. la confirmación sobre el panel) solo reacciona el de arriba.
+    const token = {};
+    stack.push(token);
+
     const onKeyDown = (e: KeyboardEvent) => {
       const box = containerRef.current;
-      if (!box || e.defaultPrevented) return;
+      if (!box || e.defaultPrevented || stack[stack.length - 1] !== token) return;
       if (e.key === 'Escape') {
         e.preventDefault();
         closeRef.current();
@@ -60,6 +66,7 @@ export const useDialogBehavior = ({ isOpen, containerRef, onClose, onSubmit, ini
 
     return () => {
       document.removeEventListener('keydown', onKeyDown);
+      stack.splice(stack.indexOf(token), 1);
       document.body.style.overflow = previousOverflow;
       if (previous && typeof previous.focus === 'function' && document.contains(previous)) previous.focus();
     };

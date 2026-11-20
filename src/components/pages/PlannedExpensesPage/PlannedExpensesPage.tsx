@@ -10,6 +10,7 @@ import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { CrudModal } from '../../molecules/CrudModal';
+import { CenteredModal } from '../../organisms/CenteredModal';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { PlannedExpenseComposer } from '../../organisms/PlannedExpenseComposer';
@@ -165,8 +166,16 @@ export const PlannedExpensesContent = () => {
     await handleUpdate(plannedExpense.id, { status });
   };
 
-  const handleDeleteExpense = async (plannedExpense: PlannedExpense) => {
-    if (!window.confirm(`¿Borrar el plan "${plannedExpense.attributes.name}"? Se borra también su bolsillo.`)) return;
+  // TCW-27: en escritorio las confirmaciones son el modal centrado; móvil conserva window.confirm.
+  const [pendingDelete, setPendingDelete] = useState<
+    { kind: 'expense'; item: PlannedExpense } | { kind: 'fund'; item: SinkingFund } | null
+  >(null);
+
+  const handleDeleteExpense = async (plannedExpense: PlannedExpense, confirmed = false) => {
+    if (!confirmed) {
+      if (isDesktop) { setPendingDelete({ kind: 'expense', item: plannedExpense }); return; }
+      if (!window.confirm(`¿Borrar el plan "${plannedExpense.attributes.name}"? Se borra también su bolsillo.`)) return;
+    }
     try {
       await financeService.deletePlannedExpense(plannedExpense.id);
       await load();
@@ -207,8 +216,11 @@ export const PlannedExpensesContent = () => {
     }
   };
 
-  const handleDeleteFund = async (fund: SinkingFund) => {
-    if (!window.confirm(`¿Borrar el bolsillo "${fund.name}"? El saldo no se devuelve automáticamente.`)) return;
+  const handleDeleteFund = async (fund: SinkingFund, confirmed = false) => {
+    if (!confirmed) {
+      if (isDesktop) { setPendingDelete({ kind: 'fund', item: fund }); return; }
+      if (!window.confirm(`¿Borrar el bolsillo "${fund.name}"? El saldo no se devuelve automáticamente.`)) return;
+    }
     try {
       await financeService.deleteSinkingFund(fund.id);
       await load();
@@ -352,6 +364,31 @@ export const PlannedExpensesContent = () => {
 
   const overlays = (
     <>
+        <CenteredModal
+          isOpen={Boolean(pendingDelete)}
+          variant="confirm"
+          title={pendingDelete?.kind === 'fund' ? 'Eliminar bolsillo' : 'Eliminar gasto planeado'}
+          confirmLabel="Eliminar"
+          cancelLabel="Cancelar"
+          consequence={pendingDelete?.kind === 'fund'
+            ? 'El saldo no se devuelve automáticamente. Esta acción no se puede deshacer.'
+            : 'Se borra también su bolsillo. Esta acción no se puede deshacer.'}
+          onClose={() => setPendingDelete(null)}
+          onConfirm={() => {
+            const target = pendingDelete;
+            setPendingDelete(null);
+            if (!target) return;
+            if (target.kind === 'expense') void handleDeleteExpense(target.item, true);
+            else void handleDeleteFund(target.item, true);
+          }}
+        >
+          {pendingDelete ? (
+            <>
+              <span>{pendingDelete.kind === 'fund' ? pendingDelete.item.name : pendingDelete.item.attributes.name}</span>
+              <span>{fmtAmount(pendingDelete.kind === 'fund' ? pendingDelete.item.current_balance : pendingDelete.item.attributes.amount_estimated)}</span>
+            </>
+          ) : null}
+        </CenteredModal>
         <SortSheet
           isOpen={sortOpen}
           title="Ordenar gastos planeados"

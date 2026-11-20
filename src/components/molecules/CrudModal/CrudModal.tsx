@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   IonContent,
   IonModal,
@@ -34,7 +34,17 @@ export const CrudModal = ({
   isOpen, title, subtitle, children, onClose, origin, figure, onSubmit, onDelete, submitLabel, cancelLabel, deleteLabel,
 }: CrudModalProps) => {
   const desktop = useDesktopLayout();
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [composerLabel, setComposerLabel] = useState<string | null>(null);
+  // Si el contenido es un composer (trae su propio pie), el pie del panel acciona su botón principal.
+  useEffect(() => {
+    if (!desktop || !isOpen) return;
+    const buttons = bodyRef.current?.querySelectorAll<HTMLButtonElement>('[data-composer-actions] button');
+    const label = buttons && buttons.length ? buttons[buttons.length - 1].textContent?.trim() ?? null : null;
+    setComposerLabel((current) => (current === label ? current : label));
+  });
   if (desktop) {
+    const wired = onSubmit ?? (composerLabel ? triggerComposerSubmit : undefined);
     return (
       <SidePanel
         isOpen={isOpen}
@@ -42,13 +52,13 @@ export const CrudModal = ({
         origin={origin}
         figure={figure}
         onClose={onClose}
-        onSubmit={onSubmit}
+        onSubmit={wired}
         onDelete={onDelete}
-        submitLabel={submitLabel}
+        submitLabel={submitLabel ?? composerLabel ?? undefined}
         cancelLabel={cancelLabel}
         deleteLabel={deleteLabel}
       >
-        {children}
+        <div ref={bodyRef}>{children}</div>
       </SidePanel>
     );
   }
