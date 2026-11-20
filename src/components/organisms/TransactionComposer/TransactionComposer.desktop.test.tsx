@@ -10,7 +10,55 @@ import { TX_78000 } from '../../../../tests/fixtures/transaction';
 
 // El composer importa themeStore (matchMedia al importar): se aísla de CA10 para que el rojo de esta suite sea el de CA6.
 vi.hoisted(async () => (await import('../../../test/stubMatchMedia')).stubMatchMedia());
+import { mockMedia } from '../../../../tests/helpers/media';
+
+let native = false;
+vi.mock('@ionic/react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@ionic/react')>();
+  return { ...actual, isPlatform: (p: string) => (p === 'capacitor' ? native : actual.isPlatform(p as never)) };
+});
+
 import { TransactionComposer } from './TransactionComposer';
+
+// CONTRATO ADICIONAL (CA12): los cambios del composer solo aplican en escritorio (useDesktopLayout). En móvil y en
+// Capacitor se conserva el composer actual: Medio de pago con botones de icono, <select> para Tipo/Estado, y los
+// encabezados "Contexto base" y "Categoría y subcategoría" con su texto.
+beforeEach(() => { native = false; mockMedia({ desktop: true }); });
+
+describe.each([
+  ['móvil (< 1024 px)', () => { native = false; mockMedia({ desktop: false }); }],
+  ['Capacitor (>= 1024 px nativo)', () => { native = true; mockMedia({ desktop: true }); }],
+])('TransactionComposer sin cambios en %s', (_n, setup) => {
+  it('TCW-27 CA12: Medio de pago son botones de icono con aria-label y aria-pressed, sin radiogroup', () => {
+    setup();
+    render(<TransactionComposer transaction={TX_78000} categories={[]} onCreate={async () => {}} onUpdate={async () => {}} />);
+    expect(screen.queryByRole('radiogroup')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Tarjeta de crédito' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Débito / Nequi' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Efectivo' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('TCW-27 CA12: Tipo y Estado siguen siendo <select>', () => {
+    setup();
+    render(<TransactionComposer transaction={TX_78000} categories={[]} onCreate={async () => {}} onUpdate={async () => {}} />);
+    expect(screen.getAllByRole('combobox')).toHaveLength(2);
+  });
+
+  it('TCW-27 CA12: conserva los encabezados originales ("Contexto base", "Categoría y subcategoría") y su texto', () => {
+    setup();
+    render(<TransactionComposer transaction={TX_78000} categories={[]} onCreate={async () => {}} onUpdate={async () => {}} />);
+    expect(screen.getByRole('heading', { name: 'Contexto base' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Categoría y subcategoría' })).toBeInTheDocument();
+    expect(screen.getByText(/Fecha, tipo y monto primero/)).toBeInTheDocument();
+  });
+
+  it('TCW-27 CA12: sin texto formateado de fecha ni punto en el monto (como antes)', () => {
+    setup();
+    render(<TransactionComposer transaction={TX_78000} categories={[]} onCreate={async () => {}} onUpdate={async () => {}} />);
+    expect(screen.queryByTestId('date-display')).toBeNull();
+    expect(screen.getByRole('textbox', { name: /Monto/ })).toHaveValue(new Intl.NumberFormat().format(78000));
+  });
+});
 
 const renderEdit = () =>
   render(<TransactionComposer transaction={TX_78000} categories={[]} onCreate={async () => {}} onUpdate={async () => {}} />);
