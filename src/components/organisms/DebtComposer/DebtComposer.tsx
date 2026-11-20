@@ -3,6 +3,8 @@ import { Button } from '../../atoms/Button';
 import { DateInput } from '../../atoms/DateInput';
 import { NumberInput } from '../../atoms/NumberInput';
 import { SelectInput } from '../../atoms/SelectInput';
+import { SegmentedControl } from '../../atoms/SegmentedControl';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { TextInput } from '../../atoms/TextInput';
 import { TextareaInput } from '../../atoms/TextareaInput';
 import type { Debt, DebtPayload } from '../../../types/finance.types';
@@ -62,6 +64,8 @@ export interface DebtComposerProps {
 }
 
 export const DebtComposer = ({ debt = null, loading, onCreate, onUpdate, onCancel }: DebtComposerProps) => {
+  // TCW-27: Tipo y Estado como segmentados con texto solo en escritorio web; móvil y Capacitor conservan los <select>.
+  const desktop = useDesktopLayout();
   const [values, setValues] = useState<DebtComposerValues>(emptyValues);
   const [error, setError] = useState<string | null>(null);
 
@@ -139,22 +143,44 @@ export const DebtComposer = ({ debt = null, loading, onCreate, onUpdate, onCance
               required
             />
           </div>
-          <SelectInput
-            name="debt-type"
-            label="Tipo"
-            value={values.debtType}
-            onChange={(debtType) => setValues((current) => ({ ...current, debtType: String(debtType) }))}
-            options={debtTypeOptions}
-            required
-          />
-          <SelectInput
-            name="debt-status"
-            label="Estado"
-            value={values.status}
-            onChange={(status) => setValues((current) => ({ ...current, status: String(status) }))}
-            options={debtStatusOptions}
-            required
-          />
+          {desktop ? (
+            <SegmentedControl
+              name="debt-type"
+              label="Tipo"
+              value={values.debtType}
+              onChange={(debtType) => setValues((current) => ({ ...current, debtType }))}
+              options={debtTypeOptions}
+              required
+            />
+          ) : (
+            <SelectInput
+              name="debt-type"
+              label="Tipo"
+              value={values.debtType}
+              onChange={(debtType) => setValues((current) => ({ ...current, debtType: String(debtType) }))}
+              options={debtTypeOptions}
+              required
+            />
+          )}
+          {desktop ? (
+            <SegmentedControl
+              name="debt-status"
+              label="Estado"
+              value={values.status}
+              onChange={(status) => setValues((current) => ({ ...current, status }))}
+              options={debtStatusOptions}
+              required
+            />
+          ) : (
+            <SelectInput
+              name="debt-status"
+              label="Estado"
+              value={values.status}
+              onChange={(status) => setValues((current) => ({ ...current, status: String(status) }))}
+              options={debtStatusOptions}
+              required
+            />
+          )}
           <NumberInput
             name="debt-original-amount"
             label="Monto original"
