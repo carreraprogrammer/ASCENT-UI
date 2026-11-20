@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { CenteredModal } from '../CenteredModal';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonModal, IonTitle, IonToolbar } from '@ionic/react';
 import { checkmarkCircleOutline } from 'ionicons/icons';
 import { Button } from '../../atoms/Button';
@@ -25,6 +27,12 @@ import styles from './IncomeSetupWizard.module.css';
 type Cadence = 'monthly' | 'biweekly' | 'weekly' | 'irregular';
 type WindowKey = 'early' | 'week1' | 'q1' | 'mid' | 'q2' | 'late';
 type Step = 'base' | 'ask_variable' | 'variable' | 'done';
+
+const WIZARD_STEPS = [
+  { id: 'base', label: 'Ingreso base' },
+  { id: 'variable', label: 'Ingresos variables' },
+  { id: 'done', label: 'Listo' },
+];
 
 interface BaseForm {
   name: string;
@@ -73,6 +81,7 @@ export interface IncomeSetupWizardProps {
 }
 
 export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWizardProps) => {
+  const desktop = useDesktopLayout();
   const [step, setStep] = useState<Step>('base');
   const [base, setBase] = useState<BaseForm>(emptyBase());
   const [varIncome, setVarIncome] = useState<VarForm>(emptyVar());
@@ -203,18 +212,8 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
 
   // ── Render ───────────────────────────────────────────────────────────────
 
-  return (
-    <IonModal isOpen={isOpen} onDidDismiss={handleClose} className="crud-modal">
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>{stepTitle[step]}</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={handleClose}>Cerrar</IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-
-      <IonContent className="crud-modal__content">
+  const body = (
+      <>
 
         {/* ── Step: Ingreso base ── */}
         {step === 'base' && (
@@ -452,6 +451,38 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
           </div>
         )}
 
+      </>
+  );
+
+  // TCW-27: en escritorio (>= 1024 px, web) el asistente va en el modal centrado compartido; móvil y Capacitor conservan la hoja.
+  if (desktop) {
+    return (
+      <CenteredModal
+        isOpen={isOpen}
+        variant="wizard"
+        title={stepTitle[step]}
+        steps={WIZARD_STEPS}
+        currentStep={step === 'base' ? 0 : step === 'done' ? 2 : 1}
+        onClose={handleClose}
+      >
+        {body}
+      </CenteredModal>
+    );
+  }
+
+  return (
+    <IonModal isOpen={isOpen} onDidDismiss={handleClose} className="crud-modal">
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle>{stepTitle[step]}</IonTitle>
+          <IonButtons slot="end">
+            <IonButton onClick={handleClose}>Cerrar</IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
+
+      <IonContent className="crud-modal__content">
+        {body}
       </IonContent>
     </IonModal>
   );

@@ -8,6 +8,8 @@ import { warningOutline } from 'ionicons/icons';
 import { BrandMark } from '../../atoms/BrandMark';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
+import { CenteredModal } from '../CenteredModal';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { financeService } from '../../../services/financeService';
 import { formatCurrencyCompact, formatCurrencyFull } from '../../../utils/formatCurrency';
 import type { BudgetAvailableCategory, BudgetProposal, BudgetProposalCategory } from '../../../types/finance.types';
@@ -120,15 +122,11 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
     }
   };
 
-  return (
-    <IonModal
-      className={styles.modal}
-      isOpen={isOpen}
-      onDidDismiss={onClose}
-      style={{ '--border-radius': '28px', '--width': 'min(1100px, 98vw)', '--height': 'min(94dvh, 960px)' }}
-    >
-      <IonContent className={styles.body}>
+  const desktop = useDesktopLayout();
+
+  const panel = (
         <div className={styles.panel}>
+          {desktop ? null : (
           <div className={styles.topbar}>
             <div className={styles.topbarBrand}>
               <BrandMark variant="monoline" size="md" />
@@ -144,6 +142,7 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
             </div>
             <button type="button" onClick={onClose} className={styles.closeBtn}>Cerrar</button>
           </div>
+          )}
 
         {loading && (
           <div className={styles.loadingState}>
@@ -329,6 +328,34 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
             </div>
           )}
         </div>
+  );
+
+  // TCW-27: en escritorio (>= 1024 px, web) el plan va en el modal centrado compartido; móvil y Capacitor conservan el IonModal.
+  if (desktop) {
+    return (
+      <CenteredModal
+        isOpen={isOpen}
+        variant="wizard"
+        title="Plan mensual"
+        origin={proposal?.mode === 'provisional' ? 'provisional' : undefined}
+        steps={[{ id: 'plan', label: 'Plan mensual' }]}
+        currentStep={0}
+        onClose={onClose}
+      >
+        {panel}
+      </CenteredModal>
+    );
+  }
+
+  return (
+    <IonModal
+      className={styles.modal}
+      isOpen={isOpen}
+      onDidDismiss={onClose}
+      style={{ '--border-radius': '28px', '--width': 'min(1100px, 98vw)', '--height': 'min(94dvh, 960px)' }}
+    >
+      <IonContent className={styles.body}>
+        {panel}
       </IonContent>
     </IonModal>
   );

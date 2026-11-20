@@ -19,8 +19,9 @@ export interface WizardModalProps extends BaseProps {
   currentStep: number;
   onBack?: () => void;
   backLabel?: string;
-  onPrimary: () => void;
-  primaryLabel: string;
+  /** Sin onPrimary ni onBack no hay pie (el asistente trae sus propios botones en el cuerpo). */
+  onPrimary?: () => void;
+  primaryLabel?: string;
   primaryDisabled?: boolean;
 }
 
@@ -78,11 +79,13 @@ export const CenteredModal = (props: CenteredModalProps) => {
               })}
             </ol>
             <div className={styles.body}>{children}</div>
-            <footer className={styles.footer}>
-              {props.onBack ? <button type="button" className={styles.back} onClick={props.onBack}>{props.backLabel ?? '← paso anterior'}</button> : null}
-              <span className={styles.spacer} />
-              <button type="button" className={styles.primary} onClick={props.onPrimary} disabled={props.primaryDisabled}>{props.primaryLabel}</button>
-            </footer>
+            {props.onPrimary || props.onBack ? (
+              <footer className={styles.footer}>
+                {props.onBack ? <button type="button" className={styles.back} onClick={props.onBack}>{props.backLabel ?? '← paso anterior'}</button> : null}
+                <span className={styles.spacer} />
+                {props.onPrimary ? <button type="button" className={styles.primary} onClick={props.onPrimary} disabled={props.primaryDisabled}>{props.primaryLabel}</button> : null}
+              </footer>
+            ) : null}
           </>
         ) : (
           <>

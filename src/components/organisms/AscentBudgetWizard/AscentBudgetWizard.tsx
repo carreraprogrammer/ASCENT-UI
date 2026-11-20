@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { IonIcon, IonModal } from '@ionic/react';
+import { CenteredModal } from '../CenteredModal';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import {
   alertCircleOutline, arrowDownOutline, arrowForward, checkmarkCircle,
   close as closeIcon, informationCircleOutline, lockClosedOutline,
@@ -222,9 +224,16 @@ export interface AscentBudgetWizardProps {
 
 type Step = 'intro' | 'list' | 'summary';
 
+const WIZARD_STEPS = [
+  { id: 'intro', label: 'Inicio' },
+  { id: 'list', label: 'Categorías' },
+  { id: 'summary', label: 'Resumen' },
+];
+
 export const AscentBudgetWizard = ({
   isOpen, onClose, onComplete, wizardData, month, existingMode,
 }: AscentBudgetWizardProps) => {
+  const desktop = useDesktopLayout();
   const [step, setStep] = useState<Step>('intro');
   const [amounts, setAmounts] = useState<Record<string, number>>({});
   const [active, setActive] = useState<string | null>(null);
@@ -491,11 +500,32 @@ export const AscentBudgetWizard = ({
     );
   };
 
+  const content = (
+    <div className="awz">
+      {!wizardData ? null : step === 'intro' ? renderIntro() : step === 'list' ? renderList() : renderSummary()}
+    </div>
+  );
+
+  // TCW-27: en escritorio (>= 1024 px, web) el asistente va en el modal centrado compartido; móvil y Capacitor conservan el IonModal.
+  if (desktop) {
+    return (
+      <CenteredModal
+        isOpen={isOpen}
+        variant="wizard"
+        title="Presupuesto mensual"
+        origin={monthLabel}
+        steps={WIZARD_STEPS}
+        currentStep={step === 'intro' ? 0 : step === 'list' ? 1 : 2}
+        onClose={onClose}
+      >
+        {content}
+      </CenteredModal>
+    );
+  }
+
   return (
     <IonModal isOpen={isOpen} onDidDismiss={onClose}>
-      <div className="awz">
-        {!wizardData ? null : step === 'intro' ? renderIntro() : step === 'list' ? renderList() : renderSummary()}
-      </div>
+      {content}
     </IonModal>
   );
 };
