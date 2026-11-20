@@ -1,0 +1,37 @@
+/* TCW-27: panel lateral único de escritorio. Solo tokens. */
+.root { position: fixed; inset: 0; z-index: 1000; }
+.scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) 45%, transparent); }
+.panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 480px; max-width: 100vw; display: flex; flex-direction: column;
+  background: var(--surface); border-left: 1px solid var(--line); color: var(--ink);
+  box-shadow: -24px 0 48px color-mix(in srgb, var(--bg) 60%, transparent);
+  animation: slideIn 180ms ease-out;
+}
+.panel:focus { outline: none; }
+.panel[data-reduced-motion="true"] { animation: none; }
+@keyframes slideIn { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.headCopy { min-width: 0; }
+.title { margin: 0; font-size: 15px; font-weight: 600; line-height: 20px; color: var(--ink); }
+.origin { margin: 2px 0 0; font-family: var(--tcw-font-mono); font-size: 11px; line-height: 16px; color: var(--ink-muted); }
+.kbd, .hint {
+  font-family: var(--tcw-font-mono); font-size: 11px; line-height: 14px; padding: 2px 6px; border: 1px solid var(--line);
+  border-radius: 4px; color: var(--ink-muted); background: var(--bg);
+}
+
+.body { flex: 1; min-height: 0; overflow-y: auto; padding: 20px; overscroll-behavior: contain; }
+.figure { display: grid; gap: 4px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+.figureValue { font-family: var(--tcw-font-mono); font-size: 34px; line-height: 40px; font-weight: 500; color: var(--ink); }
+.figureLabel { font-family: var(--tcw-font-mono); font-size: 11px; color: var(--ink-muted); }
+
+.footer { display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--line); background: var(--surface); }
+.spacer { flex: 1; }
+.delete, .cancel, .primary { font: inherit; font-size: 13px; line-height: 16px; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+.delete { border: 0; background: none; padding-left: 0; color: var(--danger); }
+.cancel { border: 1px solid var(--line); background: transparent; color: var(--ink); }
+.primary { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--violet); background: var(--violet); color: var(--bg); font-weight: 600; }
+.primary .hint { color: inherit; background: transparent; border-color: color-mix(in srgb, var(--bg) 35%, transparent); }
+.delete:focus-visible, .cancel:focus-visible, .primary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.cancel:hover { border-color: var(--line-strong); }
+.primary:hover { background: var(--violet-hover); }
