@@ -317,6 +317,7 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
                   </strong>
                 </div>
               </div>
+              {desktop ? null : (
               <div className={styles.actions}>
                 <Button label="Cerrar" variant="ghost" onClick={onClose} />
                 <Button
@@ -325,6 +326,7 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
                   disabled={saving || margin < 0}
                 />
               </div>
+              )}
             </div>
           )}
         </div>
@@ -341,6 +343,9 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
         steps={[{ id: 'plan', label: 'Plan mensual' }]}
         currentStep={0}
         onClose={onClose}
+        onPrimary={!loading && !error && proposal ? () => void handleConfirm() : undefined}
+        primaryLabel={saving ? 'Guardando...' : 'Confirmar plan'}
+        primaryDisabled={saving || margin < 0}
       >
         {panel}
       </CenteredModal>

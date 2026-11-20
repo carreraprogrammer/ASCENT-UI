@@ -134,6 +134,16 @@ export const SinkingFundComposer = ({
   return (
     <section className={styles.panel}>
       <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <div>
+            <p className={styles.sectionEyebrow}>Bolsillo</p>
+            <h3 className={styles.sectionTitle}>Reserva para un gasto futuro</h3>
+          </div>
+          <p className={styles.sectionText}>
+            Aparta dinero cada mes hacia un gasto futuro puntual (SOAT, mantenimiento, ropa). El bolsillo
+            pertenece a una de tus categorías y acumula hasta que llega el gasto.
+          </p>
+        </div>
 
         <div className={styles.grid}>
           <div className={styles.spanTwo}>

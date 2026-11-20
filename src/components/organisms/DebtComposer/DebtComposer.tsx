@@ -118,6 +118,15 @@ export const DebtComposer = ({ debt = null, loading, onCreate, onUpdate, onCance
   return (
     <section className={styles.panel}>
       <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <div>
+            <p className={styles.sectionEyebrow}>Estructura</p>
+            <h3 className={styles.sectionTitle}>Perfil de la deuda</h3>
+          </div>
+          <p className={styles.sectionText}>
+            Mantén primero los datos que definen el instrumento y luego el estado operativo para revisar la carga mensual con claridad.
+          </p>
+        </div>
 
         <div className={styles.grid}>
           <div className={styles.spanTwo}>

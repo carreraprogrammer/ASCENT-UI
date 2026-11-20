@@ -337,10 +337,12 @@ export const AscentBudgetWizard = ({
           Son <b>{totalDecisions} decisiones</b>. Cada categoría arranca en $0 — te muestro qué destinaste y gastaste antes, pero el número lo pones tú.
         </p>
       </div>
+      {desktop ? null : (
       <div className="dock">
         <button className="btn btn-primary" onClick={() => setStep('list')}>Empezar a repartir <IonIcon icon={arrowForward} /></button>
         <div className="dock-hint">Toma ~2 minutos · puedes cambiarlo cuando quieras</div>
       </div>
+      )}
     </>
   );
 
@@ -390,6 +392,7 @@ export const AscentBudgetWizard = ({
           </div>
         ))}
       </div>
+      {desktop ? null : (
       <div className="dock">
         {por > 0 ? (
           <>
@@ -402,6 +405,7 @@ export const AscentBudgetWizard = ({
           <button className="btn btn-primary danger" onClick={() => setStep('summary')}>Asignaste {pesoK(-por)} de más · revisar</button>
         )}
       </div>
+      )}
     </>
   );
 
@@ -483,6 +487,7 @@ export const AscentBudgetWizard = ({
             </div>
           )}
         </div>
+        {desktop ? null : (
         <div className="dock">
           {over ? (
             <>
@@ -496,6 +501,7 @@ export const AscentBudgetWizard = ({
             </>
           )}
         </div>
+        )}
       </>
     );
   };
@@ -517,6 +523,17 @@ export const AscentBudgetWizard = ({
         steps={WIZARD_STEPS}
         currentStep={step === 'intro' ? 0 : step === 'list' ? 1 : 2}
         onClose={onClose}
+        onBack={step === 'list' ? () => setStep('intro') : step === 'summary' ? () => setStep('list') : undefined}
+        onPrimary={
+          step === 'intro' ? () => setStep('list')
+            : step === 'list' ? () => setStep('summary')
+              : por < 0 ? () => setStep('list') : submit
+        }
+        primaryLabel={
+          step === 'intro' ? 'Empezar a repartir'
+            : step === 'list' ? (por < 0 ? 'Revisar plan' : 'Ver mi plan')
+              : por < 0 ? 'Ajustar Flexible' : `Confirmar plan de ${monthLabel}`
+        }
       >
         {content}
       </CenteredModal>

@@ -1,4 +1,5 @@
 import { SheetModal } from '../SheetModal';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import styles from './SortSheet.module.css';
 
 export interface SortOption {
@@ -26,7 +27,12 @@ export const SortSheet = ({
   onClose,
   onChangeSortBy,
   onChangeSortDir,
-}: SortSheetProps) => (
+}: SortSheetProps) => {
+  // TCW-27: en escritorio no hay hoja desde abajo. El orden va en los encabezados de columna (SortHead) y los filtros en el
+  // Menu compartido; la hoja es solo de móvil y Capacitor.
+  const desktop = useDesktopLayout();
+  if (desktop) return null;
+  return (
   <SheetModal isOpen={isOpen} title={title} onClose={onClose} height="compact">
     <div className={styles.content}>
       <div className={styles.snapshot}>
@@ -79,4 +85,5 @@ export const SortSheet = ({
       </section>
     </div>
   </SheetModal>
-);
+  );
+};

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Button } from '../../atoms/Button';
 import { SheetModal } from '../SheetModal';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import styles from './FilterSheet.module.css';
 
 export interface FilterSheetProps {
@@ -21,7 +22,11 @@ export const FilterSheet = ({
   onClose,
   onReset,
   onApply,
-}: FilterSheetProps) => (
+}: FilterSheetProps) => {
+  // TCW-27: en escritorio los filtros son chips con el Menu compartido; la hoja es solo de móvil y Capacitor.
+  const desktop = useDesktopLayout();
+  if (desktop) return null;
+  return (
   <SheetModal isOpen={isOpen} title={title} onClose={onClose} height="tall">
     <div className={styles.content}>
       <div className={styles.body}>{children}</div>
@@ -31,4 +36,5 @@ export const FilterSheet = ({
       </div>
     </div>
   </SheetModal>
-);
+  );
+};

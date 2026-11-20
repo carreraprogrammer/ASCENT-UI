@@ -3,6 +3,8 @@ const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', '
 
 /** Separador de miles con punto, nunca coma. '' si no hay dígitos. */
 export const formatThousands = (value: number | string): string => {
+  // Un número con decimales (78000.5) no se toca: reformatearlo quitaría el punto decimal y cambiaría el valor.
+  if (typeof value === 'number' && Number.isFinite(value) && !Number.isInteger(value)) return String(value);
   const digits = String(value).replace(/\D/g, '');
   if (!digits) return '';
   const clean = digits.replace(/^0+(?=\d)/, '');

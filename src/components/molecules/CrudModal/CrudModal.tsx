@@ -29,6 +29,13 @@ export const triggerComposerSubmit = (): void => {
   buttons[buttons.length - 1]?.click();
 };
 
+/** Cancelar del panel: acciona el "Cancelar" del composer (que limpia el formulario y cierra); sin composer, cierra. */
+const triggerComposerCancel = (fallback: () => void) => (): void => {
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-composer-actions] button');
+  if (buttons.length > 1) buttons[0].click();
+  else fallback();
+};
+
 /** Escritorio (>= 1024 px, no Capacitor): panel lateral. Móvil y Capacitor: la hoja IonModal de siempre. */
 export const CrudModal = ({
   isOpen, title, subtitle, children, onClose, origin, figure, onSubmit, onDelete, submitLabel, cancelLabel, deleteLabel,
@@ -54,6 +61,7 @@ export const CrudModal = ({
         onClose={onClose}
         onSubmit={wired}
         onDelete={onDelete}
+        onCancel={composerLabel ? triggerComposerCancel(onClose) : undefined}
         submitLabel={submitLabel ?? composerLabel ?? undefined}
         cancelLabel={cancelLabel}
         deleteLabel={deleteLabel}

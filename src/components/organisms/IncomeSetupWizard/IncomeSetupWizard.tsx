@@ -312,9 +312,11 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
             </div>
 
             {error ? <p className={styles.error}>{error}</p> : null}
+            {desktop ? null : (
             <div className={styles.actions}>
               <Button label="Continuar" onClick={() => void handleBaseNext()} loading={saving} />
             </div>
+            )}
           </div>
         )}
 
@@ -327,10 +329,12 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
               ¿Tenés algún ingreso variable además? (freelance, comisiones, arriendo recibido…)
             </p>
             {error ? <p className={styles.error}>{error}</p> : null}
+            {desktop ? null : (
             <div className={styles.choiceRow}>
               <Button label="Sí, agregar uno" onClick={() => setStep('variable')} />
               <Button label="No, listo" variant="ghost" onClick={() => setStep('done')} />
             </div>
+            )}
           </div>
         )}
 
@@ -428,10 +432,12 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
               </div>
             </div>
             {error ? <p className={styles.error}>{error}</p> : null}
+            {desktop ? null : (
             <div className={styles.actions}>
               <Button label="Atrás" variant="ghost" onClick={() => { setError(null); setStep('ask_variable'); }} disabled={saving} />
               <Button label="Guardar ingreso variable" onClick={() => void handleVariableSave()} loading={saving} />
             </div>
+            )}
           </div>
         )}
 
@@ -445,9 +451,11 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
             <p className={styles.successBody}>
               El sistema ya puede calcular tu presupuesto mensual real. Podés ajustar o agregar más ingresos en cualquier momento desde tu perfil.
             </p>
+            {desktop ? null : (
             <div className={styles.actions}>
               <Button label="Cerrar" onClick={handleDone} />
             </div>
+            )}
           </div>
         )}
 
@@ -464,6 +472,25 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
         steps={WIZARD_STEPS}
         currentStep={step === 'base' ? 0 : step === 'done' ? 2 : 1}
         onClose={handleClose}
+        onBack={
+          step === 'ask_variable' ? () => setStep('done')
+            : step === 'variable' ? () => { setError(null); setStep('ask_variable'); }
+              : undefined
+        }
+        backLabel={step === 'ask_variable' ? 'No, listo' : '← paso anterior'}
+        onPrimary={
+          step === 'base' ? () => void handleBaseNext()
+            : step === 'ask_variable' ? () => setStep('variable')
+              : step === 'variable' ? () => void handleVariableSave()
+                : handleDone
+        }
+        primaryLabel={
+          step === 'base' ? 'Continuar'
+            : step === 'ask_variable' ? 'Sí, agregar uno'
+              : step === 'variable' ? 'Guardar ingreso variable'
+                : 'Cerrar'
+        }
+        primaryDisabled={saving}
       >
         {body}
       </CenteredModal>

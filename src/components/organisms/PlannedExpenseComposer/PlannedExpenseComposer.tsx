@@ -150,6 +150,15 @@ export const PlannedExpenseComposer = ({
   return (
     <section className={styles.panel}>
       <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <div>
+            <p className={styles.sectionEyebrow}>Planeación</p>
+            <h3 className={styles.sectionTitle}>Gasto futuro previsible</h3>
+          </div>
+          <p className={styles.sectionText}>
+            Úsalo para gastos que todavía no ocurrieron, no son mensuales fijos y tampoco deben nacer como transacción real.
+          </p>
+        </div>
 
         <div className={styles.grid}>
           <div className={styles.spanTwo}>

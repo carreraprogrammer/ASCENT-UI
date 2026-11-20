@@ -17,6 +17,8 @@ export interface SidePanelProps {
   onSubmit?: () => void;
   /** El botón de eliminar solo existe si se pasa. */
   onDelete?: () => void;
+  /** Acción del botón Cancelar (por defecto onClose); p. ej. para que el formulario se limpie antes de cerrar. */
+  onCancel?: () => void;
   submitLabel?: string;
   cancelLabel?: string;
   deleteLabel?: string;
@@ -24,7 +26,7 @@ export interface SidePanelProps {
 
 /** Panel lateral único de escritorio (>= 1024 px): reemplaza a CrudModal. */
 export const SidePanel = ({
-  isOpen, title, origin, figure, children, onClose, onSubmit, onDelete,
+  isOpen, title, origin, figure, children, onClose, onSubmit, onDelete, onCancel,
   submitLabel = 'Guardar', cancelLabel = 'Cancelar', deleteLabel = 'Eliminar',
 }: SidePanelProps) => {
   const ref = useRef<HTMLElement>(null);
@@ -66,7 +68,7 @@ export const SidePanel = ({
           <footer className={styles.footer}>
             {onDelete ? <button type="button" className={styles.delete} data-tone="danger" onClick={onDelete}>{deleteLabel}</button> : null}
             <span className={styles.spacer} />
-            <button type="button" className={styles.cancel} onClick={onClose}>{cancelLabel}</button>
+            <button type="button" className={styles.cancel} onClick={onCancel ?? onClose}>{cancelLabel}</button>
             <button type="button" className={styles.primary} onClick={onSubmit}>
               {submitLabel}<kbd className={styles.hint}>⌘↵</kbd>
             </button>

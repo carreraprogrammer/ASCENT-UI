@@ -40,7 +40,9 @@ export const Menu = ({ label, options, selected, onChange, multiple = false, cle
     return q ? options.filter((o) => o.label.toLowerCase().includes(q)) : options;
   }, [options, query]);
 
-  const itemRole = multiple ? 'menuitemcheckbox' : 'menuitemradio';
+  // Roving tabindex: una sola opción entra en el orden de Tab (la marcada, o la primera); las flechas mueven el foco.
+  const roving = visible.find((v) => selected.includes(v.value)) ?? visible[0];
+  const itemRole =multiple ? 'menuitemcheckbox' : 'menuitemradio';
   const items = (): HTMLElement[] => Array.from(root.current?.querySelectorAll<HTMLElement>(`[role="${itemRole}"]`) ?? []);
 
   useEffect(() => {
@@ -113,6 +115,7 @@ export const Menu = ({ label, options, selected, onChange, multiple = false, cle
               const on = selected.includes(o.value);
               return (
                 <button key={o.value || 'all'} type="button" role={itemRole} aria-checked={on}
+                  tabIndex={o === roving ? 0 : -1}
                   className={cx(styles.item, on && styles.itemOn)} onClick={() => toggle(o.value)}>
                   {on ? <span data-check className={styles.check} /> : <span className={styles.checkSpace} />}
                   {o.color ? <Dot color={o.color} /> : null}

@@ -1,57 +1,332 @@
-/* TCW-27: estilos compartidos de los formularios (Transaction, Debt, RecurringObligation, PlannedExpense, SinkingFund,
-   IncomeSource). Sin tarjetas anidadas: los bloques se separan con un filete de 1 px. Las filas son una rejilla de dos
-   columnas (etiqueta mono de 11 px a la izquierda, 112 px; control a la derecha) con 9 px de aire vertical. Solo tokens. */
 .panel {
   display: grid;
-  gap: 0;
+  gap: 1.4rem;
   padding: 0;
 }
 
 .section {
   display: grid;
-  gap: 14px;
-  padding: 16px 0;
-  border-top: 1px solid var(--line);
+  gap: 1.15rem;
+  padding: 1.3rem;
+  border: 1px solid var(--surface-border-muted);
+  border-radius: var(--radius-lg);
+  background:
+    var(--surface-highlight),
+    var(--surface-panel);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-on-surface) 3%, transparent);
 }
 
-.section:first-child { padding-top: 0; border-top: 0; }
-
-/* Los bloques de cabecera de las modales de vincular (páginas) siguen existiendo, sin caja. */
-.sectionHeader { display: grid; gap: 4px; }
+.sectionHeader {
+  display: grid;
+  gap: 0.55rem;
+}
 
 .sectionEyebrow {
   margin: 0;
-  color: var(--ink-muted);
-  font-family: var(--tcw-font-mono);
-  font-size: 11px;
+  color: var(--color-accent);
+  font-size: var(--type-caption-size);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .sectionTitle {
   margin: 0;
-  color: var(--ink);
-  font-size: 15px;
-  font-weight: 600;
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-size: var(--type-section-title-size);
+  letter-spacing: -0.04em;
 }
 
 .sectionText {
   margin: 0;
   max-width: 64ch;
-  color: var(--ink-muted);
-  font-size: 13px;
-  line-height: 1.5;
+  color: var(--color-text-secondary);
+  font-size: var(--type-body-size);
+  line-height: 1.6;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 9px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
 }
 
-.spanTwo { display: block; }
+.spanTwo {
+  grid-column: span 2;
+}
 
-/* Fila: etiqueta (112 px) y control. Aplica a cada átomo de campo (su raíz es un <div>). */
-.grid > div:not(.spanTwo),
-.spanTwo > div {
+.categoryRail,
+.subcategoryRail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.categoryToken,
+.subcategoryToken {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.72rem;
+  min-height: 3rem;
+  padding: 0.78rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-control);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    transform 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.categoryToken:hover,
+.subcategoryToken:hover,
+.addSubcategoryBtn:hover {
+  transform: translateY(-1px);
+}
+
+.categoryTokenActive,
+.subcategoryTokenActive {
+  border-color: color-mix(in srgb, var(--category-accent, var(--color-accent)) 56%, var(--surface-border));
+  background: color-mix(in srgb, var(--category-accent, var(--color-accent)) 16%, var(--surface-control));
+  color: var(--color-text-primary);
+  box-shadow: 0 14px 36px color-mix(in srgb, var(--bg) 24%, transparent);
+}
+
+.categorySwatch {
+  width: 0.82rem;
+  height: 0.82rem;
+  border-radius: 999px;
+  background: var(--category-accent, var(--color-accent));
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--category-accent, var(--color-accent)) 14%, transparent);
+  flex-shrink: 0;
+}
+
+.categoryTokenText,
+.subcategoryTokenText {
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.subcategorySection {
+  display: grid;
+  gap: 0.95rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--category-accent, var(--color-accent)) 18%, var(--surface-border-muted));
+  background: var(--surface-highlight);
+}
+
+.subcategoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.subcategoryLabel {
+  color: var(--color-text-primary);
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.addSubcategoryBtn {
+  min-height: 2.75rem;
+  padding: 0.72rem 1rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--category-accent, var(--color-accent)) 30%, var(--surface-border));
+  background: color-mix(in srgb, var(--category-accent, var(--color-accent)) 10%, var(--surface-control));
+  color: var(--color-text-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.subcategoryIconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--category-accent, var(--color-accent)) 14%, var(--surface-control));
+  color: var(--category-accent, var(--color-accent));
+  flex-shrink: 0;
+}
+
+.subcategoryIcon {
+  font-size: var(--type-card-title-size);
+}
+
+.hint {
+  margin: 0;
+  padding: 0.92rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--surface-border-muted);
+  background: var(--surface-control);
+  color: var(--color-text-secondary);
+  font-size: var(--type-body-small-size);
+  line-height: 1.55;
+}
+
+.fieldLabel {
+  display: block;
+  margin: 0 0 0.5rem;
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-label-size);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.fieldHint {
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--color-text-disabled);
+}
+
+.dateInput {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-control);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  outline: none;
+  transition: border-color 0.15s;
+  color-scheme: dark;
+}
+
+.dateInput:focus {
+  border-color: var(--color-brand);
+}
+
+.paymentSourceRow {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.paymentSourceBtn {
+  flex: 1;
+  min-width: 0;
+  min-height: 3rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-control);
+  color: var(--text-on-surface-soft);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.paymentSourceIcon {
+  font-size: 1.2rem;
+}
+
+.paymentSourceBtn:hover {
+  background: var(--surface-control-hover);
+  border-color: var(--surface-border);
+}
+
+.paymentSourceBtnActive {
+  background: rgba(var(--color-brand-rgb), 0.12);
+  border-color: rgba(var(--color-brand-rgb), 0.45);
+  color: var(--color-accent);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+.error {
+  margin: 0;
+  padding: 0.95rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--color-error) 28%, var(--surface-border-soft));
+  background: color-mix(in srgb, var(--color-error) 10%, var(--surface-control));
+  color: var(--color-error);
+  font-size: var(--type-body-size);
+  line-height: 1.55;
+}
+
+@media (max-width: 720px) {
+  .section {
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .spanTwo {
+    grid-column: span 1;
+  }
+
+  .subcategoryHeader,
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .categoryRail,
+  .subcategoryRail {
+    gap: 0.6rem;
+  }
+
+  .categoryToken,
+  .subcategoryToken,
+  .addSubcategoryBtn {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* ═══ TCW-27: presentación de escritorio ═══════════════════════════════════════════════════════════════════════
+   Todo lo de abajo vive DENTRO del panel lateral (que solo existe en escritorio web >= 1024 px, no Capacitor).
+   Móvil y Capacitor siguen con las reglas de arriba, sin cambios. Sin tarjetas anidadas: los bloques se separan con un
+   filete de 1 px. Las filas son rejilla de dos columnas (etiqueta mono de 11 px, 112 px; control a la derecha) con 9 px
+   de aire vertical. Solo tokens. */
+:global([data-testid="side-panel"]) .panel { gap: 0; }
+
+:global([data-testid="side-panel"]) .section {
+  gap: 14px;
+  padding: 16px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+:global([data-testid="side-panel"]) .section:first-child { padding-top: 0; border-top: 0; }
+
+/* Los encabezados y textos de relleno no se muestran en el panel. */
+:global([data-testid="side-panel"]) .sectionHeader { display: none; }
+
+:global([data-testid="side-panel"]) .grid { grid-template-columns: minmax(0, 1fr); gap: 9px; }
+:global([data-testid="side-panel"]) .spanTwo { grid-column: auto; display: block; }
+
+:global([data-testid="side-panel"]) .grid > div:not(.spanTwo),
+:global([data-testid="side-panel"]) .spanTwo > div {
   display: grid;
   grid-template-columns: 112px minmax(0, 1fr);
   align-items: center;
@@ -59,8 +334,8 @@
   row-gap: 4px;
 }
 
-.grid > div:not(.spanTwo) > :first-child,
-.spanTwo > div > :first-child {
+:global([data-testid="side-panel"]) .grid > div:not(.spanTwo) > :first-child,
+:global([data-testid="side-panel"]) .spanTwo > div > :first-child {
   grid-column: 1;
   grid-row: 1;
   font-family: var(--tcw-font-mono);
@@ -69,20 +344,16 @@
   color: var(--ink-muted);
 }
 
-.grid > div:not(.spanTwo) > :nth-child(n + 2),
-.spanTwo > div > :nth-child(n + 2) {
-  grid-column: 2;
-}
+:global([data-testid="side-panel"]) .grid > div:not(.spanTwo) > :nth-child(n + 2),
+:global([data-testid="side-panel"]) .spanTwo > div > :nth-child(n + 2) { grid-column: 2; }
 
-.grid > div:not(.spanTwo) > :nth-child(2),
-.spanTwo > div > :nth-child(2) {
-  grid-row: 1;
-}
+:global([data-testid="side-panel"]) .grid > div:not(.spanTwo) > :nth-child(2),
+:global([data-testid="side-panel"]) .spanTwo > div > :nth-child(2) { grid-row: 1; }
 
 /* Campo de texto: borde 1 px --line, radio 8, fondo --bg, 14 px; foco violeta con anillo de 3 px; error en peligro. */
-.grid input,
-.grid select,
-.grid textarea {
+:global([data-testid="side-panel"]) .grid input,
+:global([data-testid="side-panel"]) .grid select,
+:global([data-testid="side-panel"]) .grid textarea {
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -91,49 +362,36 @@
   font-size: 14px;
 }
 
-.grid input:focus,
-.grid select:focus,
-.grid textarea:focus {
+:global([data-testid="side-panel"]) .grid input:focus,
+:global([data-testid="side-panel"]) .grid select:focus,
+:global([data-testid="side-panel"]) .grid textarea:focus {
   border-color: var(--violet);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--violet) 28%, transparent);
 }
 
-.grid input[aria-invalid="true"],
-.grid select[aria-invalid="true"] {
-  border-color: var(--danger);
-}
+:global([data-testid="side-panel"]) .grid input[aria-invalid="true"],
+:global([data-testid="side-panel"]) .grid select[aria-invalid="true"] { border-color: var(--danger); }
 
 /* Gaveta: chips redondeados con punto de color; la elegida con borde y fondo del color de la gaveta. */
-.categoryRail,
-.subcategoryRail {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+:global([data-testid="side-panel"]) .categoryRail,
+:global([data-testid="side-panel"]) .subcategoryRail { gap: 8px; }
 
-/* Categoría (subcategoría): rejilla de 3 columnas con icono y nombre; la elegida resaltada con el color de su gaveta. */
-.subcategoryRail {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
+/* Categoría: rejilla de 3 columnas con icono y nombre; la elegida resaltada con el color de su gaveta. */
+:global([data-testid="side-panel"]) .subcategoryRail { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
-.categoryToken,
-.subcategoryToken {
-  display: inline-flex;
-  align-items: center;
+:global([data-testid="side-panel"]) .categoryToken,
+:global([data-testid="side-panel"]) .subcategoryToken {
   gap: 8px;
+  min-height: 0;
   min-width: 0;
   padding: 6px 12px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+  border-color: var(--line);
   background: transparent;
   color: var(--ink-muted);
   font-size: 13px;
-  cursor: pointer;
-  transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease;
 }
 
-.subcategoryToken {
+:global([data-testid="side-panel"]) .subcategoryToken {
   flex-direction: column;
   justify-content: center;
   gap: 4px;
@@ -142,159 +400,49 @@
   text-align: center;
 }
 
-.categoryToken:hover,
-.subcategoryToken:hover { color: var(--ink); border-color: var(--line-strong); }
+:global([data-testid="side-panel"]) .categoryToken:hover,
+:global([data-testid="side-panel"]) .subcategoryToken:hover { transform: none; color: var(--ink); border-color: var(--line-strong); }
 
-.categoryToken:focus-visible,
-.subcategoryToken:focus-visible,
-.addSubcategoryBtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-
-.categoryTokenActive,
-.subcategoryTokenActive {
+:global([data-testid="side-panel"]) .categoryTokenActive,
+:global([data-testid="side-panel"]) .subcategoryTokenActive {
   border-color: var(--category-accent, var(--violet));
   background: color-mix(in srgb, var(--category-accent, var(--violet)) 16%, transparent);
   color: var(--ink);
+  box-shadow: none;
 }
 
-.categorySwatch {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--category-accent, var(--violet));
-  flex-shrink: 0;
-}
+:global([data-testid="side-panel"]) .categorySwatch { width: 8px; height: 8px; box-shadow: none; }
 
-.categoryTokenText,
-.subcategoryTokenText {
+:global([data-testid="side-panel"]) .categoryTokenText,
+:global([data-testid="side-panel"]) .subcategoryTokenText {
   min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 13px;
   font-weight: 500;
-  max-width: 100%;
+  letter-spacing: 0;
 }
 
-.subcategorySection {
-  display: grid;
+:global([data-testid="side-panel"]) .subcategorySection {
   gap: 10px;
   padding: 12px 0 0;
+  border: 0;
   border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
 }
 
-.subcategoryHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
+:global([data-testid="side-panel"]) .subcategoryLabel { color: var(--ink-muted); font-family: var(--tcw-font-mono); font-size: 11px; font-weight: 400; letter-spacing: 0; }
 
-.subcategoryLabel {
-  color: var(--ink-muted);
-  font-family: var(--tcw-font-mono);
-  font-size: 11px;
-}
+:global([data-testid="side-panel"]) .addSubcategoryBtn { min-height: 0; padding: 4px 10px; border-radius: 8px; background: transparent; font-size: 12px; }
+:global([data-testid="side-panel"]) .addSubcategoryBtn:hover { transform: none; }
 
-.addSubcategoryBtn {
-  padding: 4px 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
+:global([data-testid="side-panel"]) .subcategoryIconWrap { width: auto; height: auto; background: none; }
+:global([data-testid="side-panel"]) .subcategoryIcon { font-size: 20px; }
 
-.addSubcategoryBtn:hover { border-color: var(--line-strong); }
-
-.subcategoryIconWrap {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--category-accent, var(--violet));
-  flex-shrink: 0;
-}
-
-.subcategoryIcon { font-size: 20px; }
-
-/* Nota "sugerida por el agente" (violeta) bajo la categoría. */
-.agentNote {
-  margin: 0;
-  color: var(--violet);
-  font-family: var(--tcw-font-mono);
-  font-size: 11px;
-}
-
-.hint {
-  margin: 0;
-  color: var(--ink-muted);
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.fieldLabel {
-  display: block;
-  margin: 0 0 6px;
-  color: var(--ink-muted);
-  font-family: var(--tcw-font-mono);
-  font-size: 11px;
-}
-
-.fieldHint {
-  font-weight: 400;
-  color: var(--ink-muted);
-}
-
-.dateInput {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: var(--bg);
-  color: var(--ink);
-  font-size: 14px;
-  outline: none;
-}
-
-.dateInput:focus { border-color: var(--violet); }
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
-}
-
-/* En el panel lateral el pie es el del panel (Cancelar / guardar con ⌘↵): el de cada formulario se oculta. */
+/* El pie del panel (Cancelar / guardar con ⌘↵) reemplaza al de cada formulario. */
 :global([data-testid="side-panel"]) .actions { display: none; }
 
-.error {
-  margin: 0;
-  padding: 8px 0;
-  color: var(--danger);
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-@media (max-width: 720px) {
-  .grid > div:not(.spanTwo),
-  .spanTwo > div {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .grid > div:not(.spanTwo) > :first-child,
-  .spanTwo > div > :first-child,
-  .grid > div:not(.spanTwo) > :nth-child(n + 2),
-  .spanTwo > div > :nth-child(n + 2) {
-    grid-column: 1;
-    grid-row: auto;
-  }
-
-  .subcategoryHeader,
-  .actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
+:global([data-testid="side-panel"]) .error { padding: 8px 0; border: 0; border-radius: 0; background: none; color: var(--danger); font-size: 12px; }

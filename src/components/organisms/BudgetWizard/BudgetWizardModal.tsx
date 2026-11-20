@@ -1073,6 +1073,24 @@ export const BudgetWizardModal = ({
     const steps = categories.length
       ? categories.map((c) => ({ id: c.code, label: c.name }))
       : [{ id: 'plan', label: 'Plan' }];
+    const flowActive = mode === 'crear' && !showIntro;
+    const grace = mode === 'ajustar' && isWithinGraceWindow;
+    let primary: { label: string; run: () => void; disabled?: boolean } | null;
+    if (!wizardData || (mode === 'crear' && showIntro)) primary = null;
+    else if (flowActive) {
+      const last = activeIndex >= categories.length - 1;
+      primary = {
+        label: last ? 'Ver mi plan' : `Siguiente · ${categories[activeIndex + 1]?.name ?? ''}`,
+        run: () => { if (last) handleSave(); else setActiveIndex((i) => i + 1); },
+      };
+    } else if (grace) {
+      primary = porAsignar > 0
+        ? { label: `Ubicar ${fmt(porAsignar)}`, run: () => setLeftoverOpen(true) }
+        : { label: changesCount > 0 ? `Guardar ${changesCount} cambio${changesCount !== 1 ? 's' : ''}` : 'Guardar plan', run: () => handleSave() };
+    } else if (mode === 'ajustar') primary = { label: 'Cerrar', run: onClose };
+    else if (porAsignar > 0) primary = { label: `Ubicar ${fmt(porAsignar)}`, run: () => setLeftoverOpen(true) };
+    else if (porAsignar < 0) primary = { label: `Te pasaste ${fmt(-porAsignar)} · ajusta alguna categoría`, run: () => undefined, disabled: true };
+    else primary = { label: mode === 'replantear' ? 'Firmar plan' : 'Confirmar plan', run: () => handleSave() };
     return (
       <CenteredModal
         isOpen={isOpen}
@@ -1082,6 +1100,10 @@ export const BudgetWizardModal = ({
         steps={steps}
         currentStep={Math.min(activeIndex, steps.length - 1)}
         onClose={onClose}
+        onBack={flowActive ? () => { if (activeIndex === 0) setShowIntro(true); else setActiveIndex((i) => i - 1); } : undefined}
+        onPrimary={primary?.run}
+        primaryLabel={primary?.label}
+        primaryDisabled={primary?.disabled}
       >
         {panel}
       </CenteredModal>
