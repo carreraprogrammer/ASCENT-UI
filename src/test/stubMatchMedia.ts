@@ -4,6 +4,7 @@ export const stubMatchMedia = (matches = false): void => {
   if (typeof window.matchMedia === 'function') return;
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
+    configurable: true,
     value: (query: string) => ({
       matches, media: query, onchange: null,
       addListener: () => {}, removeListener: () => {}, addEventListener: () => {}, removeEventListener: () => {},
