@@ -11,7 +11,8 @@
     "ios:open": "npm run ios:sync && cap open ios",
     "test": "vitest run",
     "test:watch": "vitest",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:bundle": "node scripts/check-no-fixtures.mjs"
   },
   "dependencies": {
     "@capacitor-community/speech-recognition": "^7.0.1",
