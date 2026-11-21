@@ -20,6 +20,7 @@ import type {
   TransactionType,
   TransactionUpdatePayload,
 } from '../../../types/finance.types';
+import { PanelFigureAmount, PanelFigureConcept, usePanelFigure } from '../SidePanel/PanelFigure';
 import styles from '../ComposerForm.module.css';
 
 const transactionTypeOptions = [
@@ -127,6 +128,9 @@ export const TransactionComposer = ({
 }: TransactionComposerProps) => {
   // TCW-27: lo nuevo (segmentados, sin encabezados de relleno) solo en escritorio web; móvil y Capacitor, como en main.
   const desktop = useDesktopLayout();
+  // Dentro de un panel con cifra grande, la cifra es el monto y el Concepto va bajo ella (sin fila "Monto" ni "Concepto").
+  const panelFigure = usePanelFigure();
+  const inFigure = desktop && panelFigure !== null;
   const [values, setValues] = useState<TransactionComposerValues>(emptyValues);
   const [localCategories, setLocalCategories] = useState<CategoryResource[]>(categories);
   const [subcategorySheetOpen, setSubcategorySheetOpen] = useState(false);
@@ -203,6 +207,22 @@ export const TransactionComposer = ({
 
   return (
     <>
+      {inFigure ? (
+        <>
+          <PanelFigureAmount
+            id="transaction-amount"
+            value={values.amount}
+            sign={values.transactionType === 'income' ? '+' : '−'}
+            onChange={(amount) => setValues((current) => ({ ...current, amount }))}
+          />
+          <PanelFigureConcept
+            id="transaction-concept"
+            value={values.concept}
+            placeholder="Ej. pago suscripción, mercado, ingreso cliente"
+            onChange={(concept) => setValues((current) => ({ ...current, concept }))}
+          />
+        </>
+      ) : null}
       <section className={styles.panel}>
         <div className={styles.section}>
           {desktop ? null : (
@@ -269,25 +289,29 @@ export const TransactionComposer = ({
                 required
               />
             )}
-            <NumberInput
-              name="transaction-amount"
-              label="Monto"
-              value={values.amount}
-              onChange={(amount) => setValues((current) => ({ ...current, amount }))}
-              format="currency"
-              min={1}
-              required
-            />
-            <div className={styles.spanTwo}>
-              <TextInput
-                name="transaction-concept"
-                label="Concepto"
-                value={values.concept}
-                onChange={(concept) => setValues((current) => ({ ...current, concept }))}
-                placeholder="Ej. pago suscripción, mercado, ingreso cliente"
+            {inFigure ? null : (
+              <NumberInput
+                name="transaction-amount"
+                label="Monto"
+                value={values.amount}
+                onChange={(amount) => setValues((current) => ({ ...current, amount }))}
+                format="currency"
+                min={1}
                 required
               />
-            </div>
+            )}
+            {inFigure ? null : (
+              <div className={styles.spanTwo}>
+                <TextInput
+                  name="transaction-concept"
+                  label="Concepto"
+                  value={values.concept}
+                  onChange={(concept) => setValues((current) => ({ ...current, concept }))}
+                  placeholder="Ej. pago suscripción, mercado, ingreso cliente"
+                  required
+                />
+              </div>
+            )}
             <div className={styles.spanTwo}>
               {desktop ? (
                 <SegmentedControl
@@ -331,7 +355,8 @@ export const TransactionComposer = ({
               <div className={styles.spanTwo}>
                 <TextInput
                   name="transaction-product"
-                  label="Nombre de la tarjeta (opcional)"
+                  label={desktop ? 'Tarjeta' : 'Nombre de la tarjeta (opcional)'}
+                  hintInside={desktop ? 'opcional' : undefined}
                   value={values.product}
                   onChange={(product) => setValues((current) => ({ ...current, product }))}
                   placeholder="Ej. LifeMiles, TC Davivienda"
@@ -424,7 +449,7 @@ export const TransactionComposer = ({
 
         {error ? <p className={styles.error}>{error}</p> : null}
 
-        <div className={styles.actions} data-composer-actions>
+        <div className={styles.actions} data-composer-actions hidden={inFigure || undefined}>
           <Button label="Cancelar" variant="ghost" onClick={handleCancel} disabled={loading} />
           <Button label={submitLabel} onClick={() => void handleSubmit()} loading={loading} />
         </div>

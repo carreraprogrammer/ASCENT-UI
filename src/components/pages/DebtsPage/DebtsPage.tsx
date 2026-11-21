@@ -24,7 +24,7 @@ import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type { Debt, DebtPayload, DebtQueryParams, RecurringObligation } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
 import formStyles from '../../organisms/ComposerForm.module.css';
-import { Bar, InstButton, Num, StateTag, Sub, Two } from '../../atoms/Inst';
+import { Bar, InstButton, NameCell, Num, StateTag, Sub, Two } from '../../atoms/Inst';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { fmtAmount } from '../../../utils/instrumento';
 import { RowActions, SortHead, instDeskStyles as desk } from '../TransactionsPage/instDesk';
@@ -467,7 +467,7 @@ export const DebtsContent = () => {
   const debtRows = debts.map((debt) => {
     const linked = linkedObligationByDebtId.get(debt.id);
     return [
-      <Two a={debt.attributes.name} b={formatDebtType(debt.attributes.debt_type)} />,
+      <Two a={<NameCell>{debt.attributes.name}</NameCell>} b={formatDebtType(debt.attributes.debt_type)} />,
       <StateTag state={debtState(debt.attributes.status)} />,
       <Num>{fmtAmount(debt.attributes.monthly_payment)}</Num>,
       <Num>{fmtRate(debt.attributes.interest_rate)}</Num>,
@@ -499,7 +499,7 @@ export const DebtsContent = () => {
       ]} />
       <InstSection title={`Detalle · ${metrics.totalCount} ${metrics.totalCount === 1 ? 'registrada' : 'registradas'}`} id="debts-detalle">
         {loading ? (
-          <InstTableSkeleton heads={debtHeads} aligns={debtAligns} rows={5} />
+          <InstTableSkeleton heads={debtHeads} aligns={debtAligns} rows={5} withActions nameCol={0} />
         ) : error ? (
           <InstNote error onRetry={() => void load()}>{error}</InstNote>
         ) : !debts.length ? (
@@ -510,7 +510,7 @@ export const DebtsContent = () => {
             </InstButton>
           </InstNote>
         ) : (
-          <InstTable caption="Deudas registradas" heads={debtHeads} aligns={debtAligns} rows={debtRows} rowActions={debtActions}
+          <InstTable caption="Deudas registradas" heads={debtHeads} aligns={debtAligns} rows={debtRows} rowActions={debtActions} nameCol={0}
             editingRow={composerOpen && editingDebt ? debts.findIndex((d) => d.id === editingDebt.id) : undefined}
             rowKeys={debts.map((d) => d.id)} onRowClick={(i) => { setEditingDebt(debts[i]); setComposerOpen(true); }} />
         )}
@@ -554,6 +554,7 @@ export const DebtsContent = () => {
         isOpen={composerOpen}
         title={editingDebt ? 'Editar deuda' : 'Nueva deuda'}
         subtitle="Concentra estructura, carga mensual y estado de la deuda sin ruido adicional."
+        figure={{ label: 'SALDO', value: editingDebt ? fmtAmount(editingDebt.attributes.current_balance) : '' }}
         onClose={() => {
           setComposerOpen(false);
           setEditingDebt(null);

@@ -376,6 +376,11 @@
 :global([data-testid="side-panel"]) .categoryRail,
 :global([data-testid="side-panel"]) .subcategoryRail { gap: 8px; }
 
+/* Con 480 px las gavetas caben en una sola fila: sin envolver, cada chip cede ancho y recorta su texto. */
+:global([data-testid="side-panel"]) .categoryRail { flex-wrap: nowrap; }
+:global([data-testid="side-panel"]) .categoryRail .categoryToken { flex: 1 1 0; min-width: 0; justify-content: center; padding: 6px 8px; gap: 6px; }
+:global([data-testid="side-panel"]) .categoryRail .categoryTokenText { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /* Categoría: rejilla de 3 columnas con icono y nombre; la elegida resaltada con el color de su gaveta. */
 :global([data-testid="side-panel"]) .subcategoryRail { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 

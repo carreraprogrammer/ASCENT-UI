@@ -9,6 +9,7 @@ import { TextInput } from '../../atoms/TextInput';
 import { TextareaInput } from '../../atoms/TextareaInput';
 import type { Debt, DebtPayload } from '../../../types/finance.types';
 import { debtStatusOptions, debtTypeOptions } from '../../../utils/debtLabels';
+import { PanelFigureAmount, usePanelFigure } from '../SidePanel/PanelFigure';
 import styles from '../ComposerForm.module.css';
 
 interface DebtComposerValues {
@@ -66,6 +67,9 @@ export interface DebtComposerProps {
 export const DebtComposer = ({ debt = null, loading, onCreate, onUpdate, onCancel }: DebtComposerProps) => {
   // TCW-27: Tipo y Estado como segmentados con texto solo en escritorio web; móvil y Capacitor conservan los <select>.
   const desktop = useDesktopLayout();
+  // Dentro de un panel con cifra grande, el saldo es la cifra (sin fila "Saldo actual").
+  const panelFigure = usePanelFigure();
+  const inFigure = desktop && panelFigure !== null;
   const [values, setValues] = useState<DebtComposerValues>(emptyValues);
   const [error, setError] = useState<string | null>(null);
 
@@ -120,6 +124,14 @@ export const DebtComposer = ({ debt = null, loading, onCreate, onUpdate, onCance
   };
 
   return (
+    <>
+    {inFigure ? (
+      <PanelFigureAmount
+        id="debt-current-balance"
+        value={values.currentBalance}
+        onChange={(currentBalance) => setValues((current) => ({ ...current, currentBalance }))}
+      />
+    ) : null}
     <section className={styles.panel}>
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
@@ -189,15 +201,17 @@ export const DebtComposer = ({ debt = null, loading, onCreate, onUpdate, onCance
             format="currency"
             min={0}
           />
-          <NumberInput
-            name="debt-current-balance"
-            label="Saldo actual"
-            value={values.currentBalance}
-            onChange={(currentBalance) => setValues((current) => ({ ...current, currentBalance }))}
-            format="currency"
-            min={0}
-            required
-          />
+          {inFigure ? null : (
+            <NumberInput
+              name="debt-current-balance"
+              label="Saldo actual"
+              value={values.currentBalance}
+              onChange={(currentBalance) => setValues((current) => ({ ...current, currentBalance }))}
+              format="currency"
+              min={0}
+              required
+            />
+          )}
           <NumberInput
             name="debt-monthly-payment"
             label="Pago mensual"
@@ -235,10 +249,11 @@ export const DebtComposer = ({ debt = null, loading, onCreate, onUpdate, onCance
 
       {error ? <p className={styles.error}>{error}</p> : null}
 
-      <div className={styles.actions} data-composer-actions>
+      <div className={styles.actions} data-composer-actions hidden={inFigure || undefined}>
         <Button label="Cancelar" variant="ghost" onClick={handleCancel} disabled={loading} />
         <Button label={submitLabel} onClick={() => void handleSubmit()} loading={loading} />
       </div>
     </section>
+    </>
   );
 };

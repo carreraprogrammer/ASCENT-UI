@@ -1,7 +1,8 @@
-import { useId, useRef, type ReactNode } from 'react';
+import { useCallback, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { useDialogBehavior } from '../../../hooks/useDialogBehavior';
 import { usePrefersReducedMotion } from '../../../hooks/usePrefersReducedMotion';
+import { PanelFigureContext } from './PanelFigure';
 import styles from './SidePanel.module.css';
 
 export interface SidePanelProps {
@@ -34,6 +35,20 @@ export const SidePanel = ({
   const reduced = usePrefersReducedMotion();
   useDialogBehavior({ isOpen, containerRef: ref, onClose, onSubmit });
 
+  const [amountSlot, setAmountSlot] = useState<HTMLElement | null>(null);
+  const [belowSlot, setBelowSlot] = useState<HTMLElement | null>(null);
+  const [claims, setClaims] = useState(0);
+  const claim = useCallback(() => {
+    setClaims((n) => n + 1);
+    return () => setClaims((n) => n - 1);
+  }, []);
+  const hasFigure = Boolean(figure);
+  const figureLabel = figure?.label ?? '';
+  const figureCtx = useMemo(
+    () => (hasFigure ? { label: figureLabel, amountSlot, belowSlot, claim } : null),
+    [hasFigure, figureLabel, amountSlot, belowSlot, claim],
+  );
+
   if (!isOpen) return null;
   return createPortal(
     <div className={styles.root}>
@@ -57,12 +72,16 @@ export const SidePanel = ({
         </header>
         <div className={styles.body}>
           {figure ? (
-            <div className={styles.figure}>
-              <span className={styles.figureValue}>{figure.value}</span>
-              <span className={styles.figureLabel}>{figure.label}</span>
+            <div className={styles.figureBlock}>
+              <div className={styles.figure} data-testid="panel-figure">
+                {claims > 0 ? null : <span className={styles.figureValue}>{figure.value}</span>}
+                <div ref={setAmountSlot} />
+                <span className={styles.figureLabel}>{figure.label}</span>
+              </div>
+              <div ref={setBelowSlot} />
             </div>
           ) : null}
-          {children}
+          <PanelFigureContext.Provider value={figureCtx}>{children}</PanelFigureContext.Provider>
         </div>
         {onSubmit ? (
           <footer className={styles.footer}>

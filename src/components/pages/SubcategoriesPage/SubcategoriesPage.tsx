@@ -11,7 +11,7 @@ import { financeService } from '../../../services/financeService';
 import type { CategoryResource, ManageableSubcategory } from '../../../types/finance.types';
 import pageStyles from '../FinancePage.module.css';
 import styles from './SubcategoriesPage.module.css';
-import { CategoryCell, InstButton, Num, Sub, Two } from '../../atoms/Inst';
+import { CategoryCell, InstButton, NameCell, Num, Sub, Two } from '../../atoms/Inst';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { RowActions, instDeskStyles as desk } from '../TransactionsPage/instDesk';
@@ -143,7 +143,7 @@ export const SubcategoriesContent = () => {
   const aligns: Align[] = ['left', 'left', 'left', 'right'];
   const tierName = (type: string) => TIER_LABEL[type] ?? (type === 'income' ? 'Ingreso' : type);
   const rows = subs.map((sub) => [
-    <Two a={sub.name} b={sub.description || undefined} />,
+    <Two a={<NameCell>{sub.name}</NameCell>} b={sub.description || undefined} />,
     sub.categories.length
       ? <span style={{ display: 'inline-flex', flexDirection: 'column', gap: 6 }}>
           {sub.categories.map((c) => (
@@ -255,7 +255,7 @@ export const SubcategoriesContent = () => {
           ]} />
           <InstSection title={`Detalle · ${subs.length} registradas`} id="subcats-detalle">
             {loading ? (
-              <InstTableSkeleton heads={heads} aligns={aligns} rows={8} />
+              <InstTableSkeleton heads={heads} aligns={aligns} rows={8} withActions nameCol={0} />
             ) : error ? (
               <InstNote error onRetry={() => void load()}>{error}</InstNote>
             ) : !subs.length ? (
@@ -264,7 +264,7 @@ export const SubcategoriesContent = () => {
                 <InstButton className={desk.noteBtn} onClick={openNew}>Nueva subcategoría</InstButton>
               </InstNote>
             ) : (
-              <InstTable caption="Subcategorías" heads={heads} aligns={aligns} rows={rows} rowActions={rowActions}
+              <InstTable caption="Subcategorías" heads={heads} aligns={aligns} rows={rows} rowActions={rowActions} nameCol={0}
                 editingRow={formOpen && editing ? subs.findIndex((s) => s.id === editing.id) : undefined}
                 rowKeys={subs.map((sub) => sub.id)} onRowClick={(i) => openEdit(subs[i])} />
             )}

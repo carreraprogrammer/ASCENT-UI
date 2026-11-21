@@ -57,6 +57,8 @@ export const InstLink = ({ children, onClick, href }: { children: ReactNode; onC
   href ? <a className={styles.link} href={href} onClick={onClick}>{children} ›</a>
     : <button type="button" className={styles.link} onClick={onClick}>{children} ›</button>;
 
+/** Nombre del movimiento: una sola línea, con puntos suspensivos si no cabe y el texto completo en title. */
+export const NameCell = ({ children }: { children: string }) => <span className={styles.nameCell} title={children}>{children}</span>;
 export const DateCell = ({ children }: { children: ReactNode }) => <span className={styles.date}>{children}</span>;
 export const Sub = ({ children }: { children: ReactNode }) => <span className={styles.sub}>{children}</span>;
 export const Two = ({ a, b }: { a: ReactNode; b?: ReactNode }) => (
