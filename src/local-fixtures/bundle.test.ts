@@ -17,7 +17,7 @@ const buildAndScan = (withVar: boolean) => {
   try {
     const env = { ...process.env };
     delete env.VITE_LOCAL_FIXTURES;
-    if (withVar) env.VITE_LOCAL_FIXTURES = '1';
+    if (withVar) { env.VITE_LOCAL_FIXTURES = '1'; env.ALLOW_FIXTURES_BUILD = '1'; } // segundo interruptor del guard de vite.config.ts
     execFileSync('npx', ['vite', 'build', '--outDir', out, '--emptyOutDir'], { cwd: ROOT, env, stdio: 'pipe' });
     const text = files(out).filter((f) => /\.(js|html)$/.test(f)).map((f) => readFileSync(f, 'utf8')).join('\n');
     return MARKERS.filter((m) => text.includes(m));

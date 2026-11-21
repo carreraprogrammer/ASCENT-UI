@@ -21,7 +21,9 @@ const buildAndScan = (withVar) => {
   try {
     const env = { ...process.env };
     delete env.VITE_LOCAL_FIXTURES;
-    if (withVar) env.VITE_LOCAL_FIXTURES = '1';
+    // vite.config.ts rechaza VITE_LOCAL_FIXTURES=1 en build salvo con este segundo interruptor (solo para esta comprobación).
+    if (withVar) { env.VITE_LOCAL_FIXTURES = '1'; env.ALLOW_FIXTURES_BUILD = '1'; }
+    else delete env.ALLOW_FIXTURES_BUILD;
     execFileSync('npx', ['vite', 'build', '--outDir', out, '--emptyOutDir'], { cwd: ROOT, env, stdio: 'pipe' });
     const text = files(out).filter((f) => /\.(js|html)$/.test(f)).map((f) => readFileSync(f, 'utf8')).join('\n');
     return MARKERS.filter((m) => text.includes(m));
