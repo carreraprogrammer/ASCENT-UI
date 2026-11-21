@@ -31,11 +31,12 @@
 
 /* Acciones de fila (TCW-27): viven en la columna final propia de InstTable; invisibles hasta hover o foco de la fila,
    pero con opacity (no display) para que la columna siempre reserve su espacio y la tabla no salte. */
-.acts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; opacity: 0; pointer-events: none; }
+.acts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; opacity: 0; pointer-events: none; }
 :global(tr):hover .acts, :global(tr):focus-within .acts { opacity: 1; pointer-events: auto; }
 .act {
-  font-family: var(--tcw-font-mono); font-size: 11px; line-height: 14px; padding: 4px 8px; border-radius: var(--tcw-radius-md);
+  font-family: var(--tcw-font-mono); font-size: 11px; line-height: 14px; padding: 3px 6px; border-radius: var(--tcw-radius-md);
   border: 1px solid var(--line); background: var(--bg); color: var(--ink-muted); cursor: pointer; white-space: nowrap;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis;
 }
 .act:hover { color: var(--ink); border-color: var(--line-strong); }
 .actDanger:hover { color: var(--cat-rose); }

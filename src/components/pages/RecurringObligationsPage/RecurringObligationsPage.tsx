@@ -33,7 +33,7 @@ import type {
   SummaryResponse,
 } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
-import { Bar, CategoryCell, DateCell, InstButton, Num, StateTag, Sub, Two } from '../../atoms/Inst';
+import { Bar, CategoryCell, DateCell, InstButton, NameCell, Num, StateTag, Sub, Two } from '../../atoms/Inst';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { fmtAmount } from '../../../utils/instrumento';
@@ -414,7 +414,7 @@ export const RecurringObligationsContent = () => {
     const catResource = categories.find((c) => Number(c.id) === attrs.category_id);
     const catCode = attrs.category_code ?? catResource?.attributes.code ?? null;
     return [
-      <Two a={attrs.name} b={
+      <Two a={<NameCell>{attrs.name}</NameCell>} b={
         <CategoryCell code={catCode} subcategoryName={attrs.subcategory_name}
           gavetaName={catCode || attrs.category_name ? getCategoryDisplayName({ name: attrs.category_name, code: catCode, type: catResource?.attributes.category_type }) : null}
           icon={attrs.subcategory_icon ?? catResource?.attributes.icon} />
@@ -433,7 +433,7 @@ export const RecurringObligationsContent = () => {
     ]} />
   ));
   const inRows = incomeSources.map((source) => [
-    <span style={{ fontWeight: 500 }}>{source.attributes.name}</span>,
+    <NameCell>{source.attributes.name}</NameCell>,
     <DateCell>{incomeDayLabel(source.attributes)}</DateCell>,
     <Num strong>{source.attributes.expected_amount > 0 ? fmtAmount(source.attributes.expected_amount) : '—'}</Num>,
   ]);
@@ -459,11 +459,11 @@ export const RecurringObligationsContent = () => {
       <InstSection title="Compromisos que vuelven cada mes" id="rec-obligaciones"
         right={<InstButton primary onClick={openNewObligation}>+ Nuevo recurrente</InstButton>}>
         {loading ? (
-          <InstTableSkeleton heads={obHeads} aligns={obAligns} rows={5} />
+          <InstTableSkeleton heads={obHeads} aligns={obAligns} rows={5} withActions nameCol={0} />
         ) : error ? null : !obligations.length ? (
           <InstNote>Todavía no hay obligaciones recurrentes.</InstNote>
         ) : (
-          <InstTable caption="Obligaciones recurrentes" heads={obHeads} aligns={obAligns} rows={obRows} rowActions={obActions}
+          <InstTable caption="Obligaciones recurrentes" heads={obHeads} aligns={obAligns} rows={obRows} rowActions={obActions} nameCol={0}
             editingRow={composerOpen && editingObligation ? obligations.findIndex((o) => o.id === editingObligation.id) : undefined}
             rowKeys={obligations.map((o) => o.id)}
             onRowClick={(i) => { setEditingObligation(obligations[i]); setComposerOpen(true); }} />
@@ -472,11 +472,11 @@ export const RecurringObligationsContent = () => {
       <InstSection title="Fuentes que sostienen el mes" id="rec-ingresos"
         right={<InstButton onClick={openNewIncome}>Agregar ingreso</InstButton>}>
         {loading ? (
-          <InstTableSkeleton heads={inHeads} aligns={inAligns} rows={2} />
+          <InstTableSkeleton heads={inHeads} aligns={inAligns} rows={2} withActions nameCol={0} />
         ) : error ? null : !incomeSources.length ? (
           <InstNote>Todavía no hay fuentes de ingreso.</InstNote>
         ) : (
-          <InstTable caption="Fuentes de ingreso" heads={inHeads} aligns={inAligns} rows={inRows} rowActions={inActions}
+          <InstTable caption="Fuentes de ingreso" heads={inHeads} aligns={inAligns} rows={inRows} rowActions={inActions} nameCol={0}
             editingRow={incomeComposerOpen && editingIncome ? incomeSources.findIndex((s) => s.id === editingIncome.id) : undefined}
             rowKeys={incomeSources.map((s) => s.id)}
             onRowClick={(i) => { setEditingIncome(incomeSources[i]); setIncomeComposerOpen(true); }} />

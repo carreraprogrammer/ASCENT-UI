@@ -17,9 +17,11 @@ export interface InstTableProps {
   rowActions?: ReactNode[];
   /** Índice de la fila en edición (resaltada). */
   editingRow?: number;
+  /** Columna del nombre (con NameCell): cede ancho y recorta con puntos suspensivos en vez de partirse en dos líneas. */
+  nameCol?: number;
 }
 
-export const InstTable = ({ heads, rows, aligns, caption, rowKeys, onRowClick, rowActions, editingRow }: InstTableProps) => {
+export const InstTable = ({ heads, rows, aligns, caption, rowKeys, onRowClick, rowActions, editingRow, nameCol }: InstTableProps) => {
   const al = (i: number) => styles[aligns?.[i] ?? 'left'];
   const key = (e: KeyboardEvent, i: number) => {
     if (onRowClick && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onRowClick(i); }
@@ -34,7 +36,7 @@ export const InstTable = ({ heads, rows, aligns, caption, rowKeys, onRowClick, r
             data-editing={editingRow === ri ? 'true' : undefined}
             tabIndex={onRowClick ? 0 : undefined} onClick={onRowClick ? () => onRowClick(ri) : undefined}
             onKeyDown={onRowClick ? (e) => key(e, ri) : undefined}>
-            {r.map((c, ci) => <td key={ci} className={`${styles.td} ${al(ci)}`}>{c}</td>)}
+            {r.map((c, ci) => <td key={ci} className={`${styles.td} ${al(ci)} ${ci === nameCol ? styles.tdName : ''}`.trim()}>{c}</td>)}
             {rowActions ? <td data-cell="actions" className={styles.tdActions}>{rowActions[ri] ?? null}</td> : null}
           </tr>
         ))}
@@ -44,9 +46,10 @@ export const InstTable = ({ heads, rows, aligns, caption, rowKeys, onRowClick, r
 };
 
 /** Esqueleto de tabla mientras carga: mismos encabezados, filas grises. */
-export const InstTableSkeleton = ({ heads, aligns, rows = 5 }: { heads: ReactNode[]; aligns?: Align[]; rows?: number }) => (
+export const InstTableSkeleton = ({ heads, aligns, rows = 5, withActions, nameCol }: { heads: ReactNode[]; aligns?: Align[]; rows?: number; withActions?: boolean; nameCol?: number }) => (
   <div aria-busy="true" aria-label="Cargando">
-    <InstTable heads={heads} aligns={aligns}
+    <InstTable heads={heads} aligns={aligns} nameCol={nameCol}
+      rowActions={withActions ? Array.from({ length: rows }, () => null) : undefined}
       rows={Array.from({ length: rows }, () => heads.map((_, i) => (
         <span className={styles.skel} style={{ width: `${[40, 70, 55, 45, 35, 50][i % 6]}%`, marginLeft: aligns?.[i] === 'right' ? 'auto' : undefined }} />
       )))} />

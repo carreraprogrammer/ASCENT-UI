@@ -2,7 +2,7 @@
 .root { position: fixed; inset: 0; z-index: 1000; }
 .scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) 45%, transparent); }
 .panel {
-  position: fixed; top: 0; right: 0; bottom: 0; width: 480px; max-width: 100vw; display: flex; flex-direction: column;
+  position: fixed; top: 0; right: 0; bottom: 0; width: 480px; min-width: 480px; max-width: 100vw; box-sizing: border-box; flex: none; display: flex; flex-direction: column;
   background: var(--surface); border-left: 1px solid var(--line); color: var(--ink);
   box-shadow: -24px 0 48px color-mix(in srgb, var(--bg) 60%, transparent);
   animation: slideIn 180ms ease-out;
@@ -21,9 +21,25 @@
 }
 
 .body { flex: 1; min-height: 0; overflow-y: auto; padding: 20px; overscroll-behavior: contain; }
-.figure { display: grid; gap: 4px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+.figureBlock { padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+.figure { display: grid; gap: 4px; }
 .figureValue { font-family: var(--tcw-font-mono); font-size: 34px; line-height: 40px; font-weight: 500; color: var(--ink); }
 .figureLabel { font-family: var(--tcw-font-mono); font-size: 11px; color: var(--ink-muted); }
+/* La cifra editable: signo aparte + input mono de 34 px, sin caja. */
+.figureField { display: flex; align-items: baseline; gap: 4px; min-width: 0; }
+.figureSign { font-family: var(--tcw-font-mono); font-size: 34px; line-height: 40px; font-weight: 500; color: var(--ink); }
+.figureInput {
+  flex: 1; min-width: 0; padding: 0; border: 0; background: transparent; color: var(--ink);
+  font-family: var(--tcw-font-mono); font-size: 34px; line-height: 40px; font-weight: 500; font-variant-numeric: tabular-nums;
+}
+.figureInput:focus { outline: none; box-shadow: 0 2px 0 0 var(--violet); }
+.figureInput::placeholder { color: var(--ink-muted); }
+/* Concepto: sin etiqueta, a todo el ancho bajo la cifra. */
+.figureConcept {
+  display: block; width: 100%; margin-top: 12px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--bg); color: var(--ink); font: inherit; font-size: 14px;
+}
+.figureConcept:focus { outline: none; border-color: var(--violet); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violet) 28%, transparent); }
 
 .footer { display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--line); background: var(--surface); }
 .spacer { flex: 1; }

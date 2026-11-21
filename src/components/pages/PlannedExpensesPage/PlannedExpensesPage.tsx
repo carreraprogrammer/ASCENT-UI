@@ -29,7 +29,7 @@ import type {
   SinkingFundPayload,
 } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
-import { BarPct, CategoryCell, DateCell, InstButton, Num, StateTag, Sub, Two } from '../../atoms/Inst';
+import { BarPct, CategoryCell, DateCell, InstButton, NameCell, Num, StateTag, Sub, Two } from '../../atoms/Inst';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { fmtAmount, fmtDayYear } from '../../../utils/instrumento';
@@ -322,7 +322,7 @@ export const PlannedExpensesContent = () => {
   const peRows = plannedExpenses.map((expense) => {
     const attrs = expense.attributes;
     return [
-      <Two a={attrs.name} b={planningTypeLabels[attrs.planning_type] ?? attrs.planning_type} />,
+      <Two a={<NameCell>{attrs.name}</NameCell>} b={planningTypeLabels[attrs.planning_type] ?? attrs.planning_type} />,
       <DateCell>{fmtDayYear(attrs.target_date)}</DateCell>,
       <CategoryCell code={attrs.category_code} subcategoryName={attrs.subcategory_name}
         gavetaName={attrs.category_code || attrs.category_name ? getCategoryDisplayName({ name: attrs.category_name, code: attrs.category_code }) : null}
@@ -347,7 +347,7 @@ export const PlannedExpensesContent = () => {
     const target = fund.target_amount ?? 0;
     const linked = fund.planned_expense_id ? plannedById.get(fund.planned_expense_id) : null;
     return [
-      <Two a={fund.name} b={linked ? linked.attributes.name : (fund.active ? 'activo' : 'inactivo')} />,
+      <Two a={<NameCell>{fund.name}</NameCell>} b={linked ? linked.attributes.name : (fund.active ? 'activo' : 'inactivo')} />,
       <Num>{fmtAmount(fund.monthly_contribution)}</Num>,
       <DateCell>{fund.target_date ? fmtDayYear(fund.target_date) : '—'}</DateCell>,
       target > 0 ? <BarPct pct={(fund.current_balance / target) * 100} label={`Avance de ${fund.name}`} /> : <Sub>sin meta</Sub>,
@@ -479,7 +479,7 @@ export const PlannedExpensesContent = () => {
                 onChange={(category_id) => setFilters((current) => ({ ...current, category_id }))} />
             </>}>
             {loading ? (
-              <InstTableSkeleton heads={peHeads} aligns={peAligns} rows={3} />
+              <InstTableSkeleton heads={peHeads} aligns={peAligns} rows={3} withActions nameCol={0} />
             ) : error ? null : !plannedExpenses.length ? (
               <InstNote>
                 {peFiltered ? 'No hay gastos planeados con estos filtros.' : 'Todavía no hay gastos planeados.'}
@@ -488,7 +488,7 @@ export const PlannedExpensesContent = () => {
                 </InstButton>
               </InstNote>
             ) : (
-              <InstTable caption="Gastos planeados" heads={peHeads} aligns={peAligns} rows={peRows} rowActions={peActions}
+              <InstTable caption="Gastos planeados" heads={peHeads} aligns={peAligns} rows={peRows} rowActions={peActions} nameCol={0}
                 editingRow={composerOpen && editingExpense ? plannedExpenses.findIndex((e) => e.id === editingExpense.id) : undefined}
                 rowKeys={plannedExpenses.map((e) => e.id)}
                 onRowClick={(i) => { setEditingExpense(plannedExpenses[i]); setComposerOpen(true); }} />
@@ -496,14 +496,14 @@ export const PlannedExpensesContent = () => {
           </InstSection>
           <InstSection title={`Bolsillos · ${sinkingFunds.length}`} id="planned-bolsillos">
             {loading ? (
-              <InstTableSkeleton heads={sfHeads} aligns={sfAligns} rows={2} />
+              <InstTableSkeleton heads={sfHeads} aligns={sfAligns} rows={2} withActions nameCol={0} />
             ) : error ? null : !sinkingFunds.length ? (
               <InstNote>
                 Todavía no hay bolsillos.
                 <InstButton className={desk.noteBtn} onClick={openNewFund}>Crear bolsillo</InstButton>
               </InstNote>
             ) : (
-              <InstTable caption="Bolsillos" heads={sfHeads} aligns={sfAligns} rows={sfRows} rowActions={sfActions}
+              <InstTable caption="Bolsillos" heads={sfHeads} aligns={sfAligns} rows={sfRows} rowActions={sfActions} nameCol={0}
                 editingRow={fundComposerOpen && editingFund ? sinkingFunds.findIndex((f) => f.id === editingFund.id) : undefined}
                 rowKeys={sinkingFunds.map((f) => f.id)}
                 onRowClick={(i) => { setEditingFund(sinkingFunds[i]); setFundComposerOpen(true); }} />

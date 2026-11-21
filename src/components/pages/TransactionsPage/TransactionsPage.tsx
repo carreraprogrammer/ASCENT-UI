@@ -26,7 +26,7 @@ import { financeService } from '../../../services/financeService';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import formStyles from '../../organisms/ComposerForm.module.css';
 import styles from '../FinancePage.module.css';
-import { DateCell, InstButton, Num, OriginTag, StateTag, Sub } from '../../atoms/Inst';
+import { DateCell, InstButton, NameCell, Num, OriginTag, StateTag, Sub } from '../../atoms/Inst';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { ORIGIN_LABEL, fmtAmount, fmtDay, fmtSigned, originOf } from '../../../utils/instrumento';
 import { RowActions, Chip, ChipSelect, PlainButton, SortHead, TxCategoryCell, instDeskStyles as desk, type RowAction } from './instDesk';
@@ -897,7 +897,8 @@ export const TransactionsContent = () => {
     const acts: RowAction[] = [];
     if (transaction.attributes.status === 'pending') {
       const suggested = suggestedFor(transaction) ?? [];
-      suggested.slice(0, 2).forEach((sug) => acts.push({ label: `✓ ${sug.name}`, onClick: () => void handleQuickConfirm(transaction, sug.code) }));
+      // La columna de acciones mide 150 px como mucho: una sola sugerida; "Otra" abre el panel con todas las gavetas.
+      suggested.slice(0, 1).forEach((sug) => acts.push({ label: `✓ ${sug.name}`, onClick: () => void handleQuickConfirm(transaction, sug.code) }));
       acts.push(suggested.length
         ? { label: 'Otra', onClick: () => openEdit(transaction) }
         : { label: 'Confirmar', onClick: () => void handleQuickConfirm(transaction) });
@@ -912,7 +913,7 @@ export const TransactionsContent = () => {
     const pending = transaction.attributes.status === 'pending';
     return [
       <DateCell>{fmtDay(resolveTransactionDate(transaction))}</DateCell>,
-      <span style={{ fontWeight: 500 }}>{transaction.attributes.concept}</span>,
+      <NameCell>{transaction.attributes.concept}</NameCell>,
       // TCW-5: Gaveta · categoría con la pieza CategoryCell (atoms/Inst), vía TxCategoryCell.
       <TxCategoryCell tx={transaction} lookup={categoryLookup} />,
       <OriginTag origin={originOf(transaction.attributes)} />,
@@ -965,7 +966,7 @@ export const TransactionsContent = () => {
           <PlainButton onClick={() => ionRouter.push('/subcategories', 'forward')}>Subcategorías</PlainButton>
         </div>
         {loading ? (
-          <InstTableSkeleton heads={txHeads} aligns={txAligns} rows={8} />
+          <InstTableSkeleton heads={txHeads} aligns={txAligns} rows={8} withActions nameCol={1} />
         ) : error ? (
           <InstNote error onRetry={() => void reload()}>{error}</InstNote>
         ) : !orderedTransactions.length ? (
@@ -979,7 +980,7 @@ export const TransactionsContent = () => {
           </InstNote>
         ) : (
           <>
-            <InstTable caption={`Movimientos de ${monthLong(period)}`} heads={txHeads} aligns={txAligns} rows={txRows} rowActions={txActions} editingRow={editingRow}
+            <InstTable caption={`Movimientos de ${monthLong(period)}`} heads={txHeads} aligns={txAligns} rows={txRows} rowActions={txActions} nameCol={1} editingRow={editingRow}
               rowKeys={orderedTransactions.map((t) => t.id)} onRowClick={(i) => openEdit(orderedTransactions[i])} />
             {hasNextPage ? (
               <div ref={moreRef} className={desk.more}>
@@ -1017,9 +1018,10 @@ export const TransactionsContent = () => {
         title={editingTransaction ? 'Editar transacción' : 'Nueva transacción'}
         subtitle="Ajusta contexto, clasificación y subcategoría desde un solo lugar."
         origin={editingTransaction ? ORIGIN_LABEL[originOf(editingTransaction.attributes)].label : undefined}
-        figure={editingTransaction
-          ? { label: 'MONTO', value: fmtSigned(editingTransaction.attributes.amount, editingTransaction.attributes.transaction_type === 'income') }
-          : undefined}
+        figure={{
+          label: 'MONTO',
+          value: editingTransaction ? fmtSigned(editingTransaction.attributes.amount, editingTransaction.attributes.transaction_type === 'income') : '',
+        }}
         onSubmit={triggerComposerSubmit}
         submitLabel={editingTransaction ? 'Guardar cambios' : 'Crear transacción'}
         cancelLabel="Cancelar"

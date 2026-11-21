@@ -25,6 +25,7 @@
 .link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .btn:focus-visible, .link:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--tcw-radius-md); }
 .date { font-family: var(--tcw-font-mono); font-size: 12px; color: var(--ink-muted); white-space: nowrap; }
+.nameCell { display: block; max-width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 .sub { font-size: 13px; color: var(--ink-muted); }
 .two1 { font-weight: 500; }
 .two2 { font-size: 12px; color: var(--ink-muted); }
