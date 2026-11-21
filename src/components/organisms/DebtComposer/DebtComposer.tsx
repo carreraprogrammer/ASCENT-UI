@@ -68,7 +68,8 @@ export const DebtComposer = ({ debt = null, loading, onCreate, onUpdate, onCance
   // TCW-27: Tipo y Estado como segmentados con texto solo en escritorio web; móvil y Capacitor conservan los <select>.
   const desktop = useDesktopLayout();
   // Dentro de un panel con cifra grande, el saldo es la cifra (sin fila "Saldo actual").
-  const inFigure = desktop && usePanelFigure() !== null;
+  const panelFigure = usePanelFigure();
+  const inFigure = desktop && panelFigure !== null;
   const [values, setValues] = useState<DebtComposerValues>(emptyValues);
   const [error, setError] = useState<string | null>(null);
 

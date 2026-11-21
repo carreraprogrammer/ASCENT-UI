@@ -129,7 +129,8 @@ export const TransactionComposer = ({
   // TCW-27: lo nuevo (segmentados, sin encabezados de relleno) solo en escritorio web; móvil y Capacitor, como en main.
   const desktop = useDesktopLayout();
   // Dentro de un panel con cifra grande, la cifra es el monto y el Concepto va bajo ella (sin fila "Monto" ni "Concepto").
-  const inFigure = desktop && usePanelFigure() !== null;
+  const panelFigure = usePanelFigure();
+  const inFigure = desktop && panelFigure !== null;
   const [values, setValues] = useState<TransactionComposerValues>(emptyValues);
   const [localCategories, setLocalCategories] = useState<CategoryResource[]>(categories);
   const [subcategorySheetOpen, setSubcategorySheetOpen] = useState(false);

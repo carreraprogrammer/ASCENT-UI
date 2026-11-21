@@ -96,7 +96,7 @@ export const RowActions = ({ actions }: { actions: RowAction[] }) => (
   <span className={styles.acts} onClick={stop} onKeyDown={stop}>
     {actions.map((a) => (
       <button key={a.label} type="button" className={cx(styles.act, a.danger && styles.actDanger)}
-        disabled={a.disabled} onClick={a.onClick}>{a.label}</button>
+        disabled={a.disabled} onClick={a.onClick} title={a.label}>{a.label}</button>
     ))}
   </span>
 );
