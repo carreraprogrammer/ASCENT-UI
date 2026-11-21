@@ -4,6 +4,8 @@ import { lockClosedOutline, trophyOutline, chevronForwardOutline, arrowBackOutli
 import { resolveNamedIcon } from './iconRegistry';
 import type { BudgetLineItem, BudgetPlanDraft, WizardCategory, WizardData, WizardSubcategory } from '../../../types/finance.types';
 import { BrandMark } from '../../atoms/BrandMark';
+import { CenteredModal } from '../CenteredModal';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import styles from './BudgetWizardModal.module.css';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -744,6 +746,7 @@ export const BudgetWizardModal = ({
   hasPlanHistory = false, isEditMode = false,
   adjustCategoryCode, existingMode, planConfirmedAt,
 }: BudgetWizardModalProps) => {
+  const desktop = useDesktopLayout();
 
   useEffect(() => {
     if (isOpen) document.body.setAttribute('data-wizard-open', 'true');
@@ -872,15 +875,8 @@ export const BudgetWizardModal = ({
   const allocated = effectiveGoal + totalPlanned;
   const focusCat = focusCode ? categories.find((c) => c.code === focusCode) ?? null : null;
 
-  return (
-    <IonModal
-      className={styles.modal}
-      isOpen={isOpen}
-      onDidDismiss={onClose}
-      style={{ '--border-radius': '0px', '--width': '100vw', '--height': '100dvh' }}
-    >
-      <IonContent className={styles.content} scrollY={false}>
-        <div className={styles.panel}>
+  const panel = (
+        <div className={`${styles.panel} ${desktop ? styles.inDialog : ''}`.trim()}>
           {!wizardData ? (
             <div className={styles.emptyState}>
               <p className={styles.emptyText}>Cargando datos del plan...</p>
@@ -888,8 +884,8 @@ export const BudgetWizardModal = ({
           ) : (
             <div className={styles.panelInner}>
 
-              {/* ── Top bar ── */}
-              <div className={styles.topbar}>
+              {/* ── Top bar (en escritorio la cabecera es la del modal centrado) ── */}
+              <div className={styles.topbar} hidden={desktop}>
                 <div className={styles.topbarLeft}>
                   <BrandMark variant="monoline" size="md" />
                   <div className={styles.topbarCopy}>
@@ -1070,6 +1066,59 @@ export const BudgetWizardModal = ({
             </div>
           )}
         </div>
+  );
+
+  // TCW-27: en escritorio (>= 1024 px, web) el asistente va en el modal centrado compartido; móvil y Capacitor conservan el IonModal.
+  if (desktop) {
+    const steps = categories.length
+      ? categories.map((c) => ({ id: c.code, label: c.name }))
+      : [{ id: 'plan', label: 'Plan' }];
+    const flowActive = mode === 'crear' && !showIntro;
+    const grace = mode === 'ajustar' && isWithinGraceWindow;
+    let primary: { label: string; run: () => void; disabled?: boolean } | null;
+    if (!wizardData || (mode === 'crear' && showIntro)) primary = null;
+    else if (flowActive) {
+      const last = activeIndex >= categories.length - 1;
+      primary = {
+        label: last ? 'Ver mi plan' : `Siguiente · ${categories[activeIndex + 1]?.name ?? ''}`,
+        run: () => { if (last) handleSave(); else setActiveIndex((i) => i + 1); },
+      };
+    } else if (grace) {
+      primary = porAsignar > 0
+        ? { label: `Ubicar ${fmt(porAsignar)}`, run: () => setLeftoverOpen(true) }
+        : { label: changesCount > 0 ? `Guardar ${changesCount} cambio${changesCount !== 1 ? 's' : ''}` : 'Guardar plan', run: () => handleSave() };
+    } else if (mode === 'ajustar') primary = { label: 'Cerrar', run: onClose };
+    else if (porAsignar > 0) primary = { label: `Ubicar ${fmt(porAsignar)}`, run: () => setLeftoverOpen(true) };
+    else if (porAsignar < 0) primary = { label: `Te pasaste ${fmt(-porAsignar)} · ajusta alguna categoría`, run: () => undefined, disabled: true };
+    else primary = { label: mode === 'replantear' ? 'Firmar plan' : 'Confirmar plan', run: () => handleSave() };
+    return (
+      <CenteredModal
+        isOpen={isOpen}
+        variant="wizard"
+        title={mode === 'crear' ? 'Tu primer plan' : mode === 'ajustar' ? 'Editar presupuesto' : 'Presupuesto mensual'}
+        origin={formatMonthLabel(month)}
+        steps={steps}
+        currentStep={Math.min(activeIndex, steps.length - 1)}
+        onClose={onClose}
+        onBack={flowActive ? () => { if (activeIndex === 0) setShowIntro(true); else setActiveIndex((i) => i - 1); } : undefined}
+        onPrimary={primary?.run}
+        primaryLabel={primary?.label}
+        primaryDisabled={primary?.disabled}
+      >
+        {panel}
+      </CenteredModal>
+    );
+  }
+
+  return (
+    <IonModal
+      className={styles.modal}
+      isOpen={isOpen}
+      onDidDismiss={onClose}
+      style={{ '--border-radius': '0px', '--width': '100vw', '--height': '100dvh' }}
+    >
+      <IonContent className={styles.content} scrollY={false}>
+        {panel}
       </IonContent>
     </IonModal>
   );

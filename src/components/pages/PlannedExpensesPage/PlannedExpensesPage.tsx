@@ -10,6 +10,7 @@ import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { CrudModal } from '../../molecules/CrudModal';
+import { CenteredModal } from '../../organisms/CenteredModal';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { PlannedExpenseComposer } from '../../organisms/PlannedExpenseComposer';
@@ -32,7 +33,7 @@ import { BarPct, CategoryCell, DateCell, InstButton, Num, StateTag, Sub, Two } f
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { fmtAmount, fmtDayYear } from '../../../utils/instrumento';
-import { CellWithActions, ChipSelect, instDeskStyles as desk } from '../TransactionsPage/instDesk';
+import { RowActions, ChipSelect, instDeskStyles as desk } from '../TransactionsPage/instDesk';
 import { categoryIconOf } from '../TransactionsPage/instDeskData';
 
 const planningTypeLabels: Record<string, string> = {
@@ -165,8 +166,16 @@ export const PlannedExpensesContent = () => {
     await handleUpdate(plannedExpense.id, { status });
   };
 
-  const handleDeleteExpense = async (plannedExpense: PlannedExpense) => {
-    if (!window.confirm(`¿Borrar el plan "${plannedExpense.attributes.name}"? Se borra también su bolsillo.`)) return;
+  // TCW-27: en escritorio las confirmaciones son el modal centrado; móvil conserva window.confirm.
+  const [pendingDelete, setPendingDelete] = useState<
+    { kind: 'expense'; item: PlannedExpense } | { kind: 'fund'; item: SinkingFund } | null
+  >(null);
+
+  const handleDeleteExpense = async (plannedExpense: PlannedExpense, confirmed = false) => {
+    if (!confirmed) {
+      if (isDesktop) { setPendingDelete({ kind: 'expense', item: plannedExpense }); return; }
+      if (!window.confirm(`¿Borrar el plan "${plannedExpense.attributes.name}"? Se borra también su bolsillo.`)) return;
+    }
     try {
       await financeService.deletePlannedExpense(plannedExpense.id);
       await load();
@@ -207,8 +216,11 @@ export const PlannedExpensesContent = () => {
     }
   };
 
-  const handleDeleteFund = async (fund: SinkingFund) => {
-    if (!window.confirm(`¿Borrar el bolsillo "${fund.name}"? El saldo no se devuelve automáticamente.`)) return;
+  const handleDeleteFund = async (fund: SinkingFund, confirmed = false) => {
+    if (!confirmed) {
+      if (isDesktop) { setPendingDelete({ kind: 'fund', item: fund }); return; }
+      if (!window.confirm(`¿Borrar el bolsillo "${fund.name}"? El saldo no se devuelve automáticamente.`)) return;
+    }
     try {
       await financeService.deleteSinkingFund(fund.id);
       await load();
@@ -316,17 +328,19 @@ export const PlannedExpensesContent = () => {
         gavetaName={attrs.category_code || attrs.category_name ? getCategoryDisplayName({ name: attrs.category_name, code: attrs.category_code }) : null}
         icon={categoryIconOf(categories, attrs.category_id, attrs.subcategory_id)} />,
       <StateTag state={plannedState[attrs.status] ?? attrs.status} />,
-      <CellWithActions actions={[
-        ...(attrs.status === 'planned' ? [
-          { label: 'Ejecutado', onClick: () => void handleChangeStatus(expense, 'executed') },
-          { label: 'Cancelar', onClick: () => void handleChangeStatus(expense, 'cancelled') },
-        ] : []),
-        { label: 'Borrar', danger: true, onClick: () => void handleDeleteExpense(expense) },
-      ]}>
-        <Num strong>{fmtAmount(attrs.amount_estimated)}</Num>
-      </CellWithActions>,
+      <Num strong>{fmtAmount(attrs.amount_estimated)}</Num>,
     ];
   });
+  // TCW-27: acciones en la columna final propia de la tabla.
+  const peActions = plannedExpenses.map((expense) => (
+    <RowActions actions={[
+      ...(expense.attributes.status === 'planned' ? [
+        { label: 'Ejecutado', onClick: () => void handleChangeStatus(expense, 'executed') },
+        { label: 'Cancelar', onClick: () => void handleChangeStatus(expense, 'cancelled') },
+      ] : []),
+      { label: 'Borrar', danger: true, onClick: () => void handleDeleteExpense(expense) },
+    ]} />
+  ));
   const sfHeads = ['Bolsillo', 'Aporte mensual', 'Fecha objetivo', 'Avance', 'Guardado (COP)'];
   const sfAligns: Align[] = ['left', 'right', 'left', 'left', 'right'];
   const sfRows = sinkingFunds.map((fund) => {
@@ -337,18 +351,44 @@ export const PlannedExpensesContent = () => {
       <Num>{fmtAmount(fund.monthly_contribution)}</Num>,
       <DateCell>{fund.target_date ? fmtDayYear(fund.target_date) : '—'}</DateCell>,
       target > 0 ? <BarPct pct={(fund.current_balance / target) * 100} label={`Avance de ${fund.name}`} /> : <Sub>sin meta</Sub>,
-      <CellWithActions actions={[
-        { label: 'Retirar', disabled: fund.current_balance <= 0, onClick: () => void handleWithdrawFund(fund) },
-        { label: 'Borrar', danger: true, onClick: () => void handleDeleteFund(fund) },
-      ]}>
-        <Num strong>{target > 0 ? `${fmtAmount(fund.current_balance)} / ${fmtAmount(target)}` : fmtAmount(fund.current_balance)}</Num>
-      </CellWithActions>,
+      <Num strong>{target > 0 ? `${fmtAmount(fund.current_balance)} / ${fmtAmount(target)}` : fmtAmount(fund.current_balance)}</Num>,
     ];
   });
+  const sfActions = sinkingFunds.map((fund) => (
+    <RowActions actions={[
+      { label: 'Retirar', disabled: fund.current_balance <= 0, onClick: () => void handleWithdrawFund(fund) },
+      { label: 'Borrar', danger: true, onClick: () => void handleDeleteFund(fund) },
+    ]} />
+  ));
   const peFiltered = Boolean(activeFilterCount || filters.q);
 
   const overlays = (
     <>
+        <CenteredModal
+          isOpen={Boolean(pendingDelete)}
+          variant="confirm"
+          title={pendingDelete?.kind === 'fund' ? 'Eliminar bolsillo' : 'Eliminar gasto planeado'}
+          confirmLabel="Eliminar"
+          cancelLabel="Cancelar"
+          consequence={pendingDelete?.kind === 'fund'
+            ? 'El saldo no se devuelve automáticamente. Esta acción no se puede deshacer.'
+            : 'Se borra también su bolsillo. Esta acción no se puede deshacer.'}
+          onClose={() => setPendingDelete(null)}
+          onConfirm={() => {
+            const target = pendingDelete;
+            setPendingDelete(null);
+            if (!target) return;
+            if (target.kind === 'expense') void handleDeleteExpense(target.item, true);
+            else void handleDeleteFund(target.item, true);
+          }}
+        >
+          {pendingDelete ? (
+            <>
+              <span>{pendingDelete.kind === 'fund' ? pendingDelete.item.name : pendingDelete.item.attributes.name}</span>
+              <span>{fmtAmount(pendingDelete.kind === 'fund' ? pendingDelete.item.current_balance : pendingDelete.item.attributes.amount_estimated)}</span>
+            </>
+          ) : null}
+        </CenteredModal>
         <SortSheet
           isOpen={sortOpen}
           title="Ordenar gastos planeados"
@@ -448,7 +488,8 @@ export const PlannedExpensesContent = () => {
                 </InstButton>
               </InstNote>
             ) : (
-              <InstTable caption="Gastos planeados" heads={peHeads} aligns={peAligns} rows={peRows}
+              <InstTable caption="Gastos planeados" heads={peHeads} aligns={peAligns} rows={peRows} rowActions={peActions}
+                editingRow={composerOpen && editingExpense ? plannedExpenses.findIndex((e) => e.id === editingExpense.id) : undefined}
                 rowKeys={plannedExpenses.map((e) => e.id)}
                 onRowClick={(i) => { setEditingExpense(plannedExpenses[i]); setComposerOpen(true); }} />
             )}
@@ -462,7 +503,8 @@ export const PlannedExpensesContent = () => {
                 <InstButton className={desk.noteBtn} onClick={openNewFund}>Crear bolsillo</InstButton>
               </InstNote>
             ) : (
-              <InstTable caption="Bolsillos" heads={sfHeads} aligns={sfAligns} rows={sfRows}
+              <InstTable caption="Bolsillos" heads={sfHeads} aligns={sfAligns} rows={sfRows} rowActions={sfActions}
+                editingRow={fundComposerOpen && editingFund ? sinkingFunds.findIndex((f) => f.id === editingFund.id) : undefined}
                 rowKeys={sinkingFunds.map((f) => f.id)}
                 onRowClick={(i) => { setEditingFund(sinkingFunds[i]); setFundComposerOpen(true); }} />
             )}

@@ -10,7 +10,8 @@ import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
-import { CrudModal } from '../../molecules/CrudModal';
+import { CrudModal, triggerComposerSubmit } from '../../molecules/CrudModal';
+import { CenteredModal } from '../../organisms/CenteredModal';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { TransactionComposer } from '../../organisms/TransactionComposer';
@@ -27,8 +28,8 @@ import formStyles from '../../organisms/ComposerForm.module.css';
 import styles from '../FinancePage.module.css';
 import { DateCell, InstButton, Num, OriginTag, StateTag, Sub } from '../../atoms/Inst';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
-import { fmtAmount, fmtDay, fmtSigned, originOf } from '../../../utils/instrumento';
-import { CellWithActions, Chip, ChipSelect, PlainButton, SortHead, TxCategoryCell, instDeskStyles as desk, type RowAction } from './instDesk';
+import { ORIGIN_LABEL, fmtAmount, fmtDay, fmtSigned, originOf } from '../../../utils/instrumento';
+import { RowActions, Chip, ChipSelect, PlainButton, SortHead, TxCategoryCell, instDeskStyles as desk, type RowAction } from './instDesk';
 import { SOURCE_OPTIONS, monthLong, monthShort, nextSort, txQuickFilters, txQuickOf, type TxQuick } from './instDeskData';
 
 const periodFormatter = new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' });
@@ -185,6 +186,7 @@ export const TransactionsContent = () => {
   const [linkSubmitting, setLinkSubmitting] = useState(false);
   const [linkOptionsLoading, setLinkOptionsLoading] = useState(false);
   const [presentAlert] = useIonAlert();
+  const [pendingDelete, setPendingDelete] = useState<Transaction | null>(null);
   const [presentToast] = useIonToast();
 
   const {
@@ -509,6 +511,12 @@ export const TransactionsContent = () => {
       concept: transaction.attributes.concept,
       amount: transaction.attributes.amount,
     });
+
+    // TCW-27: en escritorio la confirmación es el modal centrado (no el alert de Ionic); móvil sigue igual.
+    if (isDesktop) {
+      setPendingDelete(transaction);
+      return;
+    }
 
     await presentAlert({
       cssClass: 'brand-alert',
@@ -909,11 +917,14 @@ export const TransactionsContent = () => {
       <TxCategoryCell tx={transaction} lookup={categoryLookup} />,
       <OriginTag origin={originOf(transaction.attributes)} />,
       <StateTag state={pending ? 'pendiente' : 'confirmado'} />,
-      <CellWithActions actions={rowActions(transaction)}>
-        <Num strong tone={income ? 'ok' : undefined}>{fmtSigned(transaction.attributes.amount, income)}</Num>
-      </CellWithActions>,
+      <Num strong tone={income ? 'ok' : undefined}>{fmtSigned(transaction.attributes.amount, income)}</Num>,
     ];
   });
+  // TCW-27: acciones en la columna final propia de la tabla; ya no se montan sobre Estado ni Origen.
+  const txActions = orderedTransactions.map((transaction) => <RowActions actions={rowActions(transaction)} />);
+  const editingRow = composerOpen && editingTransaction
+    ? orderedTransactions.findIndex((t) => t.id === editingTransaction.id)
+    : undefined;
 
   const desktopView = (
     <div className={desk.page} data-testid="transactions-desktop">
@@ -968,7 +979,7 @@ export const TransactionsContent = () => {
           </InstNote>
         ) : (
           <>
-            <InstTable caption={`Movimientos de ${monthLong(period)}`} heads={txHeads} aligns={txAligns} rows={txRows}
+            <InstTable caption={`Movimientos de ${monthLong(period)}`} heads={txHeads} aligns={txAligns} rows={txRows} rowActions={txActions} editingRow={editingRow}
               rowKeys={orderedTransactions.map((t) => t.id)} onRowClick={(i) => openEdit(orderedTransactions[i])} />
             {hasNextPage ? (
               <div ref={moreRef} className={desk.more}>
@@ -1005,6 +1016,15 @@ export const TransactionsContent = () => {
         isOpen={composerOpen}
         title={editingTransaction ? 'Editar transacción' : 'Nueva transacción'}
         subtitle="Ajusta contexto, clasificación y subcategoría desde un solo lugar."
+        origin={editingTransaction ? ORIGIN_LABEL[originOf(editingTransaction.attributes)].label : undefined}
+        figure={editingTransaction
+          ? { label: 'MONTO', value: fmtSigned(editingTransaction.attributes.amount, editingTransaction.attributes.transaction_type === 'income') }
+          : undefined}
+        onSubmit={triggerComposerSubmit}
+        submitLabel={editingTransaction ? 'Guardar cambios' : 'Crear transacción'}
+        cancelLabel="Cancelar"
+        deleteLabel="Eliminar"
+        onDelete={editingTransaction ? () => void requestDelete(editingTransaction) : undefined}
         onClose={() => {
           setComposerOpen(false);
           setEditingTransaction(null);
@@ -1022,6 +1042,33 @@ export const TransactionsContent = () => {
           }}
         />
       </CrudModal>
+
+      {/* TCW-27: confirmación destructiva centrada en escritorio (reemplaza el alert de Ionic). */}
+      <CenteredModal
+        isOpen={Boolean(pendingDelete)}
+        variant="confirm"
+        title="Eliminar transacción"
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        consequence="Esta acción no se puede deshacer."
+        onClose={() => setPendingDelete(null)}
+        onConfirm={() => {
+          const target = pendingDelete;
+          setPendingDelete(null);
+          if (target) {
+            setComposerOpen(false);
+            setEditingTransaction(null);
+            void handleDelete(target);
+          }
+        }}
+      >
+        {pendingDelete ? (
+          <>
+            <TxCategoryCell tx={pendingDelete} lookup={categoryLookup} />
+            <Num strong>{fmtSigned(pendingDelete.attributes.amount, pendingDelete.attributes.transaction_type === 'income')}</Num>
+          </>
+        ) : null}
+      </CenteredModal>
 
       <CrudModal
         isOpen={Boolean(linkingTransaction)}

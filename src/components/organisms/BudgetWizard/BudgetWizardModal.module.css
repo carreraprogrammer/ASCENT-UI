@@ -1151,3 +1151,8 @@
   .stepOverlay { animation: stepIn 260ms cubic-bezier(.22,.61,.36,1) both; }
   .introOverlay { animation: fadeIn 240ms ease both; }
 }
+
+/* TCW-27: dentro del modal centrado de escritorio el asistente ocupa una altura acotada en vez de la pantalla completa. */
+.inDialog { position: relative; height: min(70vh, 640px); min-height: 0; }
+/* El pie del modal centrado trae los botones principales: se ocultan los docks propios. */
+.inDialog .dock, .inDialog .stepDock { display: none; }

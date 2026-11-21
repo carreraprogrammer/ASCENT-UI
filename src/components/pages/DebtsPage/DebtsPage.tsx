@@ -27,7 +27,7 @@ import formStyles from '../../organisms/ComposerForm.module.css';
 import { Bar, InstButton, Num, StateTag, Sub, Two } from '../../atoms/Inst';
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { fmtAmount } from '../../../utils/instrumento';
-import { CellWithActions, SortHead, instDeskStyles as desk } from '../TransactionsPage/instDesk';
+import { RowActions, SortHead, instDeskStyles as desk } from '../TransactionsPage/instDesk';
 import { debtState, fmtRate, nextSort } from '../TransactionsPage/instDeskData';
 
 const initialFilters: DebtQueryParams = {
@@ -472,14 +472,16 @@ export const DebtsContent = () => {
       <Num>{fmtAmount(debt.attributes.monthly_payment)}</Num>,
       <Num>{fmtRate(debt.attributes.interest_rate)}</Num>,
       <Sub>{linked ? linked.attributes.name : 'sin recurrente'}</Sub>,
-      <CellWithActions actions={[
-        { label: linked ? 'Cambiar cuota' : 'Vincular cuota', onClick: () => handleOpenLinkModal(debt) },
-        { label: 'Borrar', danger: true, onClick: () => setDeletingDebt(debt) },
-      ]}>
-        <Num strong>{fmtAmount(debt.attributes.current_balance)}</Num>
-      </CellWithActions>,
+      <Num strong>{fmtAmount(debt.attributes.current_balance)}</Num>,
     ];
   });
+  // TCW-27: acciones en la columna final propia de la tabla.
+  const debtActions = debts.map((debt) => (
+    <RowActions actions={[
+      { label: linkedObligationByDebtId.get(debt.id) ? 'Cambiar cuota' : 'Vincular cuota', onClick: () => handleOpenLinkModal(debt) },
+      { label: 'Borrar', danger: true, onClick: () => setDeletingDebt(debt) },
+    ]} />
+  ));
   const settledCount = metrics.totalCount - metrics.activeCount;
 
   const desktopView = (
@@ -508,7 +510,8 @@ export const DebtsContent = () => {
             </InstButton>
           </InstNote>
         ) : (
-          <InstTable caption="Deudas registradas" heads={debtHeads} aligns={debtAligns} rows={debtRows}
+          <InstTable caption="Deudas registradas" heads={debtHeads} aligns={debtAligns} rows={debtRows} rowActions={debtActions}
+            editingRow={composerOpen && editingDebt ? debts.findIndex((d) => d.id === editingDebt.id) : undefined}
             rowKeys={debts.map((d) => d.id)} onRowClick={(i) => { setEditingDebt(debts[i]); setComposerOpen(true); }} />
         )}
       </InstSection>

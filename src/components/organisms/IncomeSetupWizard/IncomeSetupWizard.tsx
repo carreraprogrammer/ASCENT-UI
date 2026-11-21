@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { CenteredModal } from '../CenteredModal';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonModal, IonTitle, IonToolbar } from '@ionic/react';
 import { checkmarkCircleOutline } from 'ionicons/icons';
 import { Button } from '../../atoms/Button';
@@ -25,6 +27,12 @@ import styles from './IncomeSetupWizard.module.css';
 type Cadence = 'monthly' | 'biweekly' | 'weekly' | 'irregular';
 type WindowKey = 'early' | 'week1' | 'q1' | 'mid' | 'q2' | 'late';
 type Step = 'base' | 'ask_variable' | 'variable' | 'done';
+
+const WIZARD_STEPS = [
+  { id: 'base', label: 'Ingreso base' },
+  { id: 'variable', label: 'Ingresos variables' },
+  { id: 'done', label: 'Listo' },
+];
 
 interface BaseForm {
   name: string;
@@ -73,6 +81,7 @@ export interface IncomeSetupWizardProps {
 }
 
 export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWizardProps) => {
+  const desktop = useDesktopLayout();
   const [step, setStep] = useState<Step>('base');
   const [base, setBase] = useState<BaseForm>(emptyBase());
   const [varIncome, setVarIncome] = useState<VarForm>(emptyVar());
@@ -203,18 +212,8 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
 
   // ── Render ───────────────────────────────────────────────────────────────
 
-  return (
-    <IonModal isOpen={isOpen} onDidDismiss={handleClose} className="crud-modal">
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>{stepTitle[step]}</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={handleClose}>Cerrar</IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-
-      <IonContent className="crud-modal__content">
+  const body = (
+      <>
 
         {/* ── Step: Ingreso base ── */}
         {step === 'base' && (
@@ -313,9 +312,11 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
             </div>
 
             {error ? <p className={styles.error}>{error}</p> : null}
+            {desktop ? null : (
             <div className={styles.actions}>
               <Button label="Continuar" onClick={() => void handleBaseNext()} loading={saving} />
             </div>
+            )}
           </div>
         )}
 
@@ -328,10 +329,12 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
               ¿Tenés algún ingreso variable además? (freelance, comisiones, arriendo recibido…)
             </p>
             {error ? <p className={styles.error}>{error}</p> : null}
+            {desktop ? null : (
             <div className={styles.choiceRow}>
               <Button label="Sí, agregar uno" onClick={() => setStep('variable')} />
               <Button label="No, listo" variant="ghost" onClick={() => setStep('done')} />
             </div>
+            )}
           </div>
         )}
 
@@ -429,10 +432,12 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
               </div>
             </div>
             {error ? <p className={styles.error}>{error}</p> : null}
+            {desktop ? null : (
             <div className={styles.actions}>
               <Button label="Atrás" variant="ghost" onClick={() => { setError(null); setStep('ask_variable'); }} disabled={saving} />
               <Button label="Guardar ingreso variable" onClick={() => void handleVariableSave()} loading={saving} />
             </div>
+            )}
           </div>
         )}
 
@@ -446,12 +451,65 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
             <p className={styles.successBody}>
               El sistema ya puede calcular tu presupuesto mensual real. Podés ajustar o agregar más ingresos en cualquier momento desde tu perfil.
             </p>
+            {desktop ? null : (
             <div className={styles.actions}>
               <Button label="Cerrar" onClick={handleDone} />
             </div>
+            )}
           </div>
         )}
 
+      </>
+  );
+
+  // TCW-27: en escritorio (>= 1024 px, web) el asistente va en el modal centrado compartido; móvil y Capacitor conservan la hoja.
+  if (desktop) {
+    return (
+      <CenteredModal
+        isOpen={isOpen}
+        variant="wizard"
+        title={stepTitle[step]}
+        steps={WIZARD_STEPS}
+        currentStep={step === 'base' ? 0 : step === 'done' ? 2 : 1}
+        onClose={handleClose}
+        onBack={
+          step === 'ask_variable' ? () => setStep('done')
+            : step === 'variable' ? () => { setError(null); setStep('ask_variable'); }
+              : undefined
+        }
+        backLabel={step === 'ask_variable' ? 'No, listo' : '← paso anterior'}
+        onPrimary={
+          step === 'base' ? () => void handleBaseNext()
+            : step === 'ask_variable' ? () => setStep('variable')
+              : step === 'variable' ? () => void handleVariableSave()
+                : handleDone
+        }
+        primaryLabel={
+          step === 'base' ? 'Continuar'
+            : step === 'ask_variable' ? 'Sí, agregar uno'
+              : step === 'variable' ? 'Guardar ingreso variable'
+                : 'Cerrar'
+        }
+        primaryDisabled={saving}
+      >
+        {body}
+      </CenteredModal>
+    );
+  }
+
+  return (
+    <IonModal isOpen={isOpen} onDidDismiss={handleClose} className="crud-modal">
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle>{stepTitle[step]}</IonTitle>
+          <IonButtons slot="end">
+            <IonButton onClick={handleClose}>Cerrar</IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
+
+      <IonContent className="crud-modal__content">
+        {body}
       </IonContent>
     </IonModal>
   );

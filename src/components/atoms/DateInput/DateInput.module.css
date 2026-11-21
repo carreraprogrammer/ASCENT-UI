@@ -5,3 +5,9 @@
 .errorInput { composes: errorInput from '../../../styles/atoms.module.css'; }
 .error { composes: error from '../../../styles/atoms.module.css'; }
 .hint { composes: hint from '../../../styles/atoms.module.css'; }
+
+.field { position: relative; display: block; width: 100%; }
+/* El valor visible va como "20 nov 2026"; el input nativo queda por debajo y sigue abriendo el selector. */
+.display { position: absolute; inset: 0; display: flex; align-items: center; padding: 0 var(--space-4); font-family: var(--tcw-font-mono); font-size: var(--text-base); color: var(--color-text-primary); pointer-events: none; z-index: 1; }
+.native { color: transparent; }
+.native::-webkit-datetime-edit { opacity: 0; }

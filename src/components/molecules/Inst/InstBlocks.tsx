@@ -13,9 +13,13 @@ export interface InstTableProps {
   caption?: string;
   rowKeys?: Array<string | number>;
   onRowClick?: (index: number) => void;
+  /** Un nodo por fila. Agrega una columna final propia ("Acciones", ancho fijo, siempre reservada). */
+  rowActions?: ReactNode[];
+  /** Índice de la fila en edición (resaltada). */
+  editingRow?: number;
 }
 
-export const InstTable = ({ heads, rows, aligns, caption, rowKeys, onRowClick }: InstTableProps) => {
+export const InstTable = ({ heads, rows, aligns, caption, rowKeys, onRowClick, rowActions, editingRow }: InstTableProps) => {
   const al = (i: number) => styles[aligns?.[i] ?? 'left'];
   const key = (e: KeyboardEvent, i: number) => {
     if (onRowClick && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onRowClick(i); }
@@ -23,13 +27,15 @@ export const InstTable = ({ heads, rows, aligns, caption, rowKeys, onRowClick }:
   return (
     <table className={styles.table}>
       {caption ? <caption className="sr-only" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>{caption}</caption> : null}
-      <thead><tr>{heads.map((h, i) => <th key={i} scope="col" className={`${styles.th} ${al(i)}`}>{h}</th>)}</tr></thead>
+      <thead><tr>{heads.map((h, i) => <th key={i} scope="col" className={`${styles.th} ${al(i)}`}>{h}</th>)}{rowActions ? <th scope="col" className={styles.thActions}><span className={styles.srOnly}>Acciones</span></th> : null}</tr></thead>
       <tbody>
         {rows.map((r, ri) => (
-          <tr key={rowKeys?.[ri] ?? ri} className={`${styles.tr} ${onRowClick ? styles.trClick : ''}`}
+          <tr key={rowKeys?.[ri] ?? ri} className={`${styles.tr} ${onRowClick ? styles.trClick : ''} ${editingRow === ri ? styles.trEditing : ''}`.trim()}
+            data-editing={editingRow === ri ? 'true' : undefined}
             tabIndex={onRowClick ? 0 : undefined} onClick={onRowClick ? () => onRowClick(ri) : undefined}
             onKeyDown={onRowClick ? (e) => key(e, ri) : undefined}>
             {r.map((c, ci) => <td key={ci} className={`${styles.td} ${al(ci)}`}>{c}</td>)}
+            {rowActions ? <td data-cell="actions" className={styles.tdActions}>{rowActions[ri] ?? null}</td> : null}
           </tr>
         ))}
       </tbody>

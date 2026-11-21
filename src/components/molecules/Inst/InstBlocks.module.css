@@ -5,6 +5,11 @@
 .tr { border-top: 1px solid var(--line); }
 .trClick { cursor: pointer; }
 .trClick:hover { background: color-mix(in srgb, var(--ink) 3%, transparent); }
+/* TCW-27: columna de acciones propia, de ancho fijo y siempre reservada; fila en edicion resaltada. */
+.thActions { width: 260px; min-width: 260px; max-width: 260px; padding: 0; }
+.tdActions { width: 260px; min-width: 260px; max-width: 260px; padding: 11px 0; text-align: right; vertical-align: middle; }
+.trEditing { background: var(--surface); box-shadow: inset 2px 0 0 var(--violet); }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .trClick:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--violet); }
 .left { text-align: left; }
 .right { text-align: right; }

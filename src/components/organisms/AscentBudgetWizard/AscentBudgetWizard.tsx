@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { IonIcon, IonModal } from '@ionic/react';
+import { CenteredModal } from '../CenteredModal';
+import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import {
   alertCircleOutline, arrowDownOutline, arrowForward, checkmarkCircle,
   close as closeIcon, informationCircleOutline, lockClosedOutline,
@@ -222,9 +224,16 @@ export interface AscentBudgetWizardProps {
 
 type Step = 'intro' | 'list' | 'summary';
 
+const WIZARD_STEPS = [
+  { id: 'intro', label: 'Inicio' },
+  { id: 'list', label: 'Categorías' },
+  { id: 'summary', label: 'Resumen' },
+];
+
 export const AscentBudgetWizard = ({
   isOpen, onClose, onComplete, wizardData, month, existingMode,
 }: AscentBudgetWizardProps) => {
+  const desktop = useDesktopLayout();
   const [step, setStep] = useState<Step>('intro');
   const [amounts, setAmounts] = useState<Record<string, number>>({});
   const [active, setActive] = useState<string | null>(null);
@@ -328,10 +337,12 @@ export const AscentBudgetWizard = ({
           Son <b>{totalDecisions} decisiones</b>. Cada categoría arranca en $0 — te muestro qué destinaste y gastaste antes, pero el número lo pones tú.
         </p>
       </div>
+      {desktop ? null : (
       <div className="dock">
         <button className="btn btn-primary" onClick={() => setStep('list')}>Empezar a repartir <IonIcon icon={arrowForward} /></button>
         <div className="dock-hint">Toma ~2 minutos · puedes cambiarlo cuando quieras</div>
       </div>
+      )}
     </>
   );
 
@@ -381,6 +392,7 @@ export const AscentBudgetWizard = ({
           </div>
         ))}
       </div>
+      {desktop ? null : (
       <div className="dock">
         {por > 0 ? (
           <>
@@ -393,6 +405,7 @@ export const AscentBudgetWizard = ({
           <button className="btn btn-primary danger" onClick={() => setStep('summary')}>Asignaste {pesoK(-por)} de más · revisar</button>
         )}
       </div>
+      )}
     </>
   );
 
@@ -474,6 +487,7 @@ export const AscentBudgetWizard = ({
             </div>
           )}
         </div>
+        {desktop ? null : (
         <div className="dock">
           {over ? (
             <>
@@ -487,15 +501,48 @@ export const AscentBudgetWizard = ({
             </>
           )}
         </div>
+        )}
       </>
     );
   };
 
+  const content = (
+    <div className="awz">
+      {!wizardData ? null : step === 'intro' ? renderIntro() : step === 'list' ? renderList() : renderSummary()}
+    </div>
+  );
+
+  // TCW-27: en escritorio (>= 1024 px, web) el asistente va en el modal centrado compartido; móvil y Capacitor conservan el IonModal.
+  if (desktop) {
+    return (
+      <CenteredModal
+        isOpen={isOpen}
+        variant="wizard"
+        title="Presupuesto mensual"
+        origin={monthLabel}
+        steps={WIZARD_STEPS}
+        currentStep={step === 'intro' ? 0 : step === 'list' ? 1 : 2}
+        onClose={onClose}
+        onBack={step === 'list' ? () => setStep('intro') : step === 'summary' ? () => setStep('list') : undefined}
+        onPrimary={
+          step === 'intro' ? () => setStep('list')
+            : step === 'list' ? () => setStep('summary')
+              : por < 0 ? () => setStep('list') : submit
+        }
+        primaryLabel={
+          step === 'intro' ? 'Empezar a repartir'
+            : step === 'list' ? (por < 0 ? 'Revisar plan' : 'Ver mi plan')
+              : por < 0 ? 'Ajustar Flexible' : `Confirmar plan de ${monthLabel}`
+        }
+      >
+        {content}
+      </CenteredModal>
+    );
+  }
+
   return (
     <IonModal isOpen={isOpen} onDidDismiss={onClose}>
-      <div className="awz">
-        {!wizardData ? null : step === 'intro' ? renderIntro() : step === 'list' ? renderList() : renderSummary()}
-      </div>
+      {content}
     </IonModal>
   );
 };

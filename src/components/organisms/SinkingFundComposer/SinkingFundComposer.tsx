@@ -229,7 +229,7 @@ export const SinkingFundComposer = ({
 
       {error ? <p className={styles.error}>{error}</p> : null}
 
-      <div className={styles.actions}>
+      <div className={styles.actions} data-composer-actions>
         <Button label="Cancelar" variant="ghost" onClick={handleCancel} />
         <Button label={submitLabel} onClick={() => void handleSubmit()} loading={loading} />
       </div>

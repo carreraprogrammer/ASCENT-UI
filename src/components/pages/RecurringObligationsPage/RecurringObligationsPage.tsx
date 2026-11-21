@@ -37,7 +37,7 @@ import { Bar, CategoryCell, DateCell, InstButton, Num, StateTag, Sub, Two } from
 import { InstNote, InstPageHeader, InstSection, InstStats, InstTable, InstTableSkeleton, type Align } from '../../molecules/Inst';
 import { useDesktopLayout } from '../../../hooks/useDesktopLayout';
 import { fmtAmount } from '../../../utils/instrumento';
-import { CellWithActions, SortHead, instDeskStyles as desk } from '../TransactionsPage/instDesk';
+import { RowActions, SortHead, instDeskStyles as desk } from '../TransactionsPage/instDesk';
 import { incomeDayLabel, nextSort, obligationState } from '../TransactionsPage/instDeskData';
 
 const initialObligationFilters: RecurringObligationQueryParams = {
@@ -422,21 +422,24 @@ export const RecurringObligationsContent = () => {
       <Num>{attrs.due_day ?? '—'}</Num>,
       <Sub>{linked ? linked.attributes.name : attrs.source_type === 'Debt' && attrs.source_id ? `Deuda inexistente (#${attrs.source_id})` : '—'}</Sub>,
       <StateTag state={st.label} tone={st.tone} />,
-      <CellWithActions actions={[
-        ...(attrs.source_type === 'Debt' && attrs.source_id ? [{ label: 'Quitar vínculo', onClick: () => setUnlinkingObligation(obligation) }] : []),
-        { label: 'Borrar', danger: true, onClick: () => setDeletingObligation(obligation) },
-      ]}>
-        <Num strong>{fmtAmount(attrs.amount)}</Num>
-      </CellWithActions>,
+      <Num strong>{fmtAmount(attrs.amount)}</Num>,
     ];
   });
+  // TCW-27: las acciones van en la columna final propia de la tabla (RowActions), no sobre el monto.
+  const obActions = obligations.map((obligation) => (
+    <RowActions actions={[
+      ...(obligation.attributes.source_type === 'Debt' && obligation.attributes.source_id ? [{ label: 'Quitar vínculo', onClick: () => setUnlinkingObligation(obligation) }] : []),
+      { label: 'Borrar', danger: true, onClick: () => setDeletingObligation(obligation) },
+    ]} />
+  ));
   const inRows = incomeSources.map((source) => [
     <span style={{ fontWeight: 500 }}>{source.attributes.name}</span>,
     <DateCell>{incomeDayLabel(source.attributes)}</DateCell>,
-    <CellWithActions actions={[{ label: 'Borrar', danger: true, onClick: () => setDeletingIncome(source) }]}>
-      <Num strong>{source.attributes.expected_amount > 0 ? fmtAmount(source.attributes.expected_amount) : '—'}</Num>
-    </CellWithActions>,
+    <Num strong>{source.attributes.expected_amount > 0 ? fmtAmount(source.attributes.expected_amount) : '—'}</Num>,
   ]);
+  const inActions = incomeSources.map((source) => (
+    <RowActions actions={[{ label: 'Borrar', danger: true, onClick: () => setDeletingIncome(source) }]} />
+  ));
 
   const desktopView = (
     <div className={desk.page} data-testid="recurring-desktop">
@@ -460,7 +463,8 @@ export const RecurringObligationsContent = () => {
         ) : error ? null : !obligations.length ? (
           <InstNote>Todavía no hay obligaciones recurrentes.</InstNote>
         ) : (
-          <InstTable caption="Obligaciones recurrentes" heads={obHeads} aligns={obAligns} rows={obRows}
+          <InstTable caption="Obligaciones recurrentes" heads={obHeads} aligns={obAligns} rows={obRows} rowActions={obActions}
+            editingRow={composerOpen && editingObligation ? obligations.findIndex((o) => o.id === editingObligation.id) : undefined}
             rowKeys={obligations.map((o) => o.id)}
             onRowClick={(i) => { setEditingObligation(obligations[i]); setComposerOpen(true); }} />
         )}
@@ -472,7 +476,8 @@ export const RecurringObligationsContent = () => {
         ) : error ? null : !incomeSources.length ? (
           <InstNote>Todavía no hay fuentes de ingreso.</InstNote>
         ) : (
-          <InstTable caption="Fuentes de ingreso" heads={inHeads} aligns={inAligns} rows={inRows}
+          <InstTable caption="Fuentes de ingreso" heads={inHeads} aligns={inAligns} rows={inRows} rowActions={inActions}
+            editingRow={incomeComposerOpen && editingIncome ? incomeSources.findIndex((s) => s.id === editingIncome.id) : undefined}
             rowKeys={incomeSources.map((s) => s.id)}
             onRowClick={(i) => { setEditingIncome(incomeSources[i]); setIncomeComposerOpen(true); }} />
         )}
