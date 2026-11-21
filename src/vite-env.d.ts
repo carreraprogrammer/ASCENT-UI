@@ -1,4 +1,8 @@
 /// <reference types="vite/client" />
+interface ImportMetaEnv {
+  /** TCW-5: '1' activa la API simulada en memoria (solo scripts/serve-local.sh). Nunca en producción. */
+  readonly VITE_LOCAL_FIXTURES?: string;
+}
 declare module '*.module.css' {
   const classes: Record<string, string>;
   export default classes;

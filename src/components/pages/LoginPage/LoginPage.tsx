@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState, type ComponentType } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { IonContent, IonPage, isPlatform } from '@ionic/react';
 import { AuthLayout } from '../../templates/AuthLayout';
@@ -31,7 +31,17 @@ const fallbackSchema = {
   ],
 };
 
+// TCW-5: botón de la sesión de ejemplo, solo con VITE_LOCAL_FIXTURES=1. Sin la variable la condición es constante
+// (`false`) y el componente y su chunk no entran al build.
+let localShortcut: ComponentType | null = null;
+const getLocalShortcut = (): ComponentType | null => {
+  if (import.meta.env.VITE_LOCAL_FIXTURES !== '1') return null;
+  localShortcut ??= lazy(() => import('../../../local-fixtures/LocalLoginShortcut'));
+  return localShortcut;
+};
+
 export const LoginPage = () => {
+  const LocalShortcut = getLocalShortcut();
   const schema = useFormStore((state) => state.schemas['login-form']);
   const isLoading = useFormStore((state) => state.isLoading);
   const schemaError = useFormStore((state) => state.error);
@@ -206,6 +216,7 @@ export const LoginPage = () => {
           <span className={styles.demoText}>{demoLoading ? 'Abriendo la demo…' : 'Ver demo'}</span>
           <span className={styles.demoHint}>datos de ejemplo, sin cuenta</span>
         </button>
+        {LocalShortcut ? <Suspense fallback={null}><LocalShortcut /></Suspense> : null}
         {toast}
       </div>
     </AuthLayout>
